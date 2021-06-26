@@ -46,7 +46,7 @@ const productSchema = new Schema(
             ],
             required: [true, 'Please choose transporter for this product'],
         },
-        productType: {
+        productTypes: {
             type: [
                 {
                     typeName: { type: String, required: true },

@@ -34,12 +34,15 @@ function createCategories(categories, parentId = null) {
 
 exports.addCategory = (req, res, next) => {
     const { categoryName } = req.body;
-    const categoryImage = req.file.path;
+    let categoryImage;
+    if (req.file) {
+        categoryImage = processImagePath(req.file.path);
+    }
 
-    if (!categoryName || !categoryImage)
+    if (!categoryName)
         return next(
             new ErrorHandler(
-                'Please enter a category name & a category image',
+                'Please enter a category name',
                 httpStatusCode.BAD_REQUEST
             )
         );
@@ -70,22 +73,22 @@ exports.addCategory = (req, res, next) => {
         if (category)
             return res.status(httpStatusCode.CREATED).json({
                 success: true,
-                message: 'Category created successfully',
+                successMessage: 'Category created successfully',
                 category,
             });
     });
 };
 
 exports.getCategories = (req, res, next) => {
-    Category.find({}).exec((err, categories) => {
+    Category.find({}).exec((err, _categories) => {
         if (err)
             return res.status(httpStatusCode.BAD_REQUEST).json({ error: err });
-        if (categories) {
-            const categorylst = createCategories(categories);
+        if (_categories) {
+            // const categories = createCategories(_categories);
             return res.status(httpStatusCode.OK).json({
                 success: true,
-                message: 'Categories fetched successfully',
-                categorylst,
+                successMessage: 'Categories fetched successfully',
+                categories: _categories,
             });
         }
     });
@@ -144,21 +147,18 @@ exports.deleteCategory = (req, res, next) => {
 
         Category.findByIdAndDelete(categoryId, (err, category) => {
             if (err)
-                return next(
-                    new ErrorHandler(
-                        'Category was not deleted',
-                        httpStatusCode.BAD_REQUEST
-                    )
-                );
+                return res
+                    .status(httpStatusCode.BAD_REQUEST)
+                    .json({ errorMessage: err });
 
             if (category) {
                 if (category.categoryImage) {
-                    deleteIamge(category.categoryImage);
+                    deleteImage(category.categoryImage);
                 }
 
-                return res.status(httpStatusCode.NO_CONTENT).json({
+                return res.status(httpStatusCode.OK).json({
                     success: true,
-                    message: 'Category was deleted successfully',
+                    successMessage: 'Category was deleted successfully',
                 });
             }
         });

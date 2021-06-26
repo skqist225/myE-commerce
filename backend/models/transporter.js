@@ -7,17 +7,20 @@ const transporterSchema = new Schema(
             type: String,
             required: true,
             trim: true,
+            unique: true,
         },
-        transporterlogo: {
+        transporterLogo: {
             type: String,
             required: true,
+            unique: true,
         },
         contactNumber: {
             type: String,
-            required: true,
         },
         policy: { type: String },
         transportFee: { type: Number },
+        pickUpArea: { type: String, required: true },
+        deliveryArea: { type: String, required: true },
     },
     { timestamps: true }
 );

@@ -1,0 +1,26 @@
+.transporters {
+    flex: 4;
+}
+
+.transporterListNameImg {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.transporterListName {
+    color: green;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.transporterListImg {
+    width: 200px;
+    height: 70px;
+    object-fit: cover;
+}
+
+.transporterListImg:hover {
+    scale: 1.5;
+    transition: scale 0.3s ease-in-out;
+}

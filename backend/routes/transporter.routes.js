@@ -9,9 +9,9 @@ const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
 
 router.post(
-    'admin/transporter/add',
+    '/admin/transporter/add',
     [isAuthenticatedUser, authorizeRoles('admin')],
-    upload.single('transporterlogo'),
+    upload.single('transporterLogo'),
     addTransporter
 );
 

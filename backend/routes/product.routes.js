@@ -13,36 +13,24 @@ const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 const upload = require('../middlewares/multer.js');
 
+//FIXME=============================================ADD PRODUCT================================================================
 router.post(
-    '/shop/product/add/',
-    [isAuthenticatedUser, authorizeRoles('shop')],
+    '/shop/product/add',
+    [isAuthenticatedUser, authorizeRoles('shop', 'admin')],
     upload.fields([
         {
             name: 'images',
             maxCount: 5,
         },
-        { name: 'productType[typeImage]', maxCount: 20 },
+        { name: 'productTypes[typeImage]', maxCount: 20 },
     ]),
     addProduct
 );
 
-router.get(
-    '/products',
-
-    getAllProducts
-);
-
-router.get(
-    '/shop/products',
-    [isAuthenticatedUser, authorizeRoles('shop')],
-    getShopProducts
-);
-
-router.route('/product/:productId').get(getSingleProduct);
-
+//FIXME============================================UPDATE PRODUCT + DELETE PRODUCT(S)===========================================
 router
     .route(
-        '/shop/product/:productId' // adjust: productType // query: ?addProductType=true // query: ?deleteProductType=true&productTypeId=
+        '/shop/product/:productId' //TODO adjust: productType // query: ?addProductType=true // query: ?deleteProductType=true&productTypeId=
     )
     .put(
         [isAuthenticatedUser, authorizeRoles('shop')],
@@ -57,6 +45,12 @@ router
     )
     .delete([isAuthenticatedUser, authorizeRoles('shop')], deleteSingleProduct);
 
+router.delete(
+    '/admin/products/delete',
+    [isAuthenticatedUser, authorizeRoles('admin', 'shop')],
+    deleteAllProducts
+);
+
 router.put(
     '/shop/product/:productId/update-product-type',
     [isAuthenticatedUser, authorizeRoles('shop')],
@@ -64,11 +58,13 @@ router.put(
     updateProductType
 );
 
-//Testing
-router.delete(
-    '/admin/products/delete',
-    [isAuthenticatedUser, authorizeRoles('admin', 'shop')],
-    deleteAllProducts
+//FIXME===================================================GET PRODUCTS==========================================================
+router.get('/products', getAllProducts);
+router.get(
+    '/shop/products',
+    [isAuthenticatedUser, authorizeRoles('shop')],
+    getShopProducts
 );
+router.route('/product/:productId').get(getSingleProduct);
 
 module.exports = router;

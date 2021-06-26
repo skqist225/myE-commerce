@@ -6,6 +6,7 @@ import {
     Storefront,
     ShoppingCart,
 } from '@material-ui/icons';
+import { Link } from 'react-router-dom';
 
 import './sidebar.css';
 
@@ -16,10 +17,12 @@ const Sidebar = () => {
                 <div className="sidebarMenu">
                     <h3 className="sidebarTitle">Dashboard</h3>
                     <ul className="sidebarList">
-                        <li className="sidebarListItem active">
-                            <LineStyle className="sidebarIcon" />
-                            Home
-                        </li>
+                        <Link to="/">
+                            <li className="sidebarListItem active">
+                                <LineStyle className="sidebarIcon" />
+                                Home
+                            </li>
+                        </Link>
                         <li className="sidebarListItem">
                             <Timeline className="sidebarIcon" />
                             Analytics
@@ -33,14 +36,18 @@ const Sidebar = () => {
                 <div className="sidebarMenu">
                     <h3 className="sidebarTitle">Quick Menu</h3>
                     <ul className="sidebarList">
-                        <li className="sidebarListItem active">
-                            <LineStyle className="sidebarIcon" />
-                            Users
-                        </li>
-                        <li className="sidebarListItem">
-                            <Timeline className="sidebarIcon" />
-                            Products
-                        </li>
+                        <Link to="/users">
+                            <li className="sidebarListItem active">
+                                <LineStyle className="sidebarIcon" />
+                                Users
+                            </li>
+                        </Link>
+                        <Link to="/products">
+                            <li className="sidebarListItem">
+                                <Timeline className="sidebarIcon" />
+                                Products
+                            </li>
+                        </Link>
                         <li className="sidebarListItem">
                             <Storefront className="sidebarIcon" />
                             Shops
@@ -53,14 +60,18 @@ const Sidebar = () => {
                             <ShoppingCart className="sidebarIcon" />
                             Carts
                         </li>
-                        <li className="sidebarListItem">
-                            <ShoppingCart className="sidebarIcon" />
-                            Transporters
-                        </li>
-                        <li className="sidebarListItem">
-                            <ShoppingCart className="sidebarIcon" />
-                            Categories
-                        </li>
+                        <Link to="/transporters">
+                            <li className="sidebarListItem">
+                                <ShoppingCart className="sidebarIcon" />
+                                Transporters
+                            </li>
+                        </Link>
+                        <Link to="/categories">
+                            <li className="sidebarListItem">
+                                <ShoppingCart className="sidebarIcon" />
+                                Categories
+                            </li>
+                        </Link>
                         <li className="sidebarListItem">
                             <ShoppingCart className="sidebarIcon" />
                             Sales

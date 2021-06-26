@@ -51,12 +51,10 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
         if (shop) {
             if (shopProducts.length > 0) {
                 if (shopProducts.some(isProductNameExist)) {
-                    return next(
-                        new ErrorHandler(
+                    return res.status(httpStatusCode.BAD_REQUEST).json({
+                        errorMessage:
                             'This product name is already exists in our shop',
-                            httpStatusCode.BAD_REQUEST
-                        )
-                    );
+                    });
                 }
             }
 
@@ -81,7 +79,7 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                 isFreeship,
                 productWeight,
                 discountPercent,
-                productType: [],
+                productTypes: [],
                 images: [],
             };
 
@@ -91,7 +89,7 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                 });
             }
 
-            const { typeName, typeStock, typePrice } = req.body.productType;
+            const { typeName, typeStock, typePrice } = req.body.productTypes;
 
             if (Array.isArray(typeName)) {
                 const arraySize = typeName.length;
@@ -99,13 +97,13 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                 if (
                     typeStock.length !== arraySize ||
                     typePrice.length !== arraySize ||
-                    (req.files['productType[typeImage]'] &&
-                        req.files['productType[typeImage]'].length !==
+                    (req.files['productTypes[typeImage]'] &&
+                        req.files['productTypes[typeImage]'].length !==
                             arraySize)
                 ) {
                     return res.status(httpStatusCode.BAD_REQUEST).json({
                         success: false,
-                        message: 'Can not leave out any field',
+                        errorMessage: 'Can not leave out any field',
                     });
                 }
 
@@ -120,14 +118,14 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                     productTypeObj.typeStock = typeStock[i];
                     productTypeObj.typePrice = typePrice[i];
                     productTypeObj.typeImage = req.files[
-                        'productType[typeImage]'
+                        'productTypes[typeImage]'
                     ]
                         ? processImagePath(
-                              req.files['productType[typeImage]'][i].path
+                              req.files['productTypes[typeImage]'][i].path
                           )
                         : '';
 
-                    _product.productType.push(productTypeObj);
+                    _product.productTypes.push(productTypeObj);
                 }
             } else {
                 let productTypeObj = {
@@ -135,7 +133,7 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                     typeStock,
                     typePrice,
                     typeImage: processImagePath(
-                        req.files['productType[typeImage]'][0].path
+                        req.files['productTypes[typeImage]'][0].path
                     ),
                 };
 
@@ -148,12 +146,9 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                         { runValidators: true, new: true }
                     ).exec((err, product) => {
                         if (err)
-                            return next(
-                                new ErrorHandler(
-                                    err,
-                                    httpStatusCode.BAD_REQUEST
-                                )
-                            );
+                            return res
+                                .status(httpStatusCode.BAD_REQUEST)
+                                .json({ errorMessage: err.message });
 
                         return res.status(httpStatusCode.CREATED).json({
                             updatedProduct: product,
@@ -166,14 +161,14 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
 
             product.save(async (err, product) => {
                 if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                    res.status(httpStatusCode.BAD_REQUEST).json({
+                        errorMessage: err.message,
+                    });
 
                 if (product) {
                     return res.status(httpStatusCode.CREATED).json({
                         success: true,
-                        message: 'Product created successfully',
+                        successMessage: 'Product created successfully',
                         product,
                     });
                 }
@@ -189,72 +184,6 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
         );
     }
 });
-
-exports.getAllProducts = (req, res, next) => {
-    Product.find({})
-        .populate('transporters', 'transporterName transportFee -_id')
-        .populate('category', 'categoryName -_id')
-        .populate('supplier', 'supplierName headquarterAddress -_id')
-        .exec((err, products) => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-            if (products) {
-                return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: 'All products fetched successfully',
-                    products_nbm: products.length,
-                    products,
-                });
-            }
-        });
-};
-
-exports.getShopProducts = catchAsyncError(async (req, res, next) => {
-    const shop = await Shop.findOne({ user: req.user._id });
-
-    Product.find({ shop: shop._id }).exec((err, products) => {
-        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-        if (products)
-            return res.status(httpStatusCode.OK).json({
-                success: true,
-                message: "Shop's products fetched successfully",
-                products,
-            });
-    });
-});
-
-exports.getSingleProduct = (req, res, next) => {
-    const { productId } = req.params;
-
-    if (mongoose.isValidObjectId(productId)) {
-        Product.findById(productId)
-            .populate('transporters', 'transporterName transportFee -_id')
-            .populate('supplier', 'supplierName headquarterAddress -_id')
-            .populate('category', 'categoryName -_id')
-            .exec((err, product) => {
-                if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
-
-                if (product)
-                    return res.status(httpStatusCode.OK).json({
-                        success: true,
-                        message: `${product.productName} fetched successfully`,
-                        product,
-                    });
-            });
-    } else {
-        return next(
-            new ErrorHandler(
-                'Product id is invalid',
-                httpStatusCode.BAD_REQUEST
-            )
-        );
-    }
-};
 
 exports.updateProduct = async (req, res, next) => {
     const { productId } = req.params;
@@ -565,6 +494,74 @@ exports.deleteSingleProduct = catchAsyncError(async (req, res, next) => {
 
     //Check if product is being processed in order, if all orders contain this product has been processed successfull, we can delete it
 });
+
+//========================================================GET PRODUCTS================================================
+
+exports.getAllProducts = (req, res, next) => {
+    Product.find({})
+        // .populate('transporters', 'transporterName transportFee -_id')
+        .populate('category', 'categoryName -_id')
+        .populate('supplier', 'supplierName headquarterAddress -_id')
+        .exec((err, products) => {
+            if (err)
+                return res
+                    .status(httpStatusCode.BAD_REQUEST)
+                    .json({ errorMessage: err.message });
+
+            if (products) {
+                return res.status(httpStatusCode.OK).json({
+                    successMessage: 'All products fetched successfully',
+                    products,
+                });
+            }
+        });
+};
+
+exports.getShopProducts = catchAsyncError(async (req, res, next) => {
+    const shop = await Shop.findOne({ user: req.user._id });
+
+    Product.find({ shop: shop._id }).exec((err, products) => {
+        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+
+        if (products)
+            return res.status(httpStatusCode.OK).json({
+                success: true,
+                message: "Shop's products fetched successfully",
+                products,
+            });
+    });
+});
+
+exports.getSingleProduct = (req, res, next) => {
+    const { productId } = req.params;
+
+    if (mongoose.isValidObjectId(productId)) {
+        Product.findById(productId)
+            .populate('transporters', 'transporterName transportFee -_id')
+            .populate('supplier', 'supplierName headquarterAddress -_id')
+            .populate('category', 'categoryName -_id')
+            .exec((err, product) => {
+                if (err)
+                    return next(
+                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
+                    );
+
+                if (product)
+                    return res.status(httpStatusCode.OK).json({
+                        success: true,
+                        message: `${product.productName} fetched successfully`,
+                        product,
+                    });
+            });
+    } else {
+        return next(
+            new ErrorHandler(
+                'Product id is invalid',
+                httpStatusCode.BAD_REQUEST
+            )
+        );
+    }
+};
 
 //For testing purpose
 exports.deleteAllProducts = (req, res, next) => {

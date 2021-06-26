@@ -9,7 +9,7 @@ const categorySchema = new Schema(
             trim: true,
             unique: true,
         },
-        categoryImage: { type: String, required: true },
+        categoryImage: { type: String },
         parentId: { type: String },
     },
     { timestamps: true }

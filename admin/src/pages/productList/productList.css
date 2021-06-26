@@ -1,0 +1,47 @@
+.productList {
+    flex: 8;
+}
+.productListProduct {
+    display: flex;
+    align-items: center;
+}
+
+.productListHeaderTable {
+    /* width: 100%;
+    align-self: center; */
+    color: red;
+    font-size: 16px;
+}
+
+.productListImg {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.productListAction {
+    display: flex;
+    align-items: center;
+}
+
+.productListDelete {
+    color: red;
+    cursor: pointer;
+}
+.productListEdit {
+    border: none;
+    border-radius: 10px;
+    padding: 5px 10px;
+    background-color: rgb(67, 184, 67);
+    color: white;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.productListTransporterLogo:hover {
+    /* z-index: 99; */
+    transform: scale(3);
+    object-fit: contain !important;
+    transition: all 0.2s ease;
+}

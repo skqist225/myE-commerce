@@ -85,23 +85,17 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
     const user = await User.findOne({ username }).select('+password');
 
     if (!user) {
-        return next(
-            new ErrorHandler(
-                'Invalid username or password',
-                httpStatusCode.UNAUTHORIZED
-            )
-        );
+        res.status(httpStatusCode.BAD_REQUEST).json({
+            errorMessage: 'User not found',
+        });
     }
 
     const isPasswordMatched = await user.comparePassword(password);
 
     if (!isPasswordMatched) {
-        return next(
-            new ErrorHandler(
-                'Password not matched',
-                httpStatusCode.UNAUTHORIZED
-            )
-        );
+        res.status(httpStatusCode.BAD_REQUEST).json({
+            errorMessage: 'Password does not match or user name is invalid',
+        });
     }
 
     sendToken(user, httpStatusCode.OK, res, 'Login successfully');

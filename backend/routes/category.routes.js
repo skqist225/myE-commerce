@@ -8,7 +8,7 @@ const {
 const router = express.Router();
 const upload = require('../middlewares/multer');
 
-router.get('/category', getCategories);
+router.get('/categories', getCategories);
 router.post('/category/add', upload.single('categoryImage'), addCategory);
 
 router
