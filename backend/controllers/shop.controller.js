@@ -21,9 +21,7 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
         );
 
         if (!user) {
-            return next(
-                new ErrorHandler('User not exists', httpStatusCode.NOT_FOUND)
-            );
+            return next(new ErrorHandler('User not exists', httpStatusCode.NOT_FOUND));
         }
 
         if (user.isShopRequestSent) {
@@ -48,24 +46,19 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
                 if (user.role !== 'shop') {
                     const { shopName, shopDescription } = req.body;
                     let shopLogo,
-                        homeImage = [];
-
-                    console.log(req.files);
+                        homeImages = [];
 
                     if (req.files && req.files.shopLogo) {
                         shopLogo = processImagePath(req.files.shopLogo[0].path);
                     } else {
-                        return next(
-                            new ErrorHandler(
-                                "Please select a shop's logo to upload",
-                                httpStatusCode.BAD_REQUEST
-                            )
-                        );
+                        return res
+                            .status(httpStatusCode.BAD_REQUEST)
+                            .json({ errorMessage: "Please select shop's logo" });
                     }
 
-                    if (req.files && req.files.homeImage) {
-                        req.files.homeImage.forEach(image => {
-                            homeImage.push(processImagePath(image.path));
+                    if (req.files && req.files.homeImages) {
+                        req.files.homeImages.forEach(image => {
+                            homeImages.push(processImagePath(image.path));
                         });
                     }
 
@@ -74,18 +67,15 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
                         shopLogo,
                         shopName,
                         shopDescription,
-                        homeImage,
+                        homeImages,
                     });
 
                     shop.save(async (err, shop) => {
                         if (err) {
                             catchUniqueError(res, err);
-                            return next(
-                                new ErrorHandler(
-                                    err,
-                                    httpStatusCode.BAD_REQUEST
-                                )
-                            );
+                            return res
+                                .status(httpStatusCode.BAD_REQUEST)
+                                .json({ errorMessage: err.message });
                         }
 
                         if (shop) {
@@ -95,9 +85,7 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
                             );
 
                             return res.status(httpStatusCode.CREATED).json({
-                                success: true,
-                                message:
-                                    'Request for opening a shop has been sent',
+                                successMessage: 'Request for opening a shop has been sent',
                                 shop,
                             });
                         }
@@ -127,31 +115,45 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
             );
         }
     } else {
-        return next(
-            new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST));
     }
 });
 
-exports.getAllShops = (req, res, next) => {
-    let isApproved = true;
-    if (req.user && req.user.role === 'admin') {
-        if (req.query) {
-            isApproved = req.query.approve; //false
-        }
-    }
-
-    Shop.find({ isApproved }).exec((err, shops) => {
-        if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ err });
+exports.getApprovedShops = (req, res, next) => {
+    Shop.find({ isApproved: true }).exec((err, shops) => {
+        if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
         if (shops)
             return res.status(httpStatusCode.OK).json({
-                success: true,
-                shops_nbm: shops.length,
+                successMessage: 'All shops fetched successfully',
                 shops,
             });
     });
 };
+
+exports.getAllShops = (req, res, next) => {
+    Shop.find({}).exec((err, shops) => {
+        if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+
+        if (shops)
+            return res.status(httpStatusCode.OK).json({
+                successMessage: 'All shops fetched successfully',
+                shops,
+            });
+    });
+};
+
+// exports.getUnapprovedShops = (req, res, next) => {
+//     Shop.find({isApproved: false}).exec((err, shops) => {
+//         if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+
+//         if (shops)
+//             return res.status(httpStatusCode.OK).json({
+//                 successMessage: 'All shops fetched successfully',
+//                 shops,
+//             });
+//     });
+// };
 
 exports.getSingleShop = (req, res, next) => {
     const { shopId } = req.params;
@@ -159,42 +161,56 @@ exports.getSingleShop = (req, res, next) => {
         Shop.findById(shopId)
             .populate('user')
             .exec(async (err, shop) => {
-                if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (shop) {
                     const shopProducts = await Product.find({ shop: shop._id });
 
                     return res.status(httpStatusCode.OK).json({
-                        success: true,
-                        message: `${shop.shopName} fetched successfully`,
-                        products_nbm: shopProducts.length,
+                        successMessage: `${shop.shopName} fetched successfully`,
                         shopProducts,
                         shop,
                     });
                 }
             });
     } else {
-        return next(
-            new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST));
     }
+};
+
+exports.getShopByName = async (req, res, next) => {
+    const { shopName } = req.params;
+
+    const _shopName = shopName.replace(/_/g, ' ');
+
+    Shop.findOne({ shopName: { $regex: new RegExp(_shopName, 'i') } })
+        .populate('user')
+        .exec(async (err, shop) => {
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+
+            if (shop) {
+                const shopProducts = await Product.find({ shop: shop._id });
+
+                return res.status(httpStatusCode.OK).json({
+                    successMessage: `${shop.shopName} fetched successfully`,
+                    shopProducts,
+                    shop,
+                });
+            }
+        });
 };
 
 exports.updateShop = catchAsyncError(async (req, res, next) => {
     const { shopId } = req.params;
 
     if (mongoose.isValidObjectId(shopId)) {
-        const shop = await Shop.findOne({ shopId });
+        const shop = await Shop.findById(shopId);
+
         if (!shop) {
-            return next(
-                new ErrorHandler('Shop not exists', httpStatusCode.NOT_FOUND)
-            );
+            return res.status(httpStatusCode.NOT_FOUND).json({ errorMessage: 'Shop not found' });
         }
 
-        let updateShop = shop;
+        let updatedShop = shop;
 
         Object.keys(req.body).forEach(field => {
             if (!Array.isArray(field)) {
@@ -202,14 +218,16 @@ exports.updateShop = catchAsyncError(async (req, res, next) => {
             }
         });
 
-        if (req.files && req.files.shopLogo) {
-            updateShop.shopLogo = processImagePath(req.files.shopLogo[0].path);
-        }
+        if (req.files) {
+            if (req.files.shopLogo) {
+                updatedShop.shopLogo = processImagePath(req.files.shopLogo[0].path);
+            }
 
-        if (req.files && req.files.homeImage) {
-            req.files.homeImage.forEach(image => {
-                updateShop.homeImage.push(processImagePath(image.path));
-            });
+            if (req.files.homeImages) {
+                req.files.homeImages.forEach(image => {
+                    updatedShop.homeImages.push(processImagePath(image.path));
+                });
+            }
         }
 
         Shop.findByIdAndUpdate(
@@ -218,24 +236,19 @@ exports.updateShop = catchAsyncError(async (req, res, next) => {
             { runValidators: true, new: true },
             (err, newShop) => {
                 if (err) {
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                    return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
                 }
 
                 if (newShop) {
                     res.status(httpStatusCode.CREATED).json({
-                        success: true,
-                        message: 'Shop updated successfully',
+                        successMessage: 'Shop updated successfully',
                         updatedShop: newShop,
                     });
                 }
             }
         );
     } else {
-        return next(
-            new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST));
     }
 });
 
@@ -244,17 +257,13 @@ exports.deleteShop = catchAsyncError(async (req, res, next) => {
     const { shopId } = req.params;
 
     if (mongoose.isValidObjectId(shopId)) {
-        const shop = await Shop.findOne({ _id: shopId }).select(
-            'orders products'
-        );
+        const shop = await Shop.findOne({ _id: shopId }).select('orders products');
 
-        if (shop) {
-            return next(
-                new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND)
-            );
+        if (!shop) {
+            return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: 'Shop not found' });
         }
 
-        if (shop.orders.length > 0) {
+        if (shop.orders && shop.orders.length > 0) {
             shop.orders.forEach(order => {
                 if (!order.isPaid) {
                     return res.status(httpStatusCode.BAD_REQUEST).json({
@@ -270,39 +279,55 @@ exports.deleteShop = catchAsyncError(async (req, res, next) => {
             shopId,
             catchAsyncError(async (err, shop) => {
                 if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                    return res
+                        .status(httpStatusCode.BAD_REQUEST)
+                        .json({ errorMessage: err.message });
 
                 if (shop) {
                     await User.findByIdAndUpdate(shop.user, {
                         isShopRequestSent: false,
                     });
 
-                    if (shop.shopLogo) {
-                        deleteImage(shop.shopLogo);
-                    }
+                    // if (shop.shopLogo) {
+                    //     deleteImage(shop.shopLogo);
+                    // }
 
-                    if (shop.homeImage) {
-                        shop.homeImage.forEach(image => {
-                            deleteImage(image);
-                        });
-                    }
+                    // if (shop.homeImages) {
+                    //     shop.homeImages.forEach(image => {
+                    //         deleteImage(image);
+                    //     });
+                    // }
                     return res.status(httpStatusCode.OK).json({
-                        success: true,
-                        message: 'Shop deleted successfully',
+                        successMessage: 'Shop deleted successfully',
                     });
                 }
             })
         );
     } else {
-        return next(
-            new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST));
     }
 });
 
-exports.cancelRequestForCreatingShop = (req, res, next) => {};
+exports.cancelShopRequest = (req, res, next) => {
+    const { shopId } = req.params;
+
+    if (mongoose.isValidObjectId(shopId)) {
+        Shop.findById(shopId)
+            .then(async shop => {
+                await User.findByIdAndUpdate(shop.user._id, {
+                    isShopRequestSent: false,
+                });
+
+                return res.status(httpStatusCode.OK).json({
+                    cancelMessage: `Requesting for opening ${shop.shopName} canceled`,
+                    shop,
+                });
+            })
+            .catch(err => {
+                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err });
+            });
+    }
+};
 
 exports.approvedShop = catchAsyncError(async (req, res, next) => {
     const { shopId } = req.params;
@@ -316,18 +341,18 @@ exports.approvedShop = catchAsyncError(async (req, res, next) => {
             { new: true }
         )
             .then(async shop => {
-                await User.findByIdAndUpdate(shop.user._id, {
-                    role: 'shop',
-                });
+                if (req.user.role !== 'admin') {
+                    await User.findByIdAndUpdate(shop.user._id, {
+                        role: 'shop',
+                    });
+                }
 
                 return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: `${shop.shopName} is approved`,
-                    approved: shop.isApproved,
+                    successMessage: `${shop.shopName} is approved`,
                 });
             })
             .catch(err => {
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err });
             });
     }
 });
@@ -336,8 +361,7 @@ exports.approvedShop = catchAsyncError(async (req, res, next) => {
 exports.deleteAllShops = (req, res, next) => {
     Shop.find({}).then(shops => {
         Shop.deleteMany({}, (err, done) => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (done) {
                 shops.forEach(shop => {

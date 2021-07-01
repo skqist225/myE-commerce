@@ -6,8 +6,11 @@ export { default as UserLogin } from './userLogin/UserLogin';
 export { default as UserList } from './userList/UserList';
 export { default as Topbar } from './topbar/Topbar';
 export { default as Sidebar } from './sidebar/Sidebar';
-export { default as TransporterList } from './transporterList/TransporterList';
-export { default as AddTransporter } from './transporterList/AddTransporter';
-export { default as AddCategory } from './categories/AddCategory';
+export { AddTransporter, TransporterList, EditTransporter } from './transporterList';
 
-export { default as ProductList } from './products/Product.jsx';
+export { CategoryList, AddCategory } from './categories';
+export { ShopList, AddShop, EditShop, ViewShop } from './shopList';
+
+export { EditProduct, AddProduct, ViewProduct } from './products';
+export { default as FileInput } from './fileInput/FileInput';
+export { default as BootstrapInput } from './bootstrapInput/BootstrapInput';

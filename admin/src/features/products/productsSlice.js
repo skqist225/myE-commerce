@@ -1,9 +1,4 @@
-import {
-    createSlice,
-    createAsyncThunk,
-    createEntityAdapter,
-    isAnyOf,
-} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createEntityAdapter, isAnyOf } from '@reduxjs/toolkit';
 import axios from '../../axios';
 
 export const fetchProducts = createAsyncThunk(
@@ -22,16 +17,11 @@ export const fetchProducts = createAsyncThunk(
                 })),
             }));
 
-            const productTypes = mappedData.reduce(
-                (prev, cur) => [...prev, cur.productTypes],
-                []
-            );
+            const productTypes = mappedData.reduce((prev, cur) => [...prev, cur.productTypes], []);
 
             const _products = mappedData.map(product => ({
                 ...product,
-                productTypes: product.productTypes.map(
-                    productType => productType._id
-                ),
+                productTypes: product.productTypes.map(productType => productType._id),
             }));
 
             return {
@@ -47,11 +37,11 @@ export const fetchProducts = createAsyncThunk(
 
 export const addProduct = createAsyncThunk(
     'products/addProduct',
-    async (product, { dispatch, rejectWithValue }) => {
+    async (_product, { dispatch, rejectWithValue }) => {
         try {
             const {
                 data: { product, successMessage },
-            } = await axios.post('/shop/product/add', product);
+            } = await axios.post('/shop/product/add?dest=product', _product);
 
             return { product, successMessage };
         } catch ({ data: { errorMessage } }) {
@@ -63,9 +53,15 @@ export const addProduct = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
     'products/deleteProduct',
     async (productId, { rejectWithValue }) => {
-        // await axiosInstance.delete(`/product/${productId}`);
+        try {
+            const {
+                data: { successMessage },
+            } = await axios.delete(`/shop/product/${productId}`);
 
-        return productId;
+            return { productId, successMessage };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
     }
 );
 
@@ -77,7 +73,6 @@ export const patchProduct = createAsyncThunk(
         return { productId, changes: productBody };
     }
 );
-
 const productsAdapter = createEntityAdapter({
     selectId: ({ _id }) => _id,
 });
@@ -93,6 +88,9 @@ const productsSlice = createSlice({
         errorMessage: null,
     }),
     reducers: {
+        clearSuccessMessage(state) {
+            state.successMessage = null;
+        },
         clearErrorMessage(state) {
             state.errorMessage = null;
         },
@@ -103,39 +101,27 @@ const productsSlice = createSlice({
                 state.loading = false;
                 state.successMessage = payload.successMessage;
                 productsAdapter.setAll(state, payload.products);
-                productTypesAdapter.setAll(
-                    state.productTypes,
-                    payload.productTypes
-                );
+                productTypesAdapter.setAll(state.productTypes, payload.productTypes);
             })
             .addCase(addProduct.fulfilled, (state, { payload }) => {
                 state.loading = false;
                 state.successMessage = payload.successMessage;
                 productsAdapter.addOne(state, payload.product);
             })
-            .addCase(
-                deleteProduct.fulfilled,
-                (state, { payload: productId }) => {
-                    state.loading = false;
-                    productsAdapter.removeOne(state, productId);
-                }
-            )
-            .addCase(
-                patchProduct.fulfilled,
-                (state, { payload: { productId, changes } }) => {
-                    state.loading = false;
-                    productsAdapter.updateOne(state, {
-                        id: productId,
-                        changes,
-                    });
-                }
-            )
+            .addCase(deleteProduct.fulfilled, (state, { payload }) => {
+                state.loading = false;
+                state.successMessage = payload.successMessage;
+                productsAdapter.removeOne(state, payload.productId);
+            })
+            .addCase(patchProduct.fulfilled, (state, { payload: { productId, changes } }) => {
+                state.loading = false;
+                productsAdapter.updateOne(state, {
+                    id: productId,
+                    changes,
+                });
+            })
             .addMatcher(
-                isAnyOf(
-                    fetchProducts.pending,
-                    deleteProduct.pending,
-                    patchProduct.pending
-                ),
+                isAnyOf(fetchProducts.pending, deleteProduct.pending, patchProduct.pending),
                 state => {
                     state.loading = true;
                 }
@@ -144,7 +130,8 @@ const productsSlice = createSlice({
                 isAnyOf(
                     fetchProducts.rejected,
                     deleteProduct.rejected,
-                    patchProduct.rejected
+                    patchProduct.rejected,
+                    addProduct.rejected
                 ),
                 (state, { payload }) => {
                     state.loading = false;
@@ -154,11 +141,9 @@ const productsSlice = createSlice({
     },
 });
 
-export const { clearErrorMessage } = productsSlice.actions;
+export const { clearErrorMessage, clearSuccessMessage } = productsSlice.actions;
 
-export const productsSelectors = productsAdapter.getSelectors(
-    state => state.products
-);
+export const productsSelectors = productsAdapter.getSelectors(state => state.products);
 
 export const productTypesSelectors = productTypesAdapter.getSelectors(
     state => state.products.productTypes

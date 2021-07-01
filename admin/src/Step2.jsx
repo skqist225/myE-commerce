@@ -77,10 +77,9 @@ const Step2 = () => {
 
                 <Controller
                     control={control}
-                    name="hasPhone"
-                    render={({
-                        field: { onChange, onBlur, value, name, ref },
-                    }) => (
+                    name="hasPhon
+                    e"
+                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -104,9 +103,7 @@ const Step2 = () => {
                         label="Phone Number"
                         name="phoneNumber"
                         onChange={event => {
-                            event.target.value = normalizePhoneNumber(
-                                event.target.value
-                            );
+                            event.target.value = normalizePhoneNumber(event.target.value);
                         }}
                     />
                 )}

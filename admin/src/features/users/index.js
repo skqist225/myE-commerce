@@ -1,1 +1,1 @@
-export { fetchUsers, usersSelectors } from './usersSlice';
+export { fetchUsers, usersSelectors, changeIsShopRequestSentStatus } from './usersSlice';

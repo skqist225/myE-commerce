@@ -37,14 +37,11 @@ export const userLogout = createAsyncThunk('/user/userLogout', async () => {
     return { data };
 });
 
-export const userRegister = createAsyncThunk(
-    '/user/userRegister',
-    async registerInfo => {
-        const { data } = await axios.post('/register', registerInfo);
+export const userRegister = createAsyncThunk('/user/userRegister', async registerInfo => {
+    const { data } = await axios.post('/register', registerInfo);
 
-        return { data };
-    }
-);
+    return { data };
+});
 
 const authSlice = createSlice({
     name: 'user',
@@ -71,34 +68,23 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
             })
-            .addCase(
-                userRegister.fulfilled,
-                (state, { payload: { data: user } }) => {
-                    state.loading = false;
-                    state.user = user;
-                }
-            )
+            .addCase(userRegister.fulfilled, (state, { payload: { data: user } }) => {
+                state.loading = false;
+                state.user = user;
+            })
             .addCase(userLogout.rejected, (state, { payload }) => {
                 state.loading = false;
                 state.errorMessage = payload.data.error;
             })
             .addMatcher(
-                isAnyOf(
-                    userLogin.pending,
-                    userLogout.pending,
-                    userRegister.pending
-                ),
+                isAnyOf(userLogin.pending, userLogout.pending, userRegister.pending),
                 state => {
                     state.loading = true;
                     state.isAuthenticated = false;
                 }
             )
             .addMatcher(
-                isAnyOf(
-                    userLogin.rejected,
-                    userRegister.rejected,
-                    userLogout.rejected
-                ),
+                isAnyOf(userLogin.rejected, userRegister.rejected, userLogout.rejected),
                 (state, { payload }) => {
                     console.log(payload);
 

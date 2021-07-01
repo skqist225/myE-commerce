@@ -3,6 +3,7 @@ const {
     addTransporter,
     getAllTransporters,
     getProductTransporters,
+    updateTransporter,
 } = require('../controllers/transporter.controller');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
@@ -13,6 +14,13 @@ router.post(
     [isAuthenticatedUser, authorizeRoles('admin')],
     upload.single('transporterLogo'),
     addTransporter
+);
+
+router.put(
+    '/admin/transporter/:transporterId',
+    [isAuthenticatedUser, authorizeRoles('admin')],
+    upload.single('transporterLogo'),
+    updateTransporter
 );
 
 router.get('/transporters', getAllTransporters);

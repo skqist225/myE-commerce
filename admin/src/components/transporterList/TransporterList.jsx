@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     transportersSelector,
     fetchTransporters,
+    clearErrorMessage,
+    clearSuccessMessage,
 } from '../../features/transporters';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
@@ -47,9 +49,7 @@ function TransporterList() {
                             alt="Transport's logo"
                             className="transporterListImg"
                         />
-                        <span className="transporterListName">
-                            {params.row.transporterName}
-                        </span>
+                        <span className="transporterListName">{params.row.transporterName}</span>
                     </div>
                 );
             },
@@ -86,22 +86,30 @@ function TransporterList() {
             renderCell: params => {
                 return (
                     <div className="productListAction">
-                        <Link to={`/product/${params.row.id}`}>
-                            <button className="productListEdit">Edit</button>
+                        <Link to={`/transporter/${params.row.id}/edit`}>
+                            <button
+                                className="productListEdit"
+                                onClick={() => {
+                                    dispatch(clearSuccessMessage());
+                                    dispatch(clearErrorMessage());
+                                }}
+                            >
+                                Edit Transporter
+                            </button>
                         </Link>
-                        <DeleteOutlineIcon
+                        {/* <DeleteOutlineIcon
                             className="productListDelete"
                             onClick={() => handleDelete(params.row.id)}
-                        />
+                        /> */}
                     </div>
                 );
             },
         },
     ];
 
-    // React.useEffect(() => {
-    //     dispatch(fetchTransporters());
-    // }, [dispatch]);
+    React.useEffect(() => {
+        dispatch(fetchTransporters());
+    }, [dispatch]);
 
     return (
         <>

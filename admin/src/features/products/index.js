@@ -6,4 +6,5 @@ export {
     addProduct,
     deleteProduct,
     patchProduct,
+    clearSuccessMessage,
 } from './productsSlice';

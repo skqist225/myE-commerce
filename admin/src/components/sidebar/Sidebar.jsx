@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    LineStyle,
-    Timeline,
-    TrendingUp,
-    Storefront,
-    ShoppingCart,
-} from '@material-ui/icons';
+import { LineStyle, Timeline, TrendingUp, Storefront, ShoppingCart } from '@material-ui/icons';
 import { Link } from 'react-router-dom';
 
 import './sidebar.css';
@@ -48,10 +42,12 @@ const Sidebar = () => {
                                 Products
                             </li>
                         </Link>
-                        <li className="sidebarListItem">
-                            <Storefront className="sidebarIcon" />
-                            Shops
-                        </li>
+                        <Link to="/shops">
+                            <li className="sidebarListItem">
+                                <Storefront className="sidebarIcon" />
+                                Shops
+                            </li>
+                        </Link>
                         <li className="sidebarListItem">
                             <i className="bi bi-bag-check sidebarIcon"></i>
                             Orders

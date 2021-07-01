@@ -1,11 +1,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import MaterialTable from 'material-table';
-import {
-    fetchCategories,
-    categoriesSelectors,
-} from '../../features/categories';
+import { fetchCategories, categoriesSelectors } from '../../features/categories';
+import { Fab } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 
 function CategoryList() {
     const dispatch = useDispatch();
@@ -31,8 +30,7 @@ function CategoryList() {
         {
             title: 'Type',
             field: 'parentId',
-            render: rowData =>
-                !rowData.parentId ? <span>Parent</span> : <span>Children</span>,
+            render: rowData => (!rowData.parentId ? <span>Parent</span> : <span>Children</span>),
         },
     ];
 
@@ -47,13 +45,17 @@ function CategoryList() {
 
     return (
         <div>
+            <Link to="/category/add">
+                <Fab color="primary" aria-label="add" size="medium" variant="extended">
+                    <AddIcon />
+                    Add Category
+                </Fab>
+            </Link>
             <MaterialTable
                 title="Categories"
                 data={data}
                 columns={columns}
-                parentChildData={(row, rows) =>
-                    rows.find(a => a.id === row.parentId)
-                }
+                parentChildData={(row, rows) => rows.find(a => a.id === row.parentId)}
                 options={{
                     selection: true,
                 }}

@@ -18,11 +18,7 @@ const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 const upload = require('../middlewares/multer');
 
-router.get(
-    '/user',
-    [isAuthenticatedUser, authorizeRoles('user')],
-    getUserProfile
-);
+router.get('/user', [isAuthenticatedUser, authorizeRoles('user')], getUserProfile);
 
 router.post('/password/reset/:resetToken', resetPassword);
 
@@ -36,15 +32,11 @@ router.post(
 );
 router.post('/login', loginUser);
 
-router.get(
-    '/admin/users',
-    [isAuthenticatedUser, authorizeRoles('admin')],
-    getAllUsers
-);
+router.get('/admin/users', [isAuthenticatedUser, authorizeRoles('admin')], getAllUsers);
 
 router.put(
     '/user/verify-email',
-    [isAuthenticatedUser, authorizeRoles('user')],
+    [isAuthenticatedUser, authorizeRoles('user', 'admin')],
     verifyEmail
 );
 
@@ -57,19 +49,11 @@ router.route('/user/update').put(
     updateUser
 );
 
-router.get(
-    '/logout',
-    [isAuthenticatedUser, authorizeRoles('user')],
-    logoutUser
-);
+router.get('/logout', [isAuthenticatedUser, authorizeRoles('user')], logoutUser);
 
 router.post('/user/forgot-password', forgotPassword);
 
-router.delete(
-    '/admin/user/:userId',
-    [isAuthenticatedUser, authorizeRoles('admin')],
-    deleteUser
-);
+router.delete('/admin/user/:userId', [isAuthenticatedUser, authorizeRoles('admin')], deleteUser);
 
 //Testing
 router.delete(
@@ -78,11 +62,7 @@ router.delete(
     deleteAllUsers
 );
 
-router.put('/user/follow/:userId', [
-    isAuthenticatedUser,
-    authorizeRoles('user'),
-    followOtherUsers,
-]);
+router.put('/user/follow/:userId', [isAuthenticatedUser, authorizeRoles('user'), followOtherUsers]);
 
 router.put(
     '/user/unfollow/:userId',

@@ -13,7 +13,7 @@ const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 const upload = require('../middlewares/multer.js');
 
-//FIXME=============================================ADD PRODUCT================================================================
+//HIGHLIGHT=========================================ADD PRODUCT================================================================
 router.post(
     '/shop/product/add',
     [isAuthenticatedUser, authorizeRoles('shop', 'admin')],
@@ -27,13 +27,13 @@ router.post(
     addProduct
 );
 
-//FIXME============================================UPDATE PRODUCT + DELETE PRODUCT(S)===========================================
+//HIGHLIGHT========================================UPDATE PRODUCT + DELETE PRODUCT(S)===========================================
 router
     .route(
-        '/shop/product/:productId' //TODO adjust: productType // query: ?addProductType=true // query: ?deleteProductType=true&productTypeId=
+        '/shop/product/:productId' //HIGHLIGHT adjust: productType // query: ?addProductType=true // query: ?deleteProductType=true&productTypeId=
     )
     .put(
-        [isAuthenticatedUser, authorizeRoles('shop')],
+        [isAuthenticatedUser, authorizeRoles('shop', 'admin')],
         upload.fields([
             {
                 name: 'images',
@@ -43,7 +43,7 @@ router
         ]),
         updateProduct
     )
-    .delete([isAuthenticatedUser, authorizeRoles('shop')], deleteSingleProduct);
+    .delete([isAuthenticatedUser, authorizeRoles('shop', 'admin')], deleteSingleProduct);
 
 router.delete(
     '/admin/products/delete',
@@ -58,13 +58,9 @@ router.put(
     updateProductType
 );
 
-//FIXME===================================================GET PRODUCTS==========================================================
+//HIGHLIGHT==============================================GET PRODUCTS==========================================================
 router.get('/products', getAllProducts);
-router.get(
-    '/shop/products',
-    [isAuthenticatedUser, authorizeRoles('shop')],
-    getShopProducts
-);
+router.get('/shop/products', [isAuthenticatedUser, authorizeRoles('shop')], getShopProducts);
 router.route('/product/:productId').get(getSingleProduct);
 
 module.exports = router;

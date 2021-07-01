@@ -6,25 +6,26 @@ import {
     productsReducer,
     transportersReducer,
     categoriesReducer,
-} from '../features';
+    productReducer,
+    shopsReducer,
+    shopReducer,
+} from './features';
 
 const rootReducer = {
     users: usersReducer,
     auth: authReducer,
     transporters: transportersReducer,
     products: productsReducer,
-    // products: productsReducer,
-    // shops: shopsReducer,
+    product: productReducer,
+    shops: shopsReducer,
+    shop: shopReducer,
     categories: categoriesReducer,
     // posts: postsReducer,
-    // transporters: transportersReducer,
     // suppliers: suppliersReducer,
     // carts: categoriesReducer,
     // orders: ordersReducer,
 };
-const user = localStorage.getItem('user')
-    ? JSON.parse(localStorage.getItem('user'))
-    : {};
+const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : {};
 
 const isUserHaveProps = Object.keys(user).length > 0;
 

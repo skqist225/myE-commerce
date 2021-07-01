@@ -2,57 +2,97 @@ import React, { useEffect, useState } from 'react';
 
 import { DataGrid } from '@material-ui/data-grid';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import { userRows } from '../../dummyData';
+
 import { Link, useHistory } from 'react-router-dom';
 
 import { fetchUsers } from '../../features/users';
 import { useDispatch, useSelector } from 'react-redux';
 import { usersSelectors } from '../../features/users';
 import { Sidebar, Topbar } from '../../components';
+import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
+import WarningIcon from '@material-ui/icons/Warning';
 import './userList.css';
 
 const UserList = () => {
     const dispatch = useDispatch();
     const history = useHistory();
     const users = useSelector(usersSelectors.selectAll);
-    const [data, setData] = useState(users);
 
     useEffect(() => {
         dispatch(fetchUsers());
     }, [dispatch]);
 
-    const handleDelete = id => {
-        setData(data.filter(user => user.id !== id));
-    };
+    const rows = users.map(user => ({ id: user._id, ...user }));
 
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
         {
             field: 'avatar',
             headerName: 'Avatar',
-            width: 200,
+            width: 100,
             renderCell: params => {
                 return (
                     <div className="userListUser">
-                        <img
-                            src={params.row.avatar}
-                            alt=""
-                            className="userListImg"
-                        />
-                        {params.row.username}
+                        <img src={params.row.avatar} alt="" className="userListImg" />
                     </div>
                 );
             },
         },
         {
-            field: 'email',
-            headerName: 'Email',
-            width: 200,
+            field: 'username',
+            headerName: 'Username',
+            width: 170,
+            // renderCell: params => (
+            //     <p style={{ width: '100%', textAlign: 'center' }}>{params.row.username}</p>
+            // ),
         },
         {
-            field: 'status',
-            headerName: 'Status',
-            width: 120,
+            field: 'email',
+            headerName: 'Email',
+            width: 300,
+        },
+        {
+            field: 'phoneNumber',
+            headerName: 'Phone number',
+            width: 170,
+        },
+        {
+            field: 'gender',
+            headerName: 'Gender',
+            width: 150,
+            renderCell: params => {
+                return <p>{params.row.gender}</p>;
+            },
+        },
+        {
+            field: 'isEmailVerified',
+            headerName: 'Verified Account',
+            width: 150,
+            renderCell: params => {
+                return (
+                    <p className="userListIsVerifiedAccount">
+                        {params.row.isEmailVerified ? (
+                            <VerifiedUserIcon className="verifiedIcon" />
+                        ) : (
+                            <WarningIcon className="warningIcon" />
+                        )}
+                    </p>
+                );
+            },
+        },
+        {
+            field: 'role',
+            headerName: 'Role',
+            width: 150,
+            renderCell: params => {
+                const { role } = params.row;
+                let className = '';
+                if (role === 'admin') className = 'userListRole admin';
+                if (role === 'shop') className = 'userListRole shop';
+                if (role === 'user') className = 'userListRole userRole';
+
+                return <span className={className}>{params.row.role}</span>;
+            },
         },
         {
             field: 'action',
@@ -64,10 +104,10 @@ const UserList = () => {
                         <Link to={`/user/${params.row.id}`}>
                             <button className="userListEdit">Edit</button>
                         </Link>
-                        <DeleteOutlineIcon
+                        {/* <DeleteOutlineIcon
                             className="userListDelete"
                             onClick={() => handleDelete(params.row.id)}
-                        />
+                        /> */}
                     </div>
                 );
             },
@@ -79,12 +119,9 @@ const UserList = () => {
             <Topbar />
             <div className="container">
                 <Sidebar />
-                <div
-                    className="userList"
-                    style={{ height: 'calc(100vh - 50px)', width: '100%' }}
-                >
+                <div className="userList" style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
                     <DataGrid
-                        rows={data}
+                        rows={rows}
                         columns={columns}
                         pageSize={20}
                         disableSelectionOnClick

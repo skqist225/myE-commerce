@@ -21,12 +21,9 @@ const shopSchema = new Schema(
         shopDescription: {
             type: String,
             required: [true, 'Shop description is required'],
-            maxLength: [
-                100,
-                'Shop description can not exceeded 100 characters',
-            ],
+            maxLength: [100, 'Shop description can not exceeded 100 characters'],
         },
-        homeImage: [{ type: String }],
+        homeImages: [{ type: String }],
         followers_nbm: {
             type: Number,
             required: true,

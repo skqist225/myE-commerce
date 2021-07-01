@@ -13,176 +13,178 @@ const deleteImage = require('../helpers/deleteImage');
 exports.addProduct = catchAsyncError(async (req, res, next) => {
     const userId = req.user._id;
 
-    if (mongoose.isValidObjectId(userId)) {
-        const shop = await Shop.findOne({ user: userId });
-        const shopProducts = await Product.find({ shop: shop._id });
+    if (!req.query || (req.query && req.query.dest === undefined)) {
+        return res
+            .status(httpStatusCode.BAD_REQUEST)
+            .json({ errorMessage: 'Please secify folder to save image ' });
+    }
 
-        const isProductNameExist = ({ productName }) => {
-            let prdName = req.body.productName;
+    console.log(req.body);
 
-            if (prdName.includes('-')) {
-                let prdNameSubName1 = prdName.split('-');
+    // if (mongoose.isValidObjectId(userId)) {
+    // const shop = await Shop.findOne({ user: userId });
+    // const shopProducts = await Product.find({ shop: shop._id });
 
-                if (productName.includes('-')) {
-                    if (
-                        productName.split('-').length === prdNameSubName1.length
-                    ) {
-                    }
+    // const isProductNameExist = ({ productName }) => {
+    //     let prdName = req.body.productName;
 
-                    const prdNameSubName2 = productName.split('-');
+    //     if (prdName.includes('-')) {
+    //         let prdNameSubName1 = prdName.split('-');
 
-                    let trueAcc = 0;
+    //         if (productName.includes('-')) {
+    //             if (productName.split('-').length === prdNameSubName1.length) {
+    //             }
 
-                    for (let i = 0; i < prdNameSubName1.length; i++) {
-                        if (prdNameSubName1[i] === prdNameSubName2[i]) {
-                            trueAcc++;
-                        }
-                    }
+    //             const prdNameSubName2 = productName.split('-');
 
-                    if (trueAcc === prdNameSubName1.length) {
-                        return true;
-                    }
-                }
-            }
+    //             let trueAcc = 0;
 
-            return productName === prdName;
-        };
+    //             for (let i = 0; i < prdNameSubName1.length; i++) {
+    //                 if (prdNameSubName1[i] === prdNameSubName2[i]) {
+    //                     trueAcc++;
+    //                 }
+    //             }
 
-        if (shop) {
-            if (shopProducts.length > 0) {
-                if (shopProducts.some(isProductNameExist)) {
-                    return res.status(httpStatusCode.BAD_REQUEST).json({
-                        errorMessage:
-                            'This product name is already exists in our shop',
-                    });
-                }
-            }
+    //             if (trueAcc === prdNameSubName1.length) {
+    //                 return true;
+    //             }
+    //         }
+    //     }
 
-            const {
-                productName,
-                description,
-                category,
-                supplier,
-                transporters,
-                isFreeship,
-                productWeight,
-                discountPercent,
-            } = req.body;
+    //     return productName === prdName;
+    // };
 
-            let _product = {
-                shop: shop._id,
-                productName,
-                description,
-                category,
-                supplier,
-                transporters,
-                isFreeship,
-                productWeight,
-                discountPercent,
-                productTypes: [],
-                images: [],
-            };
+    // if (shop) {
+    // if (shopProducts.length > 0) {
+    //     if (shopProducts.some(isProductNameExist)) {
+    //         return res.status(httpStatusCode.BAD_REQUEST).json({
+    //             errorMessage: 'This product name is already exists in our shop',
+    //         });
+    //     }
+    // }
 
-            if (req.files.images) {
-                req.files.images.forEach(image => {
-                    _product.images.push(processImagePath(image.path));
-                });
-            }
+    const {
+        productName,
+        description,
+        category,
+        supplier,
+        transporters,
+        isFreeship,
+        productWeight,
+        discountPercent,
+    } = req.body;
 
-            const { typeName, typeStock, typePrice } = req.body.productTypes;
+    if (transporters.length > 3) {
+        return res
+            .status(httpStatusCode.BAD_REQUEST)
+            .json({ errorMessage: 'Please do not choose over 3 transporters' });
+    }
 
-            if (Array.isArray(typeName)) {
-                const arraySize = typeName.length;
+    let _product = {
+        shop: userId,
+        productName,
+        description,
+        category,
+        supplier,
+        transporters,
+        isFreeship,
+        productWeight,
+        discountPercent,
+        productTypes: [],
+        images: [],
+    };
 
-                if (
-                    typeStock.length !== arraySize ||
-                    typePrice.length !== arraySize ||
-                    (req.files['productTypes[typeImage]'] &&
-                        req.files['productTypes[typeImage]'].length !==
-                            arraySize)
-                ) {
-                    return res.status(httpStatusCode.BAD_REQUEST).json({
-                        success: false,
-                        errorMessage: 'Can not leave out any field',
-                    });
-                }
+    if (req.files.images) {
+        req.files.images.forEach(image => {
+            _product.images.push(processImagePath(image.path));
+        });
+    }
 
-                for (let i = 0; i < arraySize; i++) {
-                    let productTypeObj = {
-                        typeName: '',
-                        typeImage: '',
-                        typeStock: 0,
-                        typePrice: 0,
-                    };
-                    productTypeObj.typeName = typeName[i];
-                    productTypeObj.typeStock = typeStock[i];
-                    productTypeObj.typePrice = typePrice[i];
-                    productTypeObj.typeImage = req.files[
-                        'productTypes[typeImage]'
-                    ]
-                        ? processImagePath(
-                              req.files['productTypes[typeImage]'][i].path
-                          )
-                        : '';
+    const { typeName, typeStock, typePrice } = req.body.productTypes;
 
-                    _product.productTypes.push(productTypeObj);
-                }
-            } else {
-                let productTypeObj = {
-                    typeName,
-                    typeStock,
-                    typePrice,
-                    typeImage: processImagePath(
-                        req.files['productTypes[typeImage]'][0].path
-                    ),
-                };
+    if (Array.isArray(typeName)) {
+        const arraySize = typeName.length;
 
-                if (req.query.addProductType === 'true') {
-                    Product.findByIdAndUpdate(
-                        product._id,
-                        {
-                            $push: { productType: productTypeObj },
-                        },
-                        { runValidators: true, new: true }
-                    ).exec((err, product) => {
-                        if (err)
-                            return res
-                                .status(httpStatusCode.BAD_REQUEST)
-                                .json({ errorMessage: err.message });
-
-                        return res.status(httpStatusCode.CREATED).json({
-                            updatedProduct: product,
-                        });
-                    });
-                }
-            }
-
-            const product = new Product(_product);
-
-            product.save(async (err, product) => {
-                if (err)
-                    res.status(httpStatusCode.BAD_REQUEST).json({
-                        errorMessage: err.message,
-                    });
-
-                if (product) {
-                    return res.status(httpStatusCode.CREATED).json({
-                        success: true,
-                        successMessage: 'Product created successfully',
-                        product,
-                    });
-                }
+        if (
+            typeStock.length !== arraySize ||
+            typePrice.length !== arraySize ||
+            (req.files['productTypes[typeImage]'] &&
+                req.files['productTypes[typeImage]'].length !== arraySize)
+        ) {
+            return res.status(httpStatusCode.BAD_REQUEST).json({
+                success: false,
+                errorMessage: 'Can not leave out any field',
             });
-        } else {
-            return next(
-                new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND)
-            );
+        }
+
+        for (let i = 0; i < arraySize; i++) {
+            let productTypeObj = {
+                typeName: '',
+                typeImage: '',
+                typeStock: 0,
+                typePrice: 0,
+            };
+            productTypeObj.typeName = typeName[i];
+            productTypeObj.typeStock = typeStock[i];
+            productTypeObj.typePrice = typePrice[i];
+            productTypeObj.typeImage = req.files['productTypes[typeImage]']
+                ? processImagePath(req.files['productTypes[typeImage]'][i].path)
+                : '';
+
+            _product.productTypes.push(productTypeObj);
         }
     } else {
-        return next(
-            new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST)
-        );
+        let productTypeObj = {
+            typeName,
+            typeStock,
+            typePrice,
+            typeImage: processImagePath(req.files['productTypes[typeImage]'][0].path),
+        };
+        _product.productTypes.push(productTypeObj);
+
+        if (req.query.addProductType === 'true') {
+            Product.findByIdAndUpdate(
+                product._id,
+                {
+                    $push: { productType: productTypeObj },
+                },
+                { runValidators: true, new: true }
+            ).exec((err, product) => {
+                if (err)
+                    return res
+                        .status(httpStatusCode.BAD_REQUEST)
+                        .json({ errorMessage: err.message });
+
+                return res.status(httpStatusCode.CREATED).json({
+                    updatedProduct: product,
+                });
+            });
+        }
     }
+
+    const product = new Product(_product);
+
+    product.save(async (err, product) => {
+        if (err)
+            res.status(httpStatusCode.BAD_REQUEST).json({
+                errorMessage: err.message,
+            });
+
+        if (product) {
+            return res.status(httpStatusCode.CREATED).json({
+                success: true,
+                successMessage: 'Product created successfully',
+                product,
+            });
+        }
+    });
+    // }
+    // } else {
+    //     return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
+    // }
+    // } else {
+    //     return next(new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST));
+    // }
 });
 
 exports.updateProduct = async (req, res, next) => {
@@ -195,10 +197,7 @@ exports.updateProduct = async (req, res, next) => {
     if (mongoose.isValidObjectId(productId)) {
         if (shop) {
             const isProductNameExist = productName => {
-                return (
-                    productName.replace(/-/g, '') ===
-                    req.body.productName.replace(/-/g, '')
-                );
+                return productName.replace(/-/g, '') === req.body.productName.replace(/-/g, '');
             };
 
             if (
@@ -238,21 +237,14 @@ exports.updateProduct = async (req, res, next) => {
 
             return res.status(httpStatusCode.CREATED).json({
                 success: true,
-                message: 'Product updated successfully',
+                successMessage: 'Product updated successfully',
                 updatedProduct: product,
             });
         } else {
-            return next(
-                new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND)
-            );
+            return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
         }
     } else {
-        return next(
-            new ErrorHandler(
-                'Product id is invalid',
-                httpStatusCode.BAD_REQUEST
-            )
-        );
+        return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));
     }
 };
 
@@ -276,8 +268,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                         typeStock.length !== arraySize ||
                         typePrice.length !== arraySize ||
                         (req.files['productType[typeImage]'] &&
-                            req.files['productType[typeImage]'].length !==
-                                arraySize)
+                            req.files['productType[typeImage]'].length !== arraySize)
                     ) {
                         return res.status(httpStatusCode.BAD_REQUEST).json({
                             success: false,
@@ -314,8 +305,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                             let i = 0;
                             productTypeId.forEach(prdType => {
                                 const index = product.productType.findIndex(
-                                    ({ _id }) =>
-                                        _id.toString() === prdType.toString()
+                                    ({ _id }) => _id.toString() === prdType.toString()
                                 );
 
                                 if (index === -1) {
@@ -327,8 +317,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                                     );
                                 }
                                 productTypeArray[i]._id = prdType;
-                                product.productType[index] =
-                                    productTypeArray[i];
+                                product.productType[index] = productTypeArray[i];
                                 i++;
                             });
                         }
@@ -338,9 +327,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                         typeName,
                         typeStock,
                         typePrice,
-                        typeImage: processImagePath(
-                            req.files['productType[typeImage]'][0].path
-                        ),
+                        typeImage: processImagePath(req.files['productType[typeImage]'][0].path),
                     };
 
                     if (req.query.addProductType === 'true') {
@@ -351,13 +338,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                             },
                             { runValidators: true, new: true }
                         ).exec((err, product) => {
-                            if (err)
-                                return next(
-                                    new ErrorHandler(
-                                        err,
-                                        httpStatusCode.BAD_REQUEST
-                                    )
-                                );
+                            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                             return res.status(httpStatusCode.CREATED).json({
                                 success: true,
@@ -371,8 +352,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                         const { productTypeId } = req.query;
                         if (!Array.isArray(productTypeId)) {
                             const index = product.productType.findIndex(
-                                ({ _id }) =>
-                                    _id.toString() === productTypeId.toString()
+                                ({ _id }) => _id.toString() === productTypeId.toString()
                             );
 
                             if (index === -1) {
@@ -424,17 +404,10 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                 updatedProduct: product,
             });
         } else {
-            return next(
-                new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND)
-            );
+            return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
         }
     } else {
-        return next(
-            new ErrorHandler(
-                'Product id is invalid',
-                httpStatusCode.BAD_REQUEST
-            )
-        );
+        return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));
     }
 });
 
@@ -469,23 +442,23 @@ exports.deleteSingleProduct = catchAsyncError(async (req, res, next) => {
         //             'Can not delete this product because there is order containing it has been still not completed yet',
         //     });
         // } else {
-        Product.findOneAndDelete({ _id: productId, shop }, (err, product) => {
+        Product.deleteOne({ _id: productId }, (err, product) => {
             if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
             if (product) {
-                product.productType.forEach(type => {
-                    deleteImage(type.typeImage);
-                });
+                if (product.productTypes) {
+                    product.productTypes.forEach(type => {
+                        deleteImage(type.typeImage);
+                    });
+                }
 
                 if (product.images) {
                     product.images.forEach(image => deleteImage(image));
                 }
 
                 return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: `Delete ${product._id} successfully`,
-                    removedProduct: product,
+                    successMessage: `Delete product successfully`,
                 });
             }
         });
@@ -504,9 +477,7 @@ exports.getAllProducts = (req, res, next) => {
         .populate('supplier', 'supplierName headquarterAddress -_id')
         .exec((err, products) => {
             if (err)
-                return res
-                    .status(httpStatusCode.BAD_REQUEST)
-                    .json({ errorMessage: err.message });
+                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
             if (products) {
                 return res.status(httpStatusCode.OK).json({
@@ -539,27 +510,22 @@ exports.getSingleProduct = (req, res, next) => {
         Product.findById(productId)
             .populate('transporters', 'transporterName transportFee -_id')
             .populate('supplier', 'supplierName headquarterAddress -_id')
-            .populate('category', 'categoryName -_id')
+            .populate('category', 'categoryName _id parentId')
             .exec((err, product) => {
                 if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                    return res
+                        .status(httpStatusCode.BAD_REQUEST)
+                        .json({ errorMessage: 'something went wrong' });
 
                 if (product)
                     return res.status(httpStatusCode.OK).json({
                         success: true,
-                        message: `${product.productName} fetched successfully`,
+                        successMessage: `${product.productName} fetched successfully`,
                         product,
                     });
             });
     } else {
-        return next(
-            new ErrorHandler(
-                'Product id is invalid',
-                httpStatusCode.BAD_REQUEST
-            )
-        );
+        return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));
     }
 };
 
@@ -567,8 +533,7 @@ exports.getSingleProduct = (req, res, next) => {
 exports.deleteAllProducts = (req, res, next) => {
     Product.find({}).then(products => {
         Product.deleteMany({}).exec((err, done) => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (done) {
                 Shop.updateMany({}, { products: [] }).exec();
@@ -579,9 +544,7 @@ exports.deleteAllProducts = (req, res, next) => {
                     }
 
                     if (product.productType.length > 0) {
-                        product.productType.forEach(({ typeImage }) =>
-                            deleteImage(typeImage)
-                        );
+                        product.productType.forEach(({ typeImage }) => deleteImage(typeImage));
                     }
                 });
 

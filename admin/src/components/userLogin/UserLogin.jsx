@@ -19,10 +19,7 @@ import {
 } from '@material-ui/core';
 
 import { Visibility, VisibilityOff, ExitToApp } from '@material-ui/icons';
-import {
-    NotificationContainer,
-    NotificationManager,
-} from 'react-notifications';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -62,9 +59,7 @@ function UserLogin() {
     const dispatch = useDispatch();
     const classes = useStyles();
 
-    const { isAuthenticated, loading, errorMessage } = useSelector(
-        state => state.auth
-    );
+    const { isAuthenticated, loading, errorMessage } = useSelector(state => state.auth);
 
     const {
         register,
@@ -110,10 +105,7 @@ function UserLogin() {
 
     const PasswordInput = forwardRef((props, ref) => {
         return (
-            <FormControl
-                className={clsx(classes.margin, classes.textField)}
-                variant="outlined"
-            >
+            <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
                 <InputLabel>Password</InputLabel>
                 <OutlinedInput
                     inputRef={ref}
@@ -126,11 +118,7 @@ function UserLogin() {
                                 onMouseDown={handleMouseDownPassword}
                                 edge="end"
                             >
-                                {values.showPassword ? (
-                                    <Visibility />
-                                ) : (
-                                    <VisibilityOff />
-                                )}
+                                {values.showPassword ? <Visibility /> : <VisibilityOff />}
                             </IconButton>
                         </InputAdornment>
                     }
@@ -138,9 +126,7 @@ function UserLogin() {
                     {...props}
                     labelWidth={70}
                 />
-                <FormHelperText id="my-helper-text">
-                    {props.helpertext}
-                </FormHelperText>
+                <FormHelperText id="my-helper-text">{props.helpertext}</FormHelperText>
             </FormControl>
         );
     });
@@ -158,16 +144,10 @@ function UserLogin() {
                 <>
                     {errorMessage && <NotificationContainer />}
                     <MetaData title={'Login'} />
-                    <Typography
-                        variant="h2"
-                        style={{ textAlign: 'center', color: 'red' }}
-                    >
+                    <Typography variant="h2" style={{ textAlign: 'center', color: 'red' }}>
                         Login
                     </Typography>
-                    <Typography
-                        variant="h4"
-                        style={{ textAlign: 'center', color: 'darkblue' }}
-                    >
+                    <Typography variant="h4" style={{ textAlign: 'center', color: 'darkblue' }}>
                         myE-commerce
                     </Typography>
                     <Form

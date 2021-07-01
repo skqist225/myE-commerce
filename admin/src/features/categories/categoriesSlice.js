@@ -1,9 +1,4 @@
-import {
-    createEntityAdapter,
-    createSlice,
-    createAsyncThunk,
-    isAnyOf,
-} from '@reduxjs/toolkit';
+import { createEntityAdapter, createSlice, createAsyncThunk, isAnyOf } from '@reduxjs/toolkit';
 import axios from '../../axios';
 
 export const fetchCategories = createAsyncThunk(
@@ -24,20 +19,10 @@ export const fetchCategories = createAsyncThunk(
 export const addCategory = createAsyncThunk(
     'categories/addCategory',
     async (_category, { rejectWithValue }) => {
-        const options = {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        };
-
         try {
             const {
                 data: { category, successMessage },
-            } = await axios.post(
-                '/category/add?dest=category',
-                _category,
-                options
-            );
+            } = await axios.post('/category/add?dest=category', _category);
 
             return { category, successMessage };
         } catch ({ data: { errorMessage } }) {
@@ -77,20 +62,15 @@ const categoriesSlice = createSlice({
             .addMatcher(isAnyOf(fetchCategories.pending), state => {
                 state.loading = true;
             })
-            .addMatcher(
-                isAnyOf(fetchCategories.rejected),
-                (state, { payload }) => {
-                    state.loading = false;
-                    state.errorMessage = payload;
-                }
-            );
+            .addMatcher(isAnyOf(fetchCategories.rejected), (state, { payload }) => {
+                state.loading = false;
+                state.errorMessage = payload;
+            });
     },
 });
 
 export const { clearErrorMessage } = categoriesSlice.actions;
 
-export const categoriesSelectors = categoriesAdapter.getSelectors(
-    state => state.categories
-);
+export const categoriesSelectors = categoriesAdapter.getSelectors(state => state.categories);
 
 export default categoriesSlice.reducer;

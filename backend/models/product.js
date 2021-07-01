@@ -24,26 +24,20 @@ const productSchema = new Schema(
         supplier: {
             type: Schema.Types.ObjectId,
             ref: 'Supplier',
-            required: [
-                true,
-                'Please select supplier or creating a new supplier for this product',
-            ],
+            // required: [
+            //     true,
+            //     'Please select supplier or creating a new supplier for this product',
+            // ],
         },
         transporters: {
             type: [
                 {
                     type: Schema.Types.ObjectId,
                     ref: 'Transporter',
-                    required: [
-                        true,
-                        'Please select transporter for this product',
-                    ],
+                    required: [true, 'Please select transporter for this product'],
                 },
             ],
-            validate: [
-                limitTransporter,
-                '${PATH} can not exceed 3 transporters',
-            ],
+            validate: [limitTransporter, '${PATH} can not exceed 3 transporters'],
             required: [true, 'Please choose transporter for this product'],
         },
         productTypes: {

@@ -1,0 +1,21 @@
+.shopList {
+    flex: 4;
+}
+
+.shopListHomeImage {
+    display: flex;
+}
+
+.shopListHomeImage img {
+    width: 50px;
+    height: 50px;
+}
+
+.shopListHomeImage img:hover {
+    transform: scale(1.5);
+    transition: transform 0.2s ease-out;
+}
+
+.shopListApproved {
+    color: rgb(15, 151, 15);
+}

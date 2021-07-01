@@ -12,17 +12,11 @@ const sendEmail = require('../helpers/sendEmail');
 exports.registerUser = catchAsyncError(async (req, res, next) => {
     User.findOne({ username: req.body.username }).exec((err, user) => {
         if (user) {
-            return next(
-                new ErrorHandler(
-                    'User already registered.',
-                    httpStatusCode.BAD_REQUEST
-                )
-            );
+            return next(new ErrorHandler('User already registered.', httpStatusCode.BAD_REQUEST));
         }
     });
 
-    const { username, password, firstName, lastName, email, phoneNumber } =
-        req.body;
+    const { username, password, firstName, lastName, email, phoneNumber } = req.body;
 
     let user = {
         username,
@@ -32,9 +26,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
         email,
         phoneNumber,
         role: req.body.role ? req.body.role : 'user',
-        avatar: req.files.avatar
-            ? processImagePath(req.files.avatar[0].path)
-            : null,
+        avatar: req.files.avatar ? processImagePath(req.files.avatar[0].path) : null,
         birthday: req.body.birthday ? req.body.birthday : null,
     };
 
@@ -44,15 +36,8 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
     };
 
     if (req.body.identityCard) {
-        if (
-            !req.body.identityCard.number ||
-            req.files['identityCard[cardImage][]'] === undefined
-        ) {
-            return next(
-                new ErrorHandler(
-                    'Please enter card number and select card image'
-                )
-            );
+        if (!req.body.identityCard.number || req.files['identityCard[cardImage][]'] === undefined) {
+            return next(new ErrorHandler('Please enter card number and select card image'));
         }
         _identityCard.number = req.body.identityCard.number;
 
@@ -76,10 +61,7 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
 
     if (!username || !password)
         return next(
-            new ErrorHandler(
-                'Please enter username & password',
-                httpStatusCode.BAD_REQUEST
-            )
+            new ErrorHandler('Please enter username & password', httpStatusCode.BAD_REQUEST)
         );
 
     const user = await User.findOne({ username }).select('+password');
@@ -125,10 +107,7 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
         //Entity's image just using if to check
 
         Object.keys(req.body).forEach(field => {
-            if (
-                !Array.isArray(req.body[field]) &&
-                req.body[field] !== 'identityCard'
-            ) {
+            if (!Array.isArray(req.body[field]) && req.body[field] !== 'identityCard') {
                 user[field] = req.body[field];
             }
         });
@@ -154,31 +133,19 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
                     !req.body.identityCard.number ||
                     req.files['identityCard[cardImage][]'] === undefined
                 ) {
-                    return next(
-                        new ErrorHandler(
-                            'Please enter card number and select card image'
-                        )
-                    );
+                    return next(new ErrorHandler('Please enter card number and select card image'));
                 }
                 _identityCard.number = req.body.identityCard.number;
 
                 _identityCard.cardImage.push(
-                    processImagePath(
-                        req.files['identityCard[cardImage][]'][0].path
-                    )
+                    processImagePath(req.files['identityCard[cardImage][]'][0].path)
                 );
                 _identityCard.cardImage.push(
-                    processImagePath(
-                        req.files['identityCard[cardImage][]'][1].path
-                    )
+                    processImagePath(req.files['identityCard[cardImage][]'][1].path)
                 );
                 user.identityCard = _identityCard;
             } else {
-                return next(
-                    new ErrorHandler(
-                        'You can change this field after it had been set'
-                    )
-                );
+                return next(new ErrorHandler('You can change this field after it had been set'));
             }
         }
 
@@ -196,21 +163,14 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-        return next(
-            new ErrorHandler(
-                'User not found with this email',
-                httpStatusCode.NOT_FOUND
-            )
-        );
+        return next(new ErrorHandler('User not found with this email', httpStatusCode.NOT_FOUND));
     }
 
     const resetToken = user.getResetPasswordToken();
 
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${req.protocol}://${req.get(
-        'host'
-    )}/password/reset/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/password/reset/${resetToken}`;
 
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`;
 
@@ -225,9 +185,7 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
             user.resetPasswordExpire = undefined;
 
             await user.save({ validateBeforeSave: false });
-            return next(
-                new ErrorHandler(error.message, httpStatusCode.INTERNAL_SERVER)
-            );
+            return next(new ErrorHandler(error.message, httpStatusCode.INTERNAL_SERVER));
         });
 
     return res.status(httpStatusCode.OK).json({
@@ -256,12 +214,7 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
         );
 
     if (req.body.password !== req.body.confirmPassword) {
-        return next(
-            new ErrorHandler(
-                'Password does not match',
-                httpStatusCode.BAD_REQUEST
-            )
-        );
+        return next(new ErrorHandler('Password does not match', httpStatusCode.BAD_REQUEST));
     }
 
     user.password = req.body.password;
@@ -287,24 +240,17 @@ exports.followOtherUsers = catchAsyncError(async (req, res, next) => {
     const { userId } = req.params;
 
     if (mongoose.isValidObjectId(userId)) {
-        const followedUser = await User.findById(userId).select(
-            'role firstName lastName'
-        );
+        const followedUser = await User.findById(userId).select('role firstName lastName');
 
         if (!followedUser) {
-            return next(
-                new ErrorHandler('User not found', httpStatusCode.NOT_FOUND)
-            );
+            return next(new ErrorHandler('User not found', httpStatusCode.NOT_FOUND));
         }
 
         if (followedUser.role === 'shop') {
             User.updateOne(req.user._id, {
                 $push: { following: userId },
             }).exec(err => {
-                if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 return res.status(httpStatusCode.OK).json({
                     success: true,
@@ -325,9 +271,7 @@ exports.followOtherUsers = catchAsyncError(async (req, res, next) => {
 exports.unfollowOtherUsers = catchAsyncError(async (req, res, next) => {
     const { userId } = req.params;
 
-    const unfollowedUser = await User.findById(userId).select(
-        'firstName lastName'
-    );
+    const unfollowedUser = await User.findById(userId).select('firstName lastName');
 
     if (!unfollowedUser) {
         return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
@@ -380,28 +324,21 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
 
 exports.getAllUsers = catchAsyncError(async (req, res, next) => {
     const users = await User.find();
-    const account_nbm = await User.countDocuments();
     const admin_nbm = await User.countDocuments({ role: 'admin' });
 
     return res.status(httpStatusCode.OK).json({
-        success: true,
-        message: 'User fetched successfully',
-        account_nbm,
+        successMessage: 'User fetched successfully',
         admin_nbm,
         users,
     });
 });
 
 exports.verifyEmail = (req, res, next) => {
-    User.updateOne(
-        { _id: req.user._id },
-        { $set: { isEmailVerified: true } }
-    ).exec(err => {
-        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+    User.updateOne({ _id: req.user._id }, { $set: { isEmailVerified: true } }).exec(err => {
+        if (err) res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
         return res.status(httpStatusCode.CREATED).json({
-            success: true,
-            message: 'Email verified successfully',
+            successMessage: 'Email verified successfully',
         });
     });
 };
@@ -409,8 +346,7 @@ exports.verifyEmail = (req, res, next) => {
 exports.deleteAllUsers = (req, res, next) => {
     User.find({}).then(users => {
         User.deleteMany({}, (err, done) => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
             if (done) {
                 users.forEach(user => {
@@ -431,8 +367,7 @@ exports.deleteAllUsers = (req, res, next) => {
                 // deleteCollection('users');
 
                 return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: 'All users deleted',
+                    successMessage: 'All users deleted',
                 });
             }
         });

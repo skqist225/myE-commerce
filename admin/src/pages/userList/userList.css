@@ -23,6 +23,47 @@
     color: red;
     cursor: pointer;
 }
+
+.userListRole {
+    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 10px;
+    width: 100%;
+    height: 50%;
+}
+
+.admin {
+    background-color: #dd1c1a;
+    color: #fff1d0;
+}
+
+.shop {
+    background-color: #f0c808;
+    color: #222;
+}
+
+.userRole {
+    background-color: #086788;
+    color: #fff;
+}
+
+.userListIsVerifiedAccount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.verifiedIcon {
+    color: green;
+}
+
+.warningIcon {
+    color: rgb(212, 212, 42);
+}
+
 .userListEdit {
     border: none;
     border-radius: 10px;

@@ -1,9 +1,10 @@
 import React from 'react';
 import { DataGrid } from '@material-ui/data-grid';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import { productRows } from '../../dummyData';
 import { Link } from 'react-router-dom';
 import { Sidebar, Topbar } from '../../components';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
 
 import './productList.css';
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,16 +13,24 @@ import {
     productTypesSelectors,
     fetchProducts,
     clearErrorMessage,
+    deleteProduct,
 } from '../../features/products';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-
-import { transportersSelector } from '../../features/transporters';
+import { fetchTransporters, transportersSelector } from '../../features/transporters';
+import { fetchCategories } from '../../features/categories';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { clearSuccessMessage } from '../../features/product';
+import { createImage } from '../../helper';
 
 export default function ProductList() {
     const dispatch = useDispatch();
+    dispatch(clearSuccessMessage());
+
     const allProducts = useSelector(productsSelectors.selectAll);
     const productTypes = useSelector(productTypesSelectors.selectAll);
     const transporters = useSelector(transportersSelector.selectAll);
+
+    const { successMessage } = useSelector(state => state.products);
 
     const rows = allProducts.map(product => {
         let _productTypes = [];
@@ -39,8 +48,7 @@ export default function ProductList() {
 
         product.transporters.forEach(transporter => {
             const _transporter = transporters.find(
-                _transporter =>
-                    _transporter._id.toString() === transporter.toString()
+                _transporter => _transporter._id.toString() === transporter.toString()
             );
 
             _transporters.push(_transporter);
@@ -55,11 +63,6 @@ export default function ProductList() {
         };
     });
 
-    const handleDelete = id => {
-        // const newArray = ;
-        // setData(data.filter(product => product.id !== id));
-    };
-
     const _columns = [
         { field: '_id', headerName: 'ID', width: 90 },
         {
@@ -72,10 +75,7 @@ export default function ProductList() {
                         {params.row.images.map(image => (
                             <img
                                 src={`${process.env.REACT_APP_IMAGE_SERVER_PATH}${image}`}
-                                alt={image.substring(
-                                    image.lastIndexOf('/'),
-                                    image.indexOf('.')
-                                )}
+                                alt={image.substring(image.lastIndexOf('/'), image.indexOf('.'))}
                                 className="productListImg"
                                 key={image}
                             />
@@ -124,9 +124,9 @@ export default function ProductList() {
                         }}
                     >
                         {params.row._transporters.map(transporter => (
-                            <li style={{ marginRight: '10px' }}>
+                            <li style={{ marginRight: '10px' }} key={transporter._id}>
                                 <img
-                                    src={`${process.env.REACT_APP_IMAGE_SERVER_PATH}${transporter.transporterLogo}`}
+                                    src={createImage(transporter.transporterLogo, false)}
                                     style={{
                                         width: '50px',
                                         height: '50px',
@@ -156,10 +156,14 @@ export default function ProductList() {
                         <Link to={`/product/${params.row.id}/edit`}>
                             <button className="productListEdit">Edit</button>
                         </Link>
+
                         <DeleteOutlineIcon
                             className="productListDelete"
-                            onClick={() => handleDelete(params.row.id)}
+                            onClick={() => {
+                                dispatch(deleteProduct(params.row.id));
+                            }}
                         />
+
                         <Link to={`/product/${params.row.id}`}>
                             <VisibilityIcon />
                         </Link>
@@ -176,17 +180,29 @@ export default function ProductList() {
 
     React.useEffect(() => {
         dispatch(fetchProducts());
-    }, [dispatch]);
+        // dispatch(fetchTransporters());
+        // dispatch(fetchCategories());
+
+        if (successMessage) {
+            NotificationManager.success(successMessage, 'Click me!', 4000, () => {
+                dispatch(clearSuccessMessage());
+            });
+        }
+    }, [dispatch, successMessage]);
 
     return (
         <>
             <Topbar />
             <div className="container">
                 <Sidebar />
-                <div
-                    className="productList"
-                    style={{ height: 'calc(100vh - 50px)', width: '80%' }}
-                >
+
+                <div className="productList" style={{ height: 'calc(100vh - 50px)', width: '80%' }}>
+                    <Link to="/product/add">
+                        <Fab color="primary" aria-label="add" size="medium" variant="extended">
+                            <AddIcon />
+                            Add Product
+                        </Fab>
+                    </Link>
                     <DataGrid
                         rows={rows}
                         columns={columns}
@@ -194,6 +210,7 @@ export default function ProductList() {
                         disableSelectionOnClick
                         checkboxSelection
                     />
+                    {successMessage && <NotificationContainer />}
                 </div>
             </div>
         </>
