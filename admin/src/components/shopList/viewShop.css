@@ -1,6 +1,7 @@
 .viewShop {
     max-width: 1170px;
     width: 90%;
+    padding-top: 25px;
     margin: 0 auto;
 }
 
@@ -29,10 +30,13 @@
     width: 487px;
     background-color: rgba(0, 0, 0, 0.6);
     max-height: 170px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 }
 
 .viewShopHeaderRight {
-    padding-right: 37.5px;
+    padding-left: 37.5px;
     padding-top: 12.5px;
     display: flex;
 }
@@ -63,8 +67,17 @@
     height: 19px;
 }
 
+.viewShopActiveTime {
+    display: block;
+    margin: 7px 0;
+    color: hsla(0, 0%, 100%, 0.7);
+    font-size: 15px;
+}
+
 .viewShopLogoAndNameWrapper {
     display: flex;
+    align-items: center;
+    position: relative;
 }
 
 .viewShopLogo {
@@ -72,7 +85,16 @@
     width: 90px;
     height: 90px;
     object-fit: contain;
-    border: 3px solid #f5f5f5;
+    border: 5px solid #a2a2a2;
+    margin-left: 25px;
+}
+
+.viewShopSM {
+    height: 16px;
+    width: 64px;
+    position: absolute;
+    left: 40px;
+    top: 80%;
 }
 
 .viewShopSpan {
@@ -83,6 +105,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    justify-self: center;
 }
 
 .viewShopHeaderButton {
@@ -105,4 +128,29 @@
 .viewShopHeaderButton span {
     display: inline-block;
     margin-right: 12px;
+}
+
+.viewShopMenuSection {
+    width: 100%;
+    padding-top: 25px;
+}
+.viewShopMenuContainer {
+}
+.viewShopMenuList {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.viewShopMenuItem {
+    display: inline-block;
+    padding: 14px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+}
+
+.viewShopMenuItem.active {
+    border-bottom: 3px solid #d0011b;
 }

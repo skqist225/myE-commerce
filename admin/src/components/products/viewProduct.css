@@ -25,7 +25,7 @@
 .viewProductProductImageBig {
     width: 450px;
     height: 450px;
-    /* object-fit: contain; */
+    display: block;
 }
 .viewProductSmallImageContainer {
     display: flex;

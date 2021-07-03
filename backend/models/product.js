@@ -64,6 +64,7 @@ const productSchema = new Schema(
             required: [true, 'Please enter product weight'],
             select: false,
         },
+        soldNumber: { type: Number, default: 0 },
     },
     {
         timestamps: true,

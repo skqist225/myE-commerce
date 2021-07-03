@@ -1,1 +1,1 @@
-export { clearErrorMessage, clearSuccessMessage, setViewedShopId } from './shopSlice';
+export { clearErrorMessage, clearSuccessMessage } from './shopSlice';

@@ -6,7 +6,7 @@ const {
     getApprovedShops,
     getAllShops,
     approvedShop,
-    getSingleShop,
+    getShopById,
     cancelShopRequest,
     getShopByName,
 } = require('../controllers/shop.controller');
@@ -58,7 +58,7 @@ router
     );
 
 router.get('/shop/:shopName', getShopByName);
-router.get('/shop/:shopId/search', getSingleShop);
+router.get('/shop/:shopId/search', getShopById);
 
 router.delete(
     '/admin/shops/delete',

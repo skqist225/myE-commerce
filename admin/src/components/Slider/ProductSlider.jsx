@@ -1,9 +1,10 @@
 import React, { memo } from 'react';
 import BtnSlider from './BtnSlider';
 import PropTypes from 'prop-types';
-import './Slider.css';
+import './productSlider.css';
+import { createImage } from '../../helper';
 
-function Slider({ dataSlider, handleSelectedImage }) {
+function ProductSlider({ dataSlider, handleSelectedImage }) {
     const [slideIndex, setSlideIndex] = React.useState(1);
     const [xTrans, setXTrans] = React.useState(0);
 
@@ -29,22 +30,22 @@ function Slider({ dataSlider, handleSelectedImage }) {
         }
     };
 
-    const moveDot = index => {
-        setSlideIndex(index);
-    };
-
     return (
-        <div className="container-slider">
+        <div className="productContainer-slider">
             <div id="toggle-width">
                 {dataSlider.map(({ imgUrl, id }, index) => {
                     return (
                         <div
                             key={id}
-                            className={slideIndex === index + 1 ? 'slide active-anim' : 'slide '}
+                            className={
+                                slideIndex === index + 1
+                                    ? 'productSlide active-anim'
+                                    : 'productSlide '
+                            }
                         >
                             <img
-                                src={`${process.env.REACT_APP_IMAGE_SERVER_PATH}${imgUrl}`}
-                                alt={`${process.env.REACT_APP_IMAGE_SERVER_PATH}${imgUrl}`}
+                                src={createImage(imgUrl, false)}
+                                alt={createImage(imgUrl, false)}
                                 key={id}
                                 onClick={handleSelectedImage}
                                 name={imgUrl}
@@ -55,26 +56,12 @@ function Slider({ dataSlider, handleSelectedImage }) {
             </div>
             <BtnSlider direction="next" moveSlide={nextSlide} />
             <BtnSlider direction="prev" moveSlide={prevSlide} />
-
-            {/* <div className="container-dots">
-                {Array.from({ length: dataSlider.length }).map(
-                    (item, index) => (
-                        <div
-                            key={index}
-                            onClick={() => moveDot(index + 1)}
-                            className={
-                                slideIndex === index + 1 ? 'dot active' : 'dot'
-                            }
-                        ></div>
-                    )
-                )}
-            </div> */}
         </div>
     );
 }
 
-Slider.propTypes = {
+ProductSlider.propTypes = {
     dataSlider: PropTypes.array.isRequired,
 };
 
-export default memo(Slider);
+export default memo(ProductSlider);

@@ -25,6 +25,10 @@
     align-items: center;
 }
 
+.productListAction a {
+    display: inline-flex;
+}
+
 .productListDelete {
     color: red;
     cursor: pointer;

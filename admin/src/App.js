@@ -1,40 +1,11 @@
 import React, { useCallback } from 'react';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
-    Redirect,
-    useHistory,
-} from 'react-router-dom';
-import UseFieldArray from './UseFieldArray';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Home from './pages/home/Home';
 import UserList from './pages/userList/UserList';
 import ProductList from './pages/productList/ProductList';
 import User from './pages/user/User';
-import NewUser from './pages/newPage/NewUser';
 import './app.css';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    fetchComments,
-    commentsSelectors,
-    deleteComment,
-    patchComment,
-    removeLikes,
-    removeTagById,
-    tagsSelectors,
-    likesSelectors,
-} from './features/comments/commentSlice';
-import {
-    fetchProducts,
-    productsSelectors,
-    deleteProduct,
-    patchProduct,
-    updateOneProduct,
-    addProduct,
-} from './features/products/productsSlice';
-import Product from './components/products/Product';
-import Comment from './Comment';
 import {
     UserLogin,
     ProtectedRoute,
@@ -49,6 +20,7 @@ import {
     AddShop,
     EditShop,
     ViewShop,
+    ShopProducts,
     EditTransporter,
 } from './components';
 import { fetchCategories } from './features/categories';
@@ -57,10 +29,10 @@ import { fetchTransporters } from './features/transporters';
 function App() {
     const dispatch = useDispatch();
 
-    React.useEffect(() => {
-        dispatch(fetchTransporters());
-        dispatch(fetchCategories());
-    }, [dispatch]);
+    // React.useEffect(() => {
+    // dispatch(fetchTransporters());
+    // dispatch(fetchCategories());
+    // }, [dispatch]);
 
     return (
         <div>
@@ -80,6 +52,7 @@ function App() {
 
                     <ProtectedRoute path="/shop/add" component={AddShop} exact />
                     <ProtectedRoute path="/shop/:shopId/edit" component={EditShop} exact />
+                    <ProtectedRoute path="/shop/:shopId/search" component={ShopProducts} exact />
                     <ProtectedRoute path="/shop/:shopName" component={ViewShop} exact />
 
                     <ProtectedRoute path="/shops" component={ShopList} exact />

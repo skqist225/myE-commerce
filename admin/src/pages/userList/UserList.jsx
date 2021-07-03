@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@material-ui/data-grid';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { fetchUsers } from '../../features/users';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,7 +15,6 @@ import './userList.css';
 
 const UserList = () => {
     const dispatch = useDispatch();
-    const history = useHistory();
     const users = useSelector(usersSelectors.selectAll);
 
     useEffect(() => {

@@ -9,7 +9,7 @@ export { default as Sidebar } from './sidebar/Sidebar';
 export { AddTransporter, TransporterList, EditTransporter } from './transporterList';
 
 export { CategoryList, AddCategory } from './categories';
-export { ShopList, AddShop, EditShop, ViewShop } from './shopList';
+export { ShopList, AddShop, EditShop, ViewShop, ShopProducts, ProductCard } from './shopList';
 
 export { EditProduct, AddProduct, ViewProduct } from './products';
 export { default as FileInput } from './fileInput/FileInput';

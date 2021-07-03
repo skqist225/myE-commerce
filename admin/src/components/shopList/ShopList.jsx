@@ -8,21 +8,17 @@ import {
     cancelShopRequest,
 } from '../../features/shops';
 import { DataGrid } from '@material-ui/data-grid';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import { Link } from 'react-router-dom';
 import { Sidebar, Topbar } from '..';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 
 import { useDispatch, useSelector } from 'react-redux';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+
 import { NotificationContainer, NotificationManager } from 'react-notifications';
-import CancelIcon from '@material-ui/icons/Cancel';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import CheckIcon from '@material-ui/icons/Check';
-import './shopList.css';
-import { setViewedShopId } from '../../features/shop';
+import { Cancel, Check, ThumbUp } from '@material-ui/icons';
 import slugify from 'slugify';
+import './shopList.css';
 
 function ShopList() {
     const dispatch = useDispatch();
@@ -107,7 +103,7 @@ function ShopList() {
                             width: '100%',
                         }}
                     >
-                        {isApproved ? <CheckIcon className="shopListApproved" /> : 'Waiting'}
+                        {isApproved ? <Check className="shopListApproved" /> : 'Waiting'}
                     </div>
                 );
             },
@@ -141,7 +137,6 @@ function ShopList() {
                                 onClick={() => {
                                     dispatch(clearErrorMessage());
                                     dispatch(clearSuccessMessage());
-                                    dispatch(setViewedShopId(params.row._id));
                                 }}
                             >
                                 View Shop
@@ -160,8 +155,8 @@ function ShopList() {
                     <div className="productListAction">
                         {params.row.isApproved === false ? (
                             <>
-                                <ThumbUpIcon onClick={() => dispatch(approveShop(params.row.id))} />
-                                <CancelIcon
+                                <ThumbUp onClick={() => dispatch(approveShop(params.row.id))} />
+                                <Cancel
                                     onClick={() => dispatch(cancelShopRequest(params.row.id))}
                                 />
                             </>

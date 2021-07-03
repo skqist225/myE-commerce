@@ -6,7 +6,8 @@ import { MetaData } from '../../components';
 import { fetchCategoryPath, fetchProductById } from '../../features/product';
 import './viewProduct.css';
 import { categoriesSelectors } from '../../features/categories';
-import Slider from '../Slider/Slider';
+import ProductSlider from '../Slider/ProductSlider';
+import { createImage } from '../../helper';
 
 function ViewProduct({ match }) {
     const { productId } = match.params;
@@ -51,6 +52,23 @@ function ViewProduct({ match }) {
         return categoryList;
     };
 
+    const calculatePrice = ({ productTypes }) => {
+        if (productTypes.length > 1) {
+            const minPriceOfProductTypePrice = productTypes.reduce(
+                (min, productType) => (productType.typePrice < min ? productType.typePrice : min),
+                productTypes[0].typePrice
+            );
+
+            const maxPriceOfProductTypePrice = productTypes.reduce(
+                (max, productType) => (productType.typePrice > max ? productType.typePrice : max),
+                productTypes[0].typePrice
+            );
+            return [minPriceOfProductTypePrice, maxPriceOfProductTypePrice];
+        }
+
+        return productTypes[0].typePrice;
+    };
+
     useEffect(() => {
         dispatch(fetchProductById({ productId }));
         if (successMessage) {
@@ -68,23 +86,6 @@ function ViewProduct({ match }) {
         setSelectedImage(e.target.name);
         const productType = JSON.parse(e.target.dataset.productType);
         setProductTypeStock(productType.typeStock);
-    };
-
-    const calculatePrice = ({ productTypes }) => {
-        if (productTypes.length > 1) {
-            const minPriceOfProductType = productTypes.reduce(
-                (min, productType) => (productType < min ? productType : min),
-                productTypes[0]
-            );
-
-            const maxPriceOfProductType = productTypes.reduce(
-                (max, productType) => (productType > max ? productType : max),
-                productTypes[0]
-            );
-            return [minPriceOfProductType, maxPriceOfProductType];
-        }
-
-        return productTypes[0].typePrice;
     };
 
     return (
@@ -107,24 +108,12 @@ function ViewProduct({ match }) {
                     <div className="viewProductContainer">
                         <div className="viewProductLeft">
                             <img
-                                src={`${process.env.REACT_APP_IMAGE_SERVER_PATH}${selectedImage}`}
+                                src={createImage(selectedImage, false)}
+                                alt="Image not exists"
                                 className="viewProductProductImageBig"
                             />
                             <div className="viewProductSmallImageContainer">
-                                {/* {allProductImages.map(({ imgUrl }) => (
-                                    <img
-                                        key={imgUrl}
-                                        name={imgUrl}
-                                        src={`${process.env.REACT_APP_IMAGE_SERVER_PATH}${imgUrl}`}
-                                        alt={imgUrl.substring(
-                                            imgUrl.lastIndexOf('/'),
-                                            imgUrl.indexOf('.')
-                                        )}
-                                        className="viewProductProductImageSmall"
-                                        onClick={handleSelectedImage}
-                                    />
-                                ))} */}
-                                <Slider
+                                <ProductSlider
                                     dataSlider={allProductImages}
                                     handleSelectedImage={handleSelectedImage}
                                 />
@@ -235,7 +224,7 @@ function ViewProduct({ match }) {
                                     </p>
                                     <div style={{ flex: '3' }}>
                                         <img
-                                            src={`${process.env.REACT_APP_IMAGE_SERVER_PATH}/uploads/images/freeship.png`}
+                                            src={createImage('freeship.png')}
                                             style={{ width: '25px', height: '15px' }}
                                         />
                                         <span style={{ color: '#222222', fontSize: '18px' }}>
@@ -261,7 +250,7 @@ function ViewProduct({ match }) {
                                     </div>
                                 </div>
                             </div>
-                            {product.productTypes.length !== 1 && (
+                            {product.productTypes.length > 1 && (
                                 <div className="viewProductProductTypesContainer">
                                     <p className="viewProductProductTypesTitle">Màu</p>
                                     <div className="viewProductProductType">

@@ -66,8 +66,8 @@ export default function ProductList() {
     const _columns = [
         { field: '_id', headerName: 'ID', width: 90 },
         {
-            field: 'productName',
-            headerName: 'Product Name',
+            field: 'images',
+            headerName: "Product's images",
             width: 200,
             renderCell: params => {
                 return (
@@ -80,9 +80,16 @@ export default function ProductList() {
                                 key={image}
                             />
                         ))}
-                        {params.row.productName}
                     </div>
                 );
+            },
+        },
+        {
+            field: 'productName',
+            headerName: 'Product Name',
+            width: 250,
+            renderCell: params => {
+                return <span style={{ color: '#222' }}> {params.row.productName}</span>;
             },
         },
         {
@@ -153,19 +160,35 @@ export default function ProductList() {
             renderCell: params => {
                 return (
                     <div className="productListAction">
-                        <Link to={`/product/${params.row.id}/edit`}>
+                        <Link
+                            to={`/product/${params.row.id}/edit`}
+                            onClick={() => {
+                                dispatch(clearSuccessMessage());
+                                dispatch(clearErrorMessage());
+                            }}
+                        >
                             <button className="productListEdit">Edit</button>
                         </Link>
 
                         <DeleteOutlineIcon
                             className="productListDelete"
                             onClick={() => {
+                                dispatch(clearSuccessMessage());
+                                dispatch(clearErrorMessage());
                                 dispatch(deleteProduct(params.row.id));
                             }}
                         />
 
-                        <Link to={`/product/${params.row.id}`}>
-                            <VisibilityIcon />
+                        <Link
+                            to={`/product/${params.row.id}`}
+                            onClick={() => {
+                                dispatch(clearSuccessMessage());
+                                dispatch(clearErrorMessage());
+                            }}
+                        >
+                            <VisibilityIcon
+                                style={{ width: '25px', height: '25px', marginLeft: '10px' }}
+                            />
                         </Link>
                     </div>
                 );
@@ -180,8 +203,8 @@ export default function ProductList() {
 
     React.useEffect(() => {
         dispatch(fetchProducts());
-        // dispatch(fetchTransporters());
-        // dispatch(fetchCategories());
+        dispatch(fetchTransporters());
+        dispatch(fetchCategories());
 
         if (successMessage) {
             NotificationManager.success(successMessage, 'Click me!', 4000, () => {

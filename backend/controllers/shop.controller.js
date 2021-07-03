@@ -155,7 +155,7 @@ exports.getAllShops = (req, res, next) => {
 //     });
 // };
 
-exports.getSingleShop = (req, res, next) => {
+exports.getShopById = (req, res, next) => {
     const { shopId } = req.params;
     if (mongoose.isValidObjectId(shopId)) {
         Shop.findById(shopId)

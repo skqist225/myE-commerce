@@ -3,7 +3,7 @@ import { Route, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 function ProtectedRoute({ component: Component, ...restProps }) {
-    const { isAuthenticated, loading } = useSelector(state => state.auth);
+    const { isAuthenticated, loading, user } = useSelector(state => state.auth);
 
     return (
         <>
@@ -11,7 +11,7 @@ function ProtectedRoute({ component: Component, ...restProps }) {
                 <Route
                     {...restProps}
                     render={props => {
-                        if (!isAuthenticated) {
+                        if (!isAuthenticated || user.role !== 'admin') {
                             return <Redirect to="/login" />;
                         }
 
