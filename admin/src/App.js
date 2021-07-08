@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     UserLogin,
     ProtectedRoute,
+    ProtectedRouteWithLayout,
     AddTransporter,
     TransporterList,
     AddCategory,
@@ -26,6 +27,7 @@ import {
 import { fetchCategories } from './features/categories';
 import { fetchTransporters } from './features/transporters';
 import SaleChannel from './pages/shop/SaleChannel';
+import AllOrder from './pages/shop/AllOrder';
 
 function App() {
     const dispatch = useDispatch();
@@ -52,11 +54,17 @@ function App() {
                     <ProtectedRoute path="/product/:productId" component={ViewProduct} />
 
                     <ProtectedRoute path="/shop/add" component={AddShop} exact />
-                    <ProtectedRoute path="/shop" component={SaleChannel} exact />
+                    {/* <ProtectedRoute path="/shop" component={SaleChannel} exact /> */}
 
                     <ProtectedRoute path="/shop/:shopId/edit" component={EditShop} exact />
                     <ProtectedRoute path="/shop/:shopId/search" component={ShopProducts} exact />
                     <ProtectedRoute path="/shop/:shopName" component={ViewShop} exact />
+                    <ProtectedRouteWithLayout
+                        parent={SaleChannel}
+                        path={`/shop/sale/order`}
+                        component={AllOrder}
+                        exact={true}
+                    />
 
                     <ProtectedRoute path="/shops" component={ShopList} exact />
                     <ProtectedRoute path="/transporters" component={TransporterList} />

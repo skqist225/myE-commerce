@@ -24,6 +24,17 @@ function SideBar() {
         const openIcons = document.getElementsByClassName('openIcon');
         const closeIcons = document.getElementsByClassName('closeIcon');
         const menuExpand = document.getElementsByClassName('menuExpand');
+        const menuItems = document.getElementsByClassName('menuItem');
+
+        for (let item of menuItems) {
+            item.addEventListener('click', function () {
+                for (let item of menuItems) {
+                    item.classList.remove('active');
+                }
+
+                this.classList.add('active');
+            });
+        }
 
         for (let icon of openIcons) {
             icon.classList.add('active');
@@ -66,7 +77,7 @@ function SideBar() {
 
     React.useEffect(() => {
         handleOpenMenu();
-    }, [handleOpenMenu]);
+    }, []);
 
     return (
         <Container>
@@ -105,6 +116,7 @@ function SideBar() {
                                     <MenuItem
                                         key={itemName + headerTitle}
                                         isNew={itemName.includes('*') ? true : false}
+                                        className="menuItem"
                                     >
                                         <ItemLink to={path}>
                                             {itemName.includes('*')
@@ -117,48 +129,6 @@ function SideBar() {
                         </MenuExpend>
                     </QuickMenuContainer>
                 ))}
-
-                {/* <QuickMenuContainer>
-                    <AccessMenuExpend>
-                        <IconWrapper noMargin>
-                            <TransporterIcon src={createImage('TP.png')} />
-                        </IconWrapper>
-
-                        <div
-                            style={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                            }}
-                        >
-                            <MenuTitle>Vận Chuyển</MenuTitle>
-
-                            <IconContainer>
-                                <OverlayIconWrapper className="openIcon" data-index={1}>
-                                    <ArrowTop className="svgIcon1" />
-                                </OverlayIconWrapper>
-                                <OverlayIconWrapper className="closeIcon" data-index={1}>
-                                    <ArrowTop className="svgIcon2" />
-                                </OverlayIconWrapper>
-                            </IconContainer>
-                        </div>
-                    </AccessMenuExpend>
-
-                    <MenuExpend className="menuExpand">
-                        <MenuList className="menuList">
-                            <MenuItem>
-                                <ItemLink to="">Quản Lý Vận Chuyển</ItemLink>
-                            </MenuItem>
-                            <MenuItem>
-                                <ItemLink to="">Giao Hàng Loạt</ItemLink>
-                            </MenuItem>
-                            <MenuItem>
-                                <ItemLink to="">Cài đặt vận chuyển</ItemLink>
-                            </MenuItem>
-                        </MenuList>
-                    </MenuExpend>
-                </QuickMenuContainer> */}
             </SubContainer>
         </Container>
     );

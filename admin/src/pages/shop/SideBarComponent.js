@@ -83,7 +83,8 @@ export const ItemLink = styled(Link)`
 export const MenuItem = styled.li`
     padding: 5px 0;
 
-    &.active {
+    &.active ${ItemLink} {
+        font-weight: 600;
         color: #ee4d2d;
     }
 

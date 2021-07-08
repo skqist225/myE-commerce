@@ -2,6 +2,7 @@ export { default as Form } from './form/Form';
 export { default as Input } from './input/Input';
 export { default as MetaData } from './metaData/MetaData';
 export { default as ProtectedRoute } from './route/ProtectedRoute';
+export { default as ProtectedRouteWithLayout } from './route/ProtectedRouteWithLayout';
 export { default as UserLogin } from './userLogin/UserLogin';
 export { default as UserList } from './userList/UserList';
 export { default as Topbar } from './topbar/Topbar';

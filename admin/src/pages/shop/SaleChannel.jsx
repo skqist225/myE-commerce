@@ -5,7 +5,6 @@ import { Switch } from 'react-router-dom';
 import { AddIcon } from './icon';
 import TopBar from './TopBar';
 import SideBar from './SideBar';
-import MainContent from './MainContent';
 import styled from 'styled-components';
 import './saleChannel.css';
 import AllOrder from './AllOrder';
@@ -15,24 +14,24 @@ const Body = styled.div`
     position: relative;
     width: 100%;
 `;
+const MainContent = styled.main`
+    position: absolute;
+    top: 56px;
+    left: 0;
+    background-color: #f6f6f6;
+    flex: 1;
+    margin-left: 220px;
+    height: calc(100vh - 56px);
+    width: 100%;
+`;
 
-function ShopManage({ match }) {
-    console.log(match.url);
-
+function ShopChannel({ match, children }) {
     return (
         <div>
             <TopBar />
             <Body style={{ display: 'flex' }}>
                 <SideBar />
-                <MainContent>
-                    <Switch>
-                        <ProtectedRoute
-                            path={`${match.url}/sale/order`}
-                            component={AllOrder}
-                            exact={true}
-                        />
-                    </Switch>
-                </MainContent>
+                <MainContent>{children}</MainContent>
             </Body>
             {/* <Button
                 render={
@@ -61,4 +60,4 @@ function ShopManage({ match }) {
     );
 }
 
-export default ShopManage;
+export default ShopChannel;
