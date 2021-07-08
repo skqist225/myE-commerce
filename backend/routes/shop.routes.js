@@ -9,7 +9,7 @@ const {
     getShopById,
     cancelShopRequest,
     getShopByName,
-} = require('../controllers/shop.controller');
+} = require('../controllers/shopController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
 

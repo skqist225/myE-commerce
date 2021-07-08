@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Home from './pages/home/Home';
 import UserList from './pages/userList/UserList';
@@ -25,14 +25,15 @@ import {
 } from './components';
 import { fetchCategories } from './features/categories';
 import { fetchTransporters } from './features/transporters';
+import SaleChannel from './pages/shop/SaleChannel';
 
 function App() {
     const dispatch = useDispatch();
 
-    // React.useEffect(() => {
-    // dispatch(fetchTransporters());
-    // dispatch(fetchCategories());
-    // }, [dispatch]);
+    React.useEffect(() => {
+        dispatch(fetchTransporters());
+        dispatch(fetchCategories());
+    }, [dispatch]);
 
     return (
         <div>
@@ -51,6 +52,8 @@ function App() {
                     <ProtectedRoute path="/product/:productId" component={ViewProduct} />
 
                     <ProtectedRoute path="/shop/add" component={AddShop} exact />
+                    <ProtectedRoute path="/shop" component={SaleChannel} exact />
+
                     <ProtectedRoute path="/shop/:shopId/edit" component={EditShop} exact />
                     <ProtectedRoute path="/shop/:shopId/search" component={ShopProducts} exact />
                     <ProtectedRoute path="/shop/:shopName" component={ViewShop} exact />

@@ -4,7 +4,7 @@ const {
     getCategories,
     updateCategory,
     deleteCategory,
-} = require('../controllers/category.controller');
+} = require('../controllers/catergoryController');
 const router = express.Router();
 const upload = require('../middlewares/multer');
 

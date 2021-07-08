@@ -41,9 +41,6 @@ const UserList = () => {
             field: 'username',
             headerName: 'Username',
             width: 170,
-            // renderCell: params => (
-            //     <p style={{ width: '100%', textAlign: 'center' }}>{params.row.username}</p>
-            // ),
         },
         {
             field: 'email',
@@ -103,10 +100,6 @@ const UserList = () => {
                         <Link to={`/user/${params.row.id}`}>
                             <button className="userListEdit">Edit</button>
                         </Link>
-                        {/* <DeleteOutlineIcon
-                            className="userListDelete"
-                            onClick={() => handleDelete(params.row.id)}
-                        /> */}
                     </div>
                 );
             },

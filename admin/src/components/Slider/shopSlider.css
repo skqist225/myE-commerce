@@ -1,7 +1,7 @@
 .container-slider {
     width: 100%;
-    max-width: 1000px;
-    height: 500px;
+    /* max-width: 1200px; */
+    height: 600px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
@@ -68,13 +68,12 @@
     display: flex;
 }
 .dot {
-    width: 20px;
-    height: 20px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
-    border: 3px solid #f1f1f1;
-    margin: 0 5px;
+    margin: 0 6.25px;
     background: #f1f1f1;
 }
 .dot.active {
-    background: rgb(32, 32, 32);
+    background: #d0011b;
 }

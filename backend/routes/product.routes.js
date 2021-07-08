@@ -8,7 +8,8 @@ const {
     deleteAllProducts,
     updateProductType,
     deleteSingleProduct,
-} = require('../controllers/product.controller');
+    advancedGetAllProducts,
+} = require('../controllers/productController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 const upload = require('../middlewares/multer.js');
@@ -47,7 +48,7 @@ router
 
 router.delete(
     '/admin/products/delete',
-    [isAuthenticatedUser, authorizeRoles('admin', 'shop')],
+    [isAuthenticatedUser, authorizeRoles('admin')],
     deleteAllProducts
 );
 
@@ -60,6 +61,8 @@ router.put(
 
 //HIGHLIGHT==============================================GET PRODUCTS==========================================================
 router.get('/products', getAllProducts);
+router.get('/advanced/products', advancedGetAllProducts);
+
 router.get('/shop/products', [isAuthenticatedUser, authorizeRoles('shop')], getShopProducts);
 router.route('/product/:productId').get(getSingleProduct);
 

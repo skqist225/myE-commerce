@@ -154,3 +154,12 @@
 .viewShopMenuItem.active {
     border-bottom: 3px solid #d0011b;
 }
+
+.viewShopHomeImages {
+    padding-top: 25px;
+    width: 100%;
+}
+
+.viewShopImage {
+    width: 100%;
+}

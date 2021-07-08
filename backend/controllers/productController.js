@@ -1,190 +1,187 @@
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const Shop = require('../models/shop');
 const Order = require('../models/order');
+const Review = require('../models/review');
 const ErrorHandler = require('../utils/errorHandler');
-
 const httpStatusCode = require('../utils/constansts');
 const catchAsyncError = require('../middlewares/catchAsyncError');
 const processImagePath = require('../helpers/processImageSavePath');
 const mongoose = require('mongoose');
 const deleteImage = require('../helpers/deleteImage');
-// const isProductNameExist = require('../helpers/isProductNameExist');
+const ProductFeatures = require('../utils/productFeatureAPIs');
 
 exports.addProduct = catchAsyncError(async (req, res, next) => {
-    const userId = req.user._id;
+    const { _id: user } = req.user;
 
+    //DEVNOTIFY
     if (!req.query || (req.query && req.query.dest === undefined)) {
         return res
             .status(httpStatusCode.BAD_REQUEST)
-            .json({ errorMessage: 'Please secify folder to save image ' });
-    }
+            .json({ errorMessage: 'Please secify folder to save image' });
+    } //DEVNOTIFY
 
-    console.log(req.body);
+    if (mongoose.isValidObjectId(user)) {
+        const { _id: shop } = await Shop.findOne({ user });
+        const shopProducts = await Product.find({ shop });
 
-    // if (mongoose.isValidObjectId(userId)) {
-    // const shop = await Shop.findOne({ user: userId });
-    // const shopProducts = await Product.find({ shop: shop._id });
+        const isProductNameExist = ({ productName }) => {
+            let prdName = req.body.productName;
 
-    // const isProductNameExist = ({ productName }) => {
-    //     let prdName = req.body.productName;
+            if (prdName.includes('-')) {
+                let prdNameSubName1 = prdName.split('-');
 
-    //     if (prdName.includes('-')) {
-    //         let prdNameSubName1 = prdName.split('-');
+                if (productName.includes('-')) {
+                    if (productName.split('-').length === prdNameSubName1.length) {
+                    }
 
-    //         if (productName.includes('-')) {
-    //             if (productName.split('-').length === prdNameSubName1.length) {
-    //             }
+                    const prdNameSubName2 = productName.split('-');
 
-    //             const prdNameSubName2 = productName.split('-');
+                    let trueAcc = 0;
 
-    //             let trueAcc = 0;
+                    for (let i = 0; i < prdNameSubName1.length; i++) {
+                        if (prdNameSubName1[i] === prdNameSubName2[i]) {
+                            trueAcc++;
+                        }
+                    }
 
-    //             for (let i = 0; i < prdNameSubName1.length; i++) {
-    //                 if (prdNameSubName1[i] === prdNameSubName2[i]) {
-    //                     trueAcc++;
-    //                 }
-    //             }
+                    if (trueAcc === prdNameSubName1.length) {
+                        return true;
+                    }
+                }
+            }
 
-    //             if (trueAcc === prdNameSubName1.length) {
-    //                 return true;
-    //             }
-    //         }
-    //     }
+            return productName === prdName;
+        };
 
-    //     return productName === prdName;
-    // };
+        if (shop) {
+            if (shopProducts.length > 0) {
+                if (shopProducts.some(isProductNameExist)) {
+                    res.status(httpStatusCode.BAD_REQUEST).json({
+                        errorMessage: 'This product name is already exists in our shop',
+                    });
+                }
+            }
 
-    // if (shop) {
-    // if (shopProducts.length > 0) {
-    //     if (shopProducts.some(isProductNameExist)) {
-    //         return res.status(httpStatusCode.BAD_REQUEST).json({
-    //             errorMessage: 'This product name is already exists in our shop',
-    //         });
-    //     }
-    // }
+            const {
+                productName,
+                description,
+                category,
+                supplier,
+                transporters,
+                isFreeship,
+                productWeight,
+                discountPercent,
+            } = req.body;
 
-    const {
-        productName,
-        description,
-        category,
-        supplier,
-        transporters,
-        isFreeship,
-        productWeight,
-        discountPercent,
-    } = req.body;
+            if (transporters.length > 3) {
+                return res
+                    .status(httpStatusCode.BAD_REQUEST)
+                    .json({ errorMessage: 'Please do not choose over 3 transporters' });
+            }
 
-    if (transporters.length > 3) {
-        return res
-            .status(httpStatusCode.BAD_REQUEST)
-            .json({ errorMessage: 'Please do not choose over 3 transporters' });
-    }
-
-    let _product = {
-        shop: userId,
-        productName,
-        description,
-        category,
-        supplier,
-        transporters,
-        isFreeship,
-        productWeight,
-        discountPercent,
-        productTypes: [],
-        images: [],
-    };
-
-    if (req.files.images) {
-        req.files.images.forEach(image => {
-            _product.images.push(processImagePath(image.path));
-        });
-    }
-
-    const { typeName, typeStock, typePrice } = req.body.productTypes;
-
-    if (Array.isArray(typeName)) {
-        const arraySize = typeName.length;
-
-        if (
-            typeStock.length !== arraySize ||
-            typePrice.length !== arraySize ||
-            (req.files['productTypes[typeImage]'] &&
-                req.files['productTypes[typeImage]'].length !== arraySize)
-        ) {
-            return res.status(httpStatusCode.BAD_REQUEST).json({
-                success: false,
-                errorMessage: 'Can not leave out any field',
-            });
-        }
-
-        for (let i = 0; i < arraySize; i++) {
-            let productTypeObj = {
-                typeName: '',
-                typeImage: '',
-                typeStock: 0,
-                typePrice: 0,
+            let _product = {
+                shop: req.body.shop,
+                productName,
+                description,
+                category,
+                supplier,
+                transporters,
+                isFreeship,
+                productWeight,
+                discountPercent,
+                productTypes: [],
+                images: [],
             };
-            productTypeObj.typeName = typeName[i];
-            productTypeObj.typeStock = typeStock[i];
-            productTypeObj.typePrice = typePrice[i];
-            productTypeObj.typeImage = req.files['productTypes[typeImage]']
-                ? processImagePath(req.files['productTypes[typeImage]'][i].path)
-                : '';
 
-            _product.productTypes.push(productTypeObj);
+            if (req.files.images) {
+                req.files.images.forEach(image => {
+                    _product.images.push(processImagePath(image.path));
+                });
+            }
+
+            const { typeName, typeStock, typePrice } = req.body.productTypes;
+
+            if (Array.isArray(typeName)) {
+                const arraySize = typeName.length;
+
+                if (
+                    typeStock.length !== arraySize ||
+                    typePrice.length !== arraySize ||
+                    (req.files['productTypes[typeImage]'] &&
+                        req.files['productTypes[typeImage]'].length !== arraySize)
+                ) {
+                    return res.status(httpStatusCode.BAD_REQUEST).json({
+                        success: false,
+                        errorMessage: 'Can not leave out any field',
+                    });
+                }
+
+                for (let i = 0; i < arraySize; i++) {
+                    let productTypeObj = {
+                        typeName: '',
+                        typeImage: '',
+                        typeStock: 0,
+                        typePrice: 0,
+                    };
+                    productTypeObj.typeName = typeName[i];
+                    productTypeObj.typeStock = typeStock[i];
+                    productTypeObj.typePrice = typePrice[i];
+                    productTypeObj.typeImage = req.files['productTypes[typeImage]']
+                        ? processImagePath(req.files['productTypes[typeImage]'][i].path)
+                        : '';
+
+                    _product.productTypes.push(productTypeObj);
+                }
+            } else {
+                let productTypeObj = {
+                    typeName,
+                    typeStock,
+                    typePrice,
+                    typeImage: processImagePath(req.files['productTypes[typeImage]'][0].path),
+                };
+                _product.productTypes.push(productTypeObj);
+
+                if (req.query.addProductType === 'true') {
+                    Product.findByIdAndUpdate(
+                        product._id,
+                        {
+                            $push: { productType: productTypeObj },
+                        },
+                        { runValidators: true, new: true }
+                    ).exec((err, product) => {
+                        if (err)
+                            return res
+                                .status(httpStatusCode.BAD_REQUEST)
+                                .json({ errorMessage: err.message });
+
+                        return res.status(httpStatusCode.CREATED).json({
+                            updatedProduct: product,
+                        });
+                    });
+                }
+            }
+
+            const product = new Product(_product);
+
+            product.save(async (err, product) => {
+                if (err)
+                    res.status(httpStatusCode.BAD_REQUEST).json({
+                        errorMessage: err.message,
+                    });
+
+                if (product) {
+                    res.status(httpStatusCode.CREATED).json({
+                        successMessage: 'Product created successfully',
+                        product,
+                    });
+                }
+            });
+        } else {
+            return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
         }
     } else {
-        let productTypeObj = {
-            typeName,
-            typeStock,
-            typePrice,
-            typeImage: processImagePath(req.files['productTypes[typeImage]'][0].path),
-        };
-        _product.productTypes.push(productTypeObj);
-
-        if (req.query.addProductType === 'true') {
-            Product.findByIdAndUpdate(
-                product._id,
-                {
-                    $push: { productType: productTypeObj },
-                },
-                { runValidators: true, new: true }
-            ).exec((err, product) => {
-                if (err)
-                    return res
-                        .status(httpStatusCode.BAD_REQUEST)
-                        .json({ errorMessage: err.message });
-
-                return res.status(httpStatusCode.CREATED).json({
-                    updatedProduct: product,
-                });
-            });
-        }
+        return next(new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST));
     }
-
-    const product = new Product(_product);
-
-    product.save(async (err, product) => {
-        if (err)
-            res.status(httpStatusCode.BAD_REQUEST).json({
-                errorMessage: err.message,
-            });
-
-        if (product) {
-            return res.status(httpStatusCode.CREATED).json({
-                success: true,
-                successMessage: 'Product created successfully',
-                product,
-            });
-        }
-    });
-    // }
-    // } else {
-    //     return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
-    // }
-    // } else {
-    //     return next(new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST));
-    // }
 });
 
 exports.updateProduct = async (req, res, next) => {
@@ -341,8 +338,7 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                             if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                             return res.status(httpStatusCode.CREATED).json({
-                                success: true,
-                                message: "Product's type updated successfully",
+                                successMessage: "Product's type updated successfully",
                                 updatedProduct: product,
                             });
                         });
@@ -480,7 +476,7 @@ exports.getAllProducts = (req, res, next) => {
                 return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
             if (products) {
-                return res.status(httpStatusCode.OK).json({
+                res.status(httpStatusCode.OK).json({
                     successMessage: 'All products fetched successfully',
                     products,
                 });
@@ -488,17 +484,51 @@ exports.getAllProducts = (req, res, next) => {
         });
 };
 
-exports.getShopProducts = catchAsyncError(async (req, res, next) => {
-    const shop = await Shop.findOne({ user: req.user._id });
+exports.advancedGetAllProducts = async (req, res, next) => {
+    try {
+        let features = new ProductFeatures(Product, req.query).filter().sort().paginate();
 
-    Product.find({ shop: shop._id }).exec((err, products) => {
+        if (req.query.ratingFilter) {
+            const productsRatings = await Review.aggregate([
+                {
+                    $group: {
+                        _id: '$product',
+                        avgRatings: { $avg: '$rating' },
+                    },
+                },
+                {
+                    $match: {
+                        avgRatings: { $gte: Math.abs(req.query.ratingFilter) },
+                    },
+                },
+            ]);
+            features.query = features.query.match({
+                _id: { $in: productsRatings.map(({ _id }) => new mongoose.Types.ObjectId(_id)) },
+            });
+        }
+
+        const products = await features.query;
+
+        res.status(httpStatusCode.OK).json({
+            successMessage: 'All products fetched successfully',
+            products,
+        });
+    } catch (error) {
+        res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: error.message });
+    }
+};
+
+exports.getShopProducts = catchAsyncError(async (req, res, next) => {
+    const { _id: user } = req.user;
+    const { _id: shop } = await Shop.findOne({ user });
+
+    Product.find({ shop }).exec((err, shopProducts) => {
         if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
-        if (products)
-            return res.status(httpStatusCode.OK).json({
-                success: true,
-                message: "Shop's products fetched successfully",
-                products,
+        if (shopProducts)
+            res.status(httpStatusCode.OK).json({
+                successMessage: "All shop's products fetched successfully",
+                shopProducts,
             });
     });
 });
@@ -518,8 +548,7 @@ exports.getSingleProduct = (req, res, next) => {
                         .json({ errorMessage: 'something went wrong' });
 
                 if (product)
-                    return res.status(httpStatusCode.OK).json({
-                        success: true,
+                    res.status(httpStatusCode.OK).json({
                         successMessage: `${product.productName} fetched successfully`,
                         product,
                     });
@@ -548,9 +577,8 @@ exports.deleteAllProducts = (req, res, next) => {
                     }
                 });
 
-                return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: 'All products are deleted successfully',
+                res.status(httpStatusCode.OK).json({
+                    successMessage: 'All products are deleted successfully',
                 });
             }
         });

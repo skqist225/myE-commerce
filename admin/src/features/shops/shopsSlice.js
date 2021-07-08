@@ -9,10 +9,10 @@ const shopsAdapter = createEntityAdapter({
 export const fetchShops = createAsyncThunk('/shops/fetchShops', async (_, { rejectWithValue }) => {
     try {
         const {
-            data: { shops, successMessage },
+            data: { shops, successMessage, shops_productsLength },
         } = await axios.get('/admin/shops');
 
-        return { shops, successMessage };
+        return { shops, successMessage, shops_productsLength };
     } catch ({ data: { errorMessage } }) {
         return rejectWithValue(errorMessage);
     }
@@ -99,6 +99,7 @@ export const cancelShopRequest = createAsyncThunk(
 const shopsSlice = createSlice({
     name: 'shops',
     initialState: shopsAdapter.getInitialState({
+        shops_productsLength: [],
         loading: false,
         successMessage: null,
         cancelMessage: null,
@@ -115,7 +116,10 @@ const shopsSlice = createSlice({
     extraReducers: builder => {
         builder
             .addCase(fetchShops.fulfilled, (state, { payload }) => {
+                console.log(payload);
+
                 state.loading = false;
+                state.shops_productsLength = payload.shops_productsLength;
                 state.successMessage = payload.successMessage;
                 shopsAdapter.setAll(state, payload.shops);
             })

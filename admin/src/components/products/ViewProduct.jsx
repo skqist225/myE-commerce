@@ -1,11 +1,11 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { MetaData } from '../../components';
 import { fetchCategoryPath, fetchProductById } from '../../features/product';
 import './viewProduct.css';
-import { categoriesSelectors } from '../../features/categories';
+import { categoriesSelectors, fetchCategories } from '../../features/categories';
 import ProductSlider from '../Slider/ProductSlider';
 import { createImage } from '../../helper';
 
@@ -70,6 +70,7 @@ function ViewProduct({ match }) {
     };
 
     useEffect(() => {
+        dispatch(fetchCategories());
         dispatch(fetchProductById({ productId }));
         if (successMessage) {
             setCategoryPath(renderCategoryPath(categories, product.category.parentId));
@@ -78,9 +79,11 @@ function ViewProduct({ match }) {
         }
     }, [dispatch, productId, successMessage]);
 
-    const handleSelectedImage = e => {
+    const handleSelectedImage = useCallback(e => {
         setSelectedImage(e.target.name);
-    };
+    }, []);
+
+    console.log('Parent rendering...');
 
     const handleSelectedType = e => {
         setSelectedImage(e.target.name);
@@ -93,16 +96,40 @@ function ViewProduct({ match }) {
             <MetaData title="Product's detail" />
             {!loading && successMessage && (
                 <div className="viewProduct">
-                    <div style={{ display: 'flex' }}>
+                    <div
+                        style={{ display: 'flex', alignItems: 'center' }}
+                        className="viewProductCategoryPathContainer"
+                    >
                         {categoryPath.length > 0 &&
                             categoryPath.map(category => (
-                                <p className="viewProductCategory" key={category._id}>
-                                    {`${category.categoryName}>`}
-                                </p>
+                                <Fragment key={category._id}>
+                                    <p className="viewProductCategory">{category.categoryName}</p>
+                                    <div className="viewProductIconWrapper">
+                                        <svg
+                                            enableBackground="new 0 0 11 11"
+                                            viewBox="0 0 11 11"
+                                            x="0"
+                                            y="0"
+                                            className="viewProductArrowRightIcon"
+                                        >
+                                            <path d="m2.5 11c .1 0 .2 0 .3-.1l6-5c .1-.1.2-.3.2-.4s-.1-.3-.2-.4l-6-5c-.2-.2-.5-.1-.7.1s-.1.5.1.7l5.5 4.6-5.5 4.6c-.2.2-.2.5-.1.7.1.1.3.2.4.2z"></path>
+                                        </svg>
+                                    </div>
+                                </Fragment>
                             ))}
-                        <p className="viewProductCategory">
-                            {`${product.category.categoryName}>${product.productName}`}
-                        </p>
+                        <p className="viewProductCategory">{`${product.category.categoryName}`}</p>
+                        <div className="viewProductIconWrapper">
+                            <svg
+                                enableBackground="new 0 0 11 11"
+                                viewBox="0 0 11 11"
+                                x="0"
+                                y="0"
+                                className="viewProductArrowRightIcon"
+                            >
+                                <path d="m2.5 11c .1 0 .2 0 .3-.1l6-5c .1-.1.2-.3.2-.4s-.1-.3-.2-.4l-6-5c-.2-.2-.5-.1-.7.1s-.1.5.1.7l5.5 4.6-5.5 4.6c-.2.2-.2.5-.1.7.1.1.3.2.4.2z"></path>
+                            </svg>
+                        </div>
+                        <p className="viewProductCategory productName">{product.productName}</p>
                     </div>
 
                     <div className="viewProductContainer">

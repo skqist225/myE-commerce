@@ -13,7 +13,7 @@ const {
     resetPassword,
     followOtherUsers,
     unfollowOtherUsers,
-} = require('../controllers/auth.controller');
+} = require('../controllers/authController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 const upload = require('../middlewares/multer');

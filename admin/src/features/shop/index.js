@@ -1,1 +1,1 @@
-export { clearErrorMessage, clearSuccessMessage } from './shopSlice';
+export { clearErrorMessage, clearSuccessMessage, setSelectedTab } from './shopSlice';

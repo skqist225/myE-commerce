@@ -4,7 +4,8 @@ const {
     getProductReviews,
     deleteReview,
     getUserReviews,
-} = require('../controllers/review.controller');
+    getAllReviews,
+} = require('../controllers/reviewController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
 
@@ -15,17 +16,10 @@ router.post(
     createProductReview
 );
 
-router.get(
-    '/user/reviews',
-    [isAuthenticatedUser, authorizeRoles('user')],
-    getUserReviews
-);
+router.get('/user/reviews', [isAuthenticatedUser, authorizeRoles('user')], getUserReviews);
 
-router.get(
-    '/product/reviews/:productId',
-    [isAuthenticatedUser],
-    getProductReviews
-);
+router.get('/product/reviews/:productId', [isAuthenticatedUser], getProductReviews);
+router.get('/reviews', getAllReviews);
 
 router.delete(
     '/user/review/delete/:reviewId',

@@ -26,6 +26,7 @@ import './addProduct.css';
 import { addProduct, clearSuccessMessage, clearErrorMessage } from '../../features/products';
 import { BootstrapInput } from '../../components';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { fetchShops, shopsSelectors } from '../../features/shops';
 
 yup.setLocale({
     string: {
@@ -144,13 +145,13 @@ const WatchProductTypesField = ({ control, name, index }) => {
 
 function AddProduct() {
     const dispatch = useDispatch();
-    dispatch(clearSuccessMessage());
-
+    const classes = useStyles();
     const [imagePreview, setImageReview] = React.useState([]);
     const transporters = useSelector(transportersSelector.selectAll);
     const categories = useSelector(categoriesSelectors.selectAll);
     const { successMessage, errorMessage, loading } = useSelector(state => state.products);
-    const classes = useStyles();
+    const allShops = useSelector(shopsSelectors.selectAll);
+
     const {
         register,
         handleSubmit,
@@ -187,6 +188,7 @@ function AddProduct() {
             productName,
             description,
             category,
+            shop,
             supplier,
             transporters,
             isFreeship,
@@ -197,6 +199,7 @@ function AddProduct() {
         } = data;
 
         const formData = new FormData();
+        formData.set('shop', shop);
         formData.set('productName', productName);
         formData.set('description', description);
         formData.set('category', category);
@@ -207,7 +210,6 @@ function AddProduct() {
 
         transporters.forEach(transporter => formData.append('transporters', transporter));
         images.forEach(image => formData.append('images', image));
-        // formData.append('images', images);
 
         productTypes.forEach(productType => {
             formData.append('productTypes[typeName]', productType.typeName);
@@ -238,9 +240,9 @@ function AddProduct() {
         fileReader.readAsDataURL(e.target.files[0]);
     };
 
-    // useEffect(() => {
-    //     dispatch(clearSuccessMessage());
-    // }, []);
+    useEffect(() => {
+        dispatch(fetchShops());
+    }, []);
 
     useEffect(() => {
         if (isSubmitting) {
@@ -316,6 +318,27 @@ function AddProduct() {
                                             <Fragment key={category._id}>
                                                 <option value={category._id.toString()}>
                                                     {category.categoryName}
+                                                </option>
+                                            </Fragment>
+                                        ))}
+                                    </NativeSelect>
+                                </>
+                            )}
+                        />
+                    </FormControl>
+                    <FormControl className={classes.margin}>
+                        <InputLabel>Shop:</InputLabel>
+                        <Controller
+                            control={control}
+                            name="shop"
+                            render={({ field }) => (
+                                <>
+                                    <NativeSelect {...field} input={<BootstrapInput />}>
+                                        <option aria-label="None" value="" />
+                                        {allShops.map(shop => (
+                                            <Fragment key={shop._id}>
+                                                <option value={shop._id.toString()}>
+                                                    {shop.shopName}
                                                 </option>
                                             </Fragment>
                                         ))}

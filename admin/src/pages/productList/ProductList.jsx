@@ -17,14 +17,13 @@ import {
 } from '../../features/products';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { fetchTransporters, transportersSelector } from '../../features/transporters';
-import { fetchCategories } from '../../features/categories';
+// import { fetchCategories } from '../../features/categories';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import { clearSuccessMessage } from '../../features/product';
 import { createImage } from '../../helper';
 
 export default function ProductList() {
     const dispatch = useDispatch();
-    dispatch(clearSuccessMessage());
 
     const allProducts = useSelector(productsSelectors.selectAll);
     const productTypes = useSelector(productTypesSelectors.selectAll);
@@ -203,8 +202,6 @@ export default function ProductList() {
 
     React.useEffect(() => {
         dispatch(fetchProducts());
-        dispatch(fetchTransporters());
-        dispatch(fetchCategories());
 
         if (successMessage) {
             NotificationManager.success(successMessage, 'Click me!', 4000, () => {

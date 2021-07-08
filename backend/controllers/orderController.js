@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const catchAsyncError = require('../middlewares/catchAsyncError');
 const Order = require('../models/order');
 const Shop = require('../models/shop');
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const User = require('../models/user');
 const Address = require('../models/address');
 const httpStatusCode = require('../utils/constansts');
@@ -29,9 +29,7 @@ exports.addOrder = catchAsyncError(async (req, res, next) => {
         //     shopIds.push(productObj.shop);
         //     console.log(shopIds);
         // });
-        let productObj = await Product.findById(products[0].productId).select(
-            'shop'
-        );
+        let productObj = await Product.findById(products[0].productId).select('shop');
 
         if (!shopIds.every(id => id.toString() === shopIds[0].toString())) {
             console.log('false');
@@ -77,10 +75,7 @@ exports.addOrder = catchAsyncError(async (req, res, next) => {
 
         order.save(
             catchAsyncError(async (err, order) => {
-                if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (order) {
                     return res.status(httpStatusCode.CREATED).json({
@@ -136,9 +131,7 @@ exports.getAllOrders = catchAsyncError(async (req, res, next) => {
     const orders = await Order.find({});
 
     if (!orders) {
-        return next(
-            new ErrorHandler('Order not found', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new ErrorHandler('Order not found', httpStatusCode.BAD_REQUEST));
     }
 
     return res.status(httpStatusCode.OK).json({
@@ -156,9 +149,7 @@ exports.updateOrder = catchAsyncError(async (req, res, next) => {
         const order = await Order.findById(orderId);
 
         if (!order) {
-            return next(
-                new ErrorHandler('Order not found', httpStatusCode.BAD_REQUEST)
-            );
+            return next(new ErrorHandler('Order not found', httpStatusCode.BAD_REQUEST));
         }
 
         if (req.body.orderStatus) {
@@ -170,14 +161,12 @@ exports.updateOrder = catchAsyncError(async (req, res, next) => {
                 req.body.shippingInfo.forEach(shippingDetail => {
                     if (shippingDetail.at) {
                         order.shippingInfo.push({
-                            shippingDescription:
-                                shippingDetail.shippingDescription,
+                            shippingDescription: shippingDetail.shippingDescription,
                             at: shippingDetail.at,
                         });
                     } else {
                         order.shippingInfo.push({
-                            shippingDescription:
-                                shippingDetail.shippingDescription,
+                            shippingDescription: shippingDetail.shippingDescription,
                             at: new Date(),
                         });
                     }
@@ -223,16 +212,12 @@ exports.updateOrder = catchAsyncError(async (req, res, next) => {
                     });
                 } else {
                     const index = order.shippingInfo.findIndex(
-                        ({ _id }) =>
-                            _id.toString() === shippingDetailId.toString()
+                        ({ _id }) => _id.toString() === shippingDetailId.toString()
                     );
 
                     if (index === -1) {
                         return next(
-                            new ErrorHandler(
-                                'Product type not exists',
-                                httpStatusCode.BAD_REQUEST
-                            )
+                            new ErrorHandler('Product type not exists', httpStatusCode.BAD_REQUEST)
                         );
                     }
 
@@ -249,10 +234,7 @@ exports.updateOrder = catchAsyncError(async (req, res, next) => {
             }
         }
 
-        if (
-            req.query.deleteShippingDetail === 'true' &&
-            !req.body.shippingInfo
-        ) {
+        if (req.query.deleteShippingDetail === 'true' && !req.body.shippingInfo) {
             const { shippingDetailId } = req.query;
 
             let modifyArray;
@@ -296,8 +278,7 @@ exports.deleteOrder = (req, res, next) => {
 
     if (mongoose.isValidObjectId(orderId)) {
         Order.deleteOne({ _id: orderId }).exec(err => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             return res.status(httpStatusCode.OK).json({
                 success: true,
@@ -305,9 +286,7 @@ exports.deleteOrder = (req, res, next) => {
             });
         });
     } else {
-        return next(
-            new ErrorHandler('Order id is invalid', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new ErrorHandler('Order id is invalid', httpStatusCode.BAD_REQUEST));
     }
 };
 
@@ -316,9 +295,7 @@ exports.getUserSingleOrder = catchAsyncError(async (req, res, next) => {
     const order = await Order.findOne({ user: req.user._id, _id: orderId });
 
     if (!order) {
-        return next(
-            new ErrorHandler('Order not found', httpStatusCode.NOT_FOUND)
-        );
+        return next(new ErrorHandler('Order not found', httpStatusCode.NOT_FOUND));
     }
 
     return res.status(httpStatusCode.OK).json({

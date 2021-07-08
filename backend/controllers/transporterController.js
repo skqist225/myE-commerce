@@ -1,5 +1,5 @@
 const Transporter = require('../models/transporter');
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const Order = require('../models/order');
 const httpStatusCode = require('../utils/constansts');
 const ErrorHandler = require('../utils/errorHandler');

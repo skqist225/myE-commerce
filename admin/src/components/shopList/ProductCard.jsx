@@ -1,9 +1,47 @@
 import React, { Fragment } from 'react';
 import { createImage } from '../../helper';
 import PropTypes from 'prop-types';
+
+import { HeartIcon } from './svgIcon';
 import './productCard.css';
 
 function ProductCard({ product }) {
+    let dotNum = 0;
+    const countDotNum = number => {
+        const r = number / 1000;
+
+        if (r >= 1) {
+            dotNum++;
+            const _number = number / 1000;
+            countDotNum(_number);
+        } else {
+            return;
+        }
+    };
+
+    const seperateNumber = number => {
+        countDotNum(number);
+        let finalString = [];
+
+        let numString = String(number);
+
+        for (let i = 0; i < dotNum; i++) {
+            const subString = '.' + numString.substr(-3);
+            numString = numString.substring(0, numString.length - 3);
+            finalString.unshift(subString);
+        }
+
+        return numString + finalString.join('');
+    };
+
+    const handleProductPrice = () => {
+        const { typePrice } = product.productTypes[0];
+
+        return product.discountPercent !== 0
+            ? seperateNumber(typePrice - Math.round((product.discountPercent * typePrice) / 100))
+            : seperateNumber(typePrice);
+    };
+
     return (
         <Fragment>
             <div className="productCard">
@@ -41,29 +79,76 @@ function ProductCard({ product }) {
                         />
                     </div>
                 </div>
-                <div>
-                    <div>{product.productName}</div>
-                </div>
-                <div>
-                    <div>
-                        <span>originial Price</span>
-                        <div>
-                            <span>price</span>
-                            <img src="" alt="freeShipImage" />
+                <div className="productCardProductDetailsSection">
+                    <div className="productCardProductName">{product.productName}</div>
+                    <div style={{ marginTop: '6.25px' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyConten: 'space-between',
+                            }}
+                        >
+                            {product.discountPercent && (
+                                <div className="productCardOrginalPrice">
+                                    <span className="productCardOrginalPriceCur">đ</span>
+                                    {seperateNumber(product.productTypes[0].typePrice)}
+                                </div>
+                            )}
+                            <div className="productCardDiscountPriceWrapper">
+                                <span className="productCardOrginalPriceOrDiscountPrice">
+                                    {handleProductPrice()}
+                                </span>
+                                <div>
+                                    <img
+                                        src={createImage('freeship.png')}
+                                        alt="freeShipImage"
+                                        style={{ width: '20px', height: '12px' }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <span>heart icon</span>
-                        <div>
-                            <span className="fa fa-star checked"></span>
-                            <span className="fa fa-star checked"></span>
-                            <span className="fa fa-star checked"></span>
-                            <span className="fa fa-star checked"></span>
-                            <span className="fa fa-star checked"></span>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                width: '100%',
+                                marginTop: '6.25px',
+                                // justifyContent: 'space-between',
+                            }}
+                        >
+                            <div style={{ marginRight: '10px' }}>
+                                <HeartIcon />
+                            </div>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    flex: '1',
+                                }}
+                            >
+                                {Array.from({ length: 5 }).map((_, index) => (
+                                    <span
+                                        key={index}
+                                        className="fa fa-star checked"
+                                        style={{
+                                            fontSize: '12px',
+                                            marginRight: '3px',
+                                            color: '#ffce3d',
+                                        }}
+                                    ></span>
+                                ))}
+                            </div>
+                            <div
+                                className="productCardSoldNumber"
+                                style={{ width: '40%', justifySelf: 'flex-end' }}
+                            >
+                                Đã bán 2K
+                            </div>
                         </div>
-                        <span>Đã bán 2K</span>
+                        <div className="productCardSellLocation">TP.Hồ Chí Minh</div>
                     </div>
-                    <div>TP.Hồ Chí Minh</div>
                 </div>
             </div>
         </Fragment>

@@ -30,6 +30,10 @@ const shopSchema = new Schema(
             default: 0,
             max: 100000,
         },
+        // totalProducts: {
+        //     type: Number,
+        //     default: 0,
+        // },
         vouchers: [
             {
                 type: Schema.Types.ObjectId,

@@ -24,10 +24,6 @@ const productSchema = new Schema(
         supplier: {
             type: Schema.Types.ObjectId,
             ref: 'Supplier',
-            // required: [
-            //     true,
-            //     'Please select supplier or creating a new supplier for this product',
-            // ],
         },
         transporters: {
             type: [
@@ -63,6 +59,10 @@ const productSchema = new Schema(
             type: Number,
             required: [true, 'Please enter product weight'],
             select: false,
+        },
+        active: {
+            type: Boolean,
+            default: true,
         },
         soldNumber: { type: Number, default: 0 },
     },

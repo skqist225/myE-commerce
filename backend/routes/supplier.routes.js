@@ -6,7 +6,7 @@ const {
     updateSupplier,
     verifySupplier,
     deleteSupplier,
-} = require('../controllers/supplier.controller');
+} = require('../controllers/supplierController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
 const upload = require('../middlewares/multer');

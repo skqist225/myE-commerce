@@ -37,11 +37,15 @@ const shopSlice = createSlice({
     initialState: {
         shop: {},
         shopProducts: [],
+        selectedTab: 1,
         errorMessage: null,
         successMessage: null,
         loading: true,
     },
     reducers: {
+        setSelectedTab(state, { payload }) {
+            state.selectedTab = payload;
+        },
         clearErrorMessage(state) {
             state.errorMessage = null;
         },
@@ -73,6 +77,6 @@ const shopSlice = createSlice({
     },
 });
 
-export const { clearErrorMessage, clearSuccessMessage } = shopSlice.actions;
+export const { clearErrorMessage, clearSuccessMessage, setSelectedTab } = shopSlice.actions;
 
 export default shopSlice.reducer;

@@ -1,6 +1,6 @@
 const Shop = require('../models/shop');
 const User = require('../models/user');
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const Order = require('../models/order');
 const Address = require('../models/address');
 const mongoose = require('mongoose');
@@ -131,15 +131,36 @@ exports.getApprovedShops = (req, res, next) => {
     });
 };
 
-exports.getAllShops = (req, res, next) => {
-    Shop.find({}).exec((err, shops) => {
+exports.getAllShops = async (req, res, next) => {
+    Shop.find({}).exec(async (err, shops) => {
         if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
 
-        if (shops)
-            return res.status(httpStatusCode.OK).json({
-                successMessage: 'All shops fetched successfully',
-                shops,
+        if (shops) {
+            const shopsProducts = await Product.aggregate([
+                {
+                    $group: {
+                        _id: '$shop',
+                        number_of_products: { $sum: 1 },
+                    },
+                },
+            ]);
+
+            const _shops = shops.map(({ _doc }) => {
+                const doc = shopsProducts.find(({ _id }) => _id.toString() === _doc._id.toString());
+
+                if (doc) {
+                    const totalProducts = doc.number_of_products;
+                    return { ..._doc, totalProducts };
+                } else {
+                    return { ..._doc, totalProducts: 0 };
+                }
             });
+
+            res.status(httpStatusCode.OK).json({
+                successMessage: 'All shops fetched successfully',
+                shops: _shops,
+            });
+        }
     });
 };
 
@@ -164,7 +185,9 @@ exports.getShopById = (req, res, next) => {
                 if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (shop) {
-                    const shopProducts = await Product.find({ shop: shop._id });
+                    const shopProducts = await Product.find({ shop: shop._id })
+                        .populate('category', 'categoryName _id')
+                        .populate('transporters', 'transporterName transportFee _id');
 
                     return res.status(httpStatusCode.OK).json({
                         successMessage: `${shop.shopName} fetched successfully`,
@@ -189,7 +212,9 @@ exports.getShopByName = async (req, res, next) => {
             if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (shop) {
-                const shopProducts = await Product.find({ shop: shop._id });
+                const shopProducts = await Product.find({ shop: shop._id })
+                    .populate('category', 'categoryName _id')
+                    .populate('transporters', 'transporterName transportFee _id');
 
                 return res.status(httpStatusCode.OK).json({
                     successMessage: `${shop.shopName} fetched successfully`,
@@ -384,3 +409,20 @@ exports.deleteAllShops = (req, res, next) => {
         });
     });
 };
+
+//DEVNOTIFY
+// const shopsProducts = shops.map(async ({ _id }) => {
+//     const totalProducts = await Product.countDocuments({ shop: _id });
+
+//     return new Promise((resolve, reject) => {
+//         resolve(totalProducts);
+//     });
+// });
+
+// Promise.all(shopsProducts).then(value => {
+//     let i = -1;
+//     const _shops = shops.map(({ _doc }) => {
+//         i++;
+//         return { ..._doc, totalProducts: value[i] };
+//     });
+// });

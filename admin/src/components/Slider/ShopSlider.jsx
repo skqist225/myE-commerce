@@ -3,6 +3,7 @@ import BtnSlider from './BtnSlider';
 import PropTypes from 'prop-types';
 import { createImage } from '../../helper';
 import './shopSlider.css';
+import { useInterval } from '../../helper';
 
 function ShopSlider({ dataSlider }) {
     const [slideIndex, setSlideIndex] = useState(1);
@@ -23,9 +24,14 @@ function ShopSlider({ dataSlider }) {
         }
     };
 
+    useInterval(() => {
+        nextSlide();
+    }, 2000);
+
     const moveDot = index => {
         setSlideIndex(index);
     };
+
     return (
         <>
             {dataSlider?.length > 0 && (

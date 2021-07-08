@@ -1,5 +1,5 @@
 const Cart = require('../models/cart');
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const ErrorHandler = require('../utils/errorHandler');
 const httpStatusCode = require('../utils/constansts');
 const catchAsyncError = require('../middlewares/catchAsyncError');
@@ -24,8 +24,7 @@ exports.addToCart = (req, res, next) => {
 
         if (cart) {
             const _product = cart.cartProducts.find(
-                ({ productId }) =>
-                    productId.toString() === cartProduct.productId.toString()
+                ({ productId }) => productId.toString() === cartProduct.productId.toString()
             );
 
             let condition, update;
@@ -55,9 +54,7 @@ exports.addToCart = (req, res, next) => {
                 .then(result => {
                     res.status(httpStatusCode.CREATED).json({ result });
                 })
-                .catch(error =>
-                    res.status(httpStatusCode.BAD_REQUEST).json({ error })
-                );
+                .catch(error => res.status(httpStatusCode.BAD_REQUEST).json({ error }));
         } else {
             const cart = new Cart({
                 user: req.user._id,
@@ -65,10 +62,7 @@ exports.addToCart = (req, res, next) => {
             });
 
             cart.save((err, cart) => {
-                if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (cart) {
                     return res.status(httpStatusCode.CREATED).json({
@@ -108,12 +102,7 @@ exports.removeCartProducts = (req, res, next) => {
 
             promiseArray.push(runUpdateCart(updateData, req));
         } else {
-            return next(
-                new ErrorHandler(
-                    'Product id is invalid ',
-                    httpStatusCode.BAD_REQUEST
-                )
-            );
+            return next(new ErrorHandler('Product id is invalid ', httpStatusCode.BAD_REQUEST));
         }
     });
 
@@ -133,8 +122,7 @@ exports.getUserCart = (req, res, next) => {
     Cart.findOne({ user: req.user._id })
         .populate('cartProducts.productId', 'productName productType')
         .exec((err, cart) => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (cart) {
                 let _cart = cart;
@@ -143,9 +131,7 @@ exports.getUserCart = (req, res, next) => {
                 cart.cartProducts.forEach(cartProduct => {
                     let _productType;
                     _productType = cartProduct.productId.productType.filter(
-                        ({ _id }) =>
-                            _id.toString() ===
-                            cartProduct.productTypeId.toString()
+                        ({ _id }) => _id.toString() === cartProduct.productTypeId.toString()
                     );
 
                     _cart.cartProducts[i].productId.productType = _productType;
@@ -168,8 +154,7 @@ exports.deleteCart = catchAsyncError(async (req, res, next) => {
 
     if (cart.cartProducts.length === 0) {
         Cart.deleteOne({ user: req.user._id }).exec(err => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             return res.status(httpStatusCode.OK).json({
                 success: true,

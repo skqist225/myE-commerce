@@ -5,7 +5,7 @@ const httpStatusCode = require('../utils/constansts');
 const processImagePath = require('../helpers/processImageSavePath');
 const catchUniqueError = require('../helpers/catchUniqueError');
 const mongoose = require('mongoose');
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const deleteImage = require('../helpers/deleteImage');
 
 function createCategories(categories, parentId = null) {
@@ -40,21 +40,11 @@ exports.addCategory = (req, res, next) => {
     }
 
     if (!categoryName)
-        return next(
-            new ErrorHandler(
-                'Please enter a category name',
-                httpStatusCode.BAD_REQUEST
-            )
-        );
+        return next(new ErrorHandler('Please enter a category name', httpStatusCode.BAD_REQUEST));
 
     Category.findOne({ categoryName }).exec((err, category) => {
         if (category) {
-            return next(
-                new ErrorHandler(
-                    'Category already existed ',
-                    httpStatusCode.BAD_REQUEST
-                )
-            );
+            return next(new ErrorHandler('Category already existed ', httpStatusCode.BAD_REQUEST));
         }
     });
 
@@ -63,7 +53,7 @@ exports.addCategory = (req, res, next) => {
         categoryImage,
     };
 
-    if (req.body.parentId) {
+    if (req.body.parentId !== 'undefined') {
         categoryObj.parentId = req.body.parentId;
     }
     const category = new Category(categoryObj);
@@ -72,7 +62,6 @@ exports.addCategory = (req, res, next) => {
         if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
         if (category)
             return res.status(httpStatusCode.CREATED).json({
-                success: true,
                 successMessage: 'Category created successfully',
                 category,
             });
@@ -81,12 +70,10 @@ exports.addCategory = (req, res, next) => {
 
 exports.getCategories = (req, res, next) => {
     Category.find({}).exec((err, _categories) => {
-        if (err)
-            return res.status(httpStatusCode.BAD_REQUEST).json({ error: err });
+        if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ error: err });
         if (_categories) {
             // const categories = createCategories(_categories);
             return res.status(httpStatusCode.OK).json({
-                success: true,
                 successMessage: 'Categories fetched successfully',
                 categories: _categories,
             });
@@ -110,20 +97,14 @@ exports.updateCategory = catchAsyncError(async (req, res, next) => {
         if (mongoose.isValidObjectId(req.body.parentId)) {
             newCategory.parentId = req.body.parentId;
         } else {
-            return next(
-                new ErrorHandler(
-                    'Parent ID is invalid',
-                    httpStatusCode.BAD_REQUEST
-                )
-            );
+            return next(new ErrorHandler('Parent ID is invalid', httpStatusCode.BAD_REQUEST));
         }
     }
 
-    const updatedCategory = await Category.findByIdAndUpdate(
-        req.params.categoryId,
-        newCategory,
-        { runValidators: true, new: true }
-    );
+    const updatedCategory = await Category.findByIdAndUpdate(req.params.categoryId, newCategory, {
+        runValidators: true,
+        new: true,
+    });
 
     return res.status(httpStatusCode.CREATED).json({
         success: true,
@@ -140,16 +121,12 @@ exports.deleteCategory = (req, res, next) => {
             if (product)
                 return res.status(httpStatusCode.BAD_REQUEST).json({
                     success: false,
-                    message:
-                        'Can not delete this category because there is product using it',
+                    message: 'Can not delete this category because there is product using it',
                 });
         });
 
         Category.findByIdAndDelete(categoryId, (err, category) => {
-            if (err)
-                return res
-                    .status(httpStatusCode.BAD_REQUEST)
-                    .json({ errorMessage: err });
+            if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err });
 
             if (category) {
                 if (category.categoryImage) {

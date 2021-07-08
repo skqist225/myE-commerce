@@ -1,5 +1,5 @@
 const Supplier = require('../models/supplier');
-const Product = require('../models/product');
+const Product = require('../models/productModal');
 const httpStatusCode = require('../utils/constansts');
 const ErrorHandler = require('../utils/errorHandler');
 const processImagePath = require('../helpers/processImageSavePath');
@@ -8,8 +8,7 @@ const catchAsyncError = require('../middlewares/catchAsyncError');
 const catchUniqueError = require('../helpers/catchUniqueError');
 
 exports.addSupplier = (req, res, next) => {
-    const { supplierName, contactNumber, headquarterAddress, webURL } =
-        req.body;
+    const { supplierName, contactNumber, headquarterAddress, webURL } = req.body;
 
     let supplierLogo = null;
 
@@ -55,8 +54,7 @@ exports.getAllSuppliers = (req, res, next) => {
 exports.getSingleSupplier = (req, res, next) => {
     if (mongoose.isValidObjectId(req.params.supplierId)) {
         Supplier.findById(req.params.supplierId, (err, supplier) => {
-            if (err)
-                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (supplier)
                 return res.status(httpStatusCode.OK).json({
@@ -74,8 +72,7 @@ exports.updateSupplier = catchAsyncError(async (req, res, next) => {
     if (mongoose.isValidObjectId(supplierId)) {
         const oldSupplier = await Supplier.findById(supplierId);
 
-        const { supplierName, contactNumber, headquarterAddress, webURL } =
-            req.body;
+        const { supplierName, contactNumber, headquarterAddress, webURL } = req.body;
 
         let newSupplier = {
             supplierName,
@@ -94,10 +91,7 @@ exports.updateSupplier = catchAsyncError(async (req, res, next) => {
                 newSupplier,
                 { runValidators: true, new: true },
                 (err, supplier) => {
-                    if (err)
-                        return next(
-                            new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                        );
+                    if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                     if (supplier)
                         return res.status(httpStatusCode.CREATED).json({
@@ -122,19 +116,16 @@ exports.verifySupplier = (req, res, next) => {
     const { supplierId } = req.params;
 
     if (mongoose.isValidObjectId(supplierId)) {
-        Supplier.findByIdAndUpdate(supplierId, { isVerified: true }).exec(
-            (err, supplier) => {
-                if (err)
-                    next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+        Supplier.findByIdAndUpdate(supplierId, { isVerified: true }).exec((err, supplier) => {
+            if (err) next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
-                if (supplier) {
-                    res.status(httpStatusCode.OK).json({
-                        success: true,
-                        message: `${supplier.supplierName} is verified`,
-                    });
-                }
+            if (supplier) {
+                res.status(httpStatusCode.OK).json({
+                    success: true,
+                    message: `${supplier.supplierName} is verified`,
+                });
             }
-        );
+        });
     }
 };
 
@@ -149,10 +140,7 @@ exports.deleteSupplier = catchAsyncError(async (req, res, next) => {
         if (!supplier.isVerified) {
             if (!product) {
                 Supplier.deleteOne({ _id: supplierId }, err => {
-                    if (err)
-                        return next(
-                            new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                        );
+                    if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                     res.status(httpStatusCode.OK).json({
                         success: true,

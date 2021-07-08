@@ -9,6 +9,7 @@ import {
     productReducer,
     shopsReducer,
     shopReducer,
+    dropDownReducer,
 } from './features';
 
 const rootReducer = {
@@ -20,6 +21,7 @@ const rootReducer = {
     shops: shopsReducer,
     shop: shopReducer,
     categories: categoriesReducer,
+    dropDown: dropDownReducer,
     // posts: postsReducer,
     // suppliers: suppliersReducer,
     // carts: categoriesReducer,

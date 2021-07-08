@@ -24,7 +24,11 @@ function ShopList() {
     const dispatch = useDispatch();
     dispatch(clearSuccessMessage());
     const allShops = useSelector(shopsSelectors.selectAll);
-    const { successMessage, errorMessage, loading } = useSelector(state => state.shops);
+    const { successMessage, errorMessage, loading, shops_productsLength } = useSelector(
+        state => state.shops
+    );
+
+    console.log(shops_productsLength);
 
     const rows = allShops.map(shop => ({ id: shop._id, ...shop }));
 
@@ -77,7 +81,7 @@ function ShopList() {
         {
             field: 'vouchers',
             headerName: "Total shop's vouchers",
-            width: 170,
+            width: 120,
             renderCell: params => {
                 return <span>{params.row.vouchers.length}</span>;
             },
@@ -85,7 +89,15 @@ function ShopList() {
         {
             field: 'followers_nbm',
             headerName: 'Total followers',
-            width: 200,
+            width: 100,
+        },
+        {
+            field: 'totalProducts',
+            headerName: 'Total products',
+            width: 100,
+            rencerCell: params => {
+                return <span>{params.row.totalProducts}</span>;
+            },
         },
         {
             field: 'isApproved',
@@ -111,7 +123,7 @@ function ShopList() {
         {
             field: 'action',
             headerName: 'Action',
-            width: 200,
+            width: 250,
             renderCell: params => {
                 return (
                     <div className="productListAction">
@@ -123,7 +135,7 @@ function ShopList() {
                                     dispatch(clearSuccessMessage());
                                 }}
                             >
-                                Edit Shop
+                                Edit
                             </button>
                         </Link>
                         <Link
@@ -139,7 +151,18 @@ function ShopList() {
                                     dispatch(clearSuccessMessage());
                                 }}
                             >
-                                View Shop
+                                View
+                            </button>
+                        </Link>
+                        <Link to={'/shop'}>
+                            <button
+                                className="productListEdit"
+                                onClick={() => {
+                                    dispatch(clearErrorMessage());
+                                    dispatch(clearSuccessMessage());
+                                }}
+                            >
+                                Manage
                             </button>
                         </Link>
                     </div>

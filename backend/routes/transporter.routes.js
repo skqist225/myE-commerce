@@ -4,7 +4,7 @@ const {
     getAllTransporters,
     getProductTransporters,
     updateTransporter,
-} = require('../controllers/transporter.controller');
+} = require('../controllers/transporterController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
 const upload = require('../middlewares/multer');

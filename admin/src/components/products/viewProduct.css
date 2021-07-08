@@ -3,10 +3,34 @@
     width: 90%;
     margin: 0 auto;
 }
+
+.viewProductCategoryPathContainer {
+    margin: 25px 0;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.viewProductArrowRightIcon {
+    width: 13px;
+    height: 13px;
+}
+
 .viewProductCategory {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: normal;
     color: #222;
+}
+
+.productName {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.viewProductIconWrapper {
+    margin: 0 10px;
 }
 
 .viewProductContainer {

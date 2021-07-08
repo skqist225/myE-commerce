@@ -2,6 +2,7 @@
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
+    background-color: #f5f5f5;
 }
 
 .shopProductsMask {
@@ -105,10 +106,91 @@
 }
 
 .shopProductsMenuFilterBar {
+    background: #fff;
+    padding: 0 1.25rem 1.25rem;
+    box-shadow: 0 1px 1px 0 rgb(0 0 0 / 5%);
+    border-radius: 0.125rem;
+    overflow: hidden;
 }
-.shopProductsShopCategories {
-}
+
 .shopProductsListFilter {
+    list-style: none;
+}
+
+.shopProductsItemFilter {
+    display: block;
+    padding: 12.5px 0;
+    font-size: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.09);
+    cursor: pointer;
+}
+
+.shopProductsItemFilter:hover {
+    text-decoration: underline;
+    color: #ee4d2d;
+}
+
+.shopProductsFilterTitle {
+    color: rgba(0, 0, 0, 0.8);
+    text-transform: uppercase;
+    padding: 0.875rem 0 1.125rem;
+}
+
+.shopProductsCategoryFilter {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.shopProductsCategoryItem:first-child {
+    padding-top: 0;
+}
+
+.shopProductsCategoryItem {
+    padding: 10px 0;
+    display: flex;
+}
+
+.shopProductsInputWrapper {
+    margin-top: 1.25px;
+    margin-right: 12.5px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.shopProductsInputWrapper input {
+    margin-top: 2.25px;
+    width: 15px;
+    height: 15px;
+}
+
+.shopProductsInputWrapper input:checked {
+    background-color: #fff;
+    color: orange;
+}
+
+.shopProductsInputWrapper input:hover {
+    background-color: #ccc;
+}
+
+.shopProductsLabelWrapper {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1rem;
+    max-height: 3rem;
+    word-wrap: break-word;
+}
+
+.shopProductsLabelWrapper label {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.shopProductsShopCategories {
 }
 
 .shopProductsRight {
@@ -205,6 +287,7 @@
 
 .shopProductsDropDownOption:hover .shopProductsFilterOptionDropDownModal {
     display: block;
+    z-index: 2;
 }
 
 .shopProductsDropDownOption span {
@@ -223,6 +306,19 @@
     display: none;
 }
 
+.shopProductsBtnApplyFilter {
+    height: 1.875rem;
+    margin: 1.25rem 0 0;
+    text-transform: uppercase;
+    font-weight: 400;
+    font-size: 18px;
+    color: #fff;
+    width: 100%;
+    background-color: rgb(238, 77, 45);
+    border: none;
+    outline: none;
+}
+
 .shopProductsFilterOptionDropDown {
     display: flex;
     align-items: center;
@@ -234,6 +330,55 @@
 
 .shopProductsFilterOptionDropDown:hover span {
     color: #ee4d2d;
+}
+
+.shopProductsPriceFilterWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.shopProductsPriceRange {
+    width: 53px;
+    height: 38px;
+}
+
+.checked {
+    color: #ffce3d !important;
+    width: 15px;
+    height: 15px;
+}
+
+.unchecked {
+    width: 15px;
+    height: 15px;
+}
+
+.yellowStar {
+    color: #ffce3d;
+    width: 15px;
+    height: 15px;
+}
+
+.shopProductsPriceFilterContainer input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 1px solid #888;
+    font-size: 15px;
+    border-radius: 3px;
+}
+
+.shopProductsRatingFilter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12.5px 0;
+}
+
+.shopProductsRatingFilter span {
+    align-self: center;
 }
 
 .shopProductsFilterOptionDropDown span {
@@ -262,4 +407,8 @@
 
 .shopProductsDropDownIcon.active {
     opacity: 1;
+}
+
+.selectedTab {
+    color: rgb(208, 1, 27) !important;
 }

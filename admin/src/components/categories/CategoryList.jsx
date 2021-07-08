@@ -10,6 +10,7 @@ function CategoryList() {
     const dispatch = useDispatch();
     const history = useHistory();
     const allCategories = useSelector(categoriesSelectors.selectAll);
+    const { successMessage, errorMessage, loading } = useSelector(state => categoriesSelectors);
 
     const columns = [
         { title: 'Category name', field: 'categoryName' },
@@ -39,9 +40,9 @@ function CategoryList() {
         id: category._id,
     }));
 
-    // React.useEffect(() => {
-    //     dispatch(fetchCategories());
-    // }, [dispatch]);
+    React.useEffect(() => {
+        dispatch(fetchCategories());
+    }, [dispatch]);
 
     return (
         <div>

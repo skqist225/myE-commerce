@@ -1,7 +1,4 @@
-const {
-    addShopVoucher,
-    addAdminVoucher,
-} = require('../controllers/voucher.controller');
+const { addShopVoucher, addAdminVoucher } = require('../controllers/voucherController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = require('express').Router();
 const upload = require('../middlewares/multer');

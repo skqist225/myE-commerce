@@ -1,0 +1,34 @@
+.fill {
+    color: #999;
+}
+
+.svgIcon1,
+.svgIcon2 {
+    fill: #999;
+}
+
+.svgIcon1:hover {
+    fill: #ee4d2d;
+}
+
+.svgIcon2:hover {
+    fill: #ee4d2d;
+}
+
+.svgIcon1 {
+    transform: rotate(0deg);
+    transition: transform 0.2s ease;
+}
+
+.svgIcon2 {
+    transform: rotate(-180deg);
+    transition: transform 0.2s ease;
+}
+
+.svgIcon1.rotate1 {
+    transform: rotate(-180deg);
+}
+
+.svgIcon2.rotate2 {
+    transform: rotate(-0deg);
+}

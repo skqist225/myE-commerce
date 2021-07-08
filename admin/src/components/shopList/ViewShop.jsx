@@ -51,6 +51,8 @@ function ViewShop({ match }) {
         }
     }
 
+    console.log('View Shop rendering');
+
     React.useEffect(() => {
         if (!loading) {
             handleSelectedTabChange();
@@ -199,8 +201,12 @@ function ViewShop({ match }) {
                     <section className="viewShopHomeImages">
                         <div>
                             <div>
-                                <img src={createImage(shop.homeImages[0], false)} alt="" />
-                                <p>OK</p>
+                                <img
+                                    src={createImage(shop.homeImages[0], false)}
+                                    alt=""
+                                    className="viewShopImage"
+                                />
+                                <p></p>
                             </div>
                             <div>
                                 <ShopSlider dataSlider={shop.homeImages} />
