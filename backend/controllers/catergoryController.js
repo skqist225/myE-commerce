@@ -68,26 +68,25 @@ exports.addCategory = (req, res, next) => {
     });
 };
 
-exports.getCategories = (req, res, next) => {
-    Category.find({}).exec((err, _categories) => {
-        if (err) return res.status(httpStatusCode.BAD_REQUEST).json({ error: err });
-        if (_categories) {
-            // const categories = createCategories(_categories);
+exports.getAllCategories = (req, res, next) => {
+    Category.find({}).exec((err, categories) => {
+        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+        if (categories) {
             return res.status(httpStatusCode.OK).json({
                 successMessage: 'Categories fetched successfully',
-                categories: _categories,
+                categories,
             });
         }
     });
 };
 
 exports.updateCategory = catchAsyncError(async (req, res, next) => {
-    const { categoryName } = req.body;
-    let newCategory;
+    let newCategory = {};
 
-    newCategory = {
-        categoryName,
-    };
+    if (req.body.categoryName) {
+        const { categoryName } = req.body;
+        newCategory.categoryName = categoryName;
+    }
 
     if (req.file) {
         newCategory.categoryImage = processImagePath(req.file.path);
@@ -102,13 +101,11 @@ exports.updateCategory = catchAsyncError(async (req, res, next) => {
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(req.params.categoryId, newCategory, {
-        runValidators: true,
         new: true,
     });
 
     return res.status(httpStatusCode.CREATED).json({
-        success: true,
-        message: `Category updated successfully`,
+        successMessage: `Category updated successfully`,
         updatedCategory,
     });
 });

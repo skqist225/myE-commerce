@@ -2,9 +2,19 @@ import React, { memo, useState } from 'react';
 import BtnSlider from './BtnSlider';
 import PropTypes from 'prop-types';
 import { createImage, useInterval } from '../../helpers';
+import styled from 'styled-components';
 import './shopSlider.css';
 
-function Slider({ dataSlider }) {
+const ContainerSlider = styled.div`
+    width: 100%;
+    height: ${props => (props.height ? props.height : '600px')};
+    position: relative;
+    overflow: hidden;
+    box-shadow: ${props => (props.haveBoxShadow ? '0 10px 20px rgba(0, 0, 0, 0.2)' : '0')}
+    border-radius: 2px;
+`;
+
+function Slider({ dataSlider, withoutSubPath, height }) {
     const [slideIndex, setSlideIndex] = useState(1);
 
     const nextSlide = () => {
@@ -25,7 +35,7 @@ function Slider({ dataSlider }) {
 
     useInterval(() => {
         nextSlide();
-    }, 2000);
+    }, 3000);
 
     const moveDot = index => {
         setSlideIndex(index);
@@ -34,7 +44,7 @@ function Slider({ dataSlider }) {
     return (
         <>
             {dataSlider?.length > 0 && (
-                <div className="container-slider">
+                <ContainerSlider height={height}>
                     <div id="toggle-width">
                         {dataSlider.map((img, index) => {
                             return (
@@ -43,8 +53,8 @@ function Slider({ dataSlider }) {
                                     className={slideIndex === index + 1 ? 'slide active' : 'slide '}
                                 >
                                     <img
-                                        src={createImage(img, false)}
-                                        alt={createImage(img, false)}
+                                        src={createImage(img, withoutSubPath)}
+                                        alt={createImage(img, withoutSubPath)}
                                         name={img}
                                     />
                                 </div>
@@ -63,7 +73,7 @@ function Slider({ dataSlider }) {
                             ></div>
                         ))}
                     </div>
-                </div>
+                </ContainerSlider>
             )}
         </>
     );

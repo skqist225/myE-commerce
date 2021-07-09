@@ -25,7 +25,7 @@ function Header() {
     return (
         <ParentContainer>
             <ContentContainer>
-                <HeaderLine>
+                <HeaderLine className="headerLineOne">
                     <HeaderList className="headerListLeft">
                         <ListItem>
                             <ItemLink>Kênh người bán</ItemLink>
@@ -49,11 +49,11 @@ function Header() {
                     <HeaderList className="headerListRight">
                         <ListItem>
                             <NotifyIcon className="headerIcon" />
-                            <ItemLink needPaddingLeft="5px">Thông Báo</ItemLink>
+                            <ItemLink needpaddingleft="5px">Thông Báo</ItemLink>
                         </ListItem>
                         <ListItem>
                             <HelpIcon className="headerIcon" />
-                            <ItemLink needPaddingLeft="5px">Hỗ trợ</ItemLink>
+                            <ItemLink needpaddingleft="5px">Hỗ trợ</ItemLink>
                         </ListItem>
                         <ListItem>
                             <Avatar />
@@ -72,19 +72,19 @@ function Header() {
                         </HeaderForm>
 
                         <HeaderBelowSearchProductName>
-                            <ItemLink fontSize="1.5rem" fontWeight="300">
+                            <ItemLink fontSize="1.5rem" fontWeight="300" to="/">
                                 abc
                             </ItemLink>
-                            <ItemLink fontSize="1.5rem" mL fontWeight="300">
+                            <ItemLink fontSize="1.5rem" ml="true" fontWeight="300" to="/">
                                 asd
                             </ItemLink>
-                            <ItemLink fontSize="1.5rem" mL fontWeight="300">
+                            <ItemLink fontSize="1.5rem" ml="true" fontWeight="300" to="/">
                                 asdasd
                             </ItemLink>
-                            <ItemLink fontSize="1.5rem" mL fontWeight="300">
+                            <ItemLink fontSize="1.5rem" ml="true" fontWeight="300" to="/">
                                 asdfsafdsafd
                             </ItemLink>
-                            <ItemLink fontSize="1.5rem" mL fontWeight="300">
+                            <ItemLink fontSize="1.5rem" ml="true" fontWeight="300" to="/">
                                 sadfsadf
                             </ItemLink>
                         </HeaderBelowSearchProductName>

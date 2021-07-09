@@ -41,7 +41,7 @@ app.all('*', (req, res, next) => {
 });
 
 const applyRoute = route => {
-    app.use('/api', route);
+    app.use('/api/v1', route);
 };
 
 routes.forEach(route => applyRoute(route));
@@ -58,9 +58,7 @@ routes.forEach(route => applyRoute(route));
 // const httpsServer = https.createServer(credentials, app);
 
 const server = app.listen(process.env.PORT, () => {
-    console.log(
-        `Server started on PORT: ${process.env.PORT} in ${process.env.NODE_ENV} mode`
-    );
+    console.log(`Server started on PORT: ${process.env.PORT} in ${process.env.NODE_ENV} mode`);
 });
 
 process.on('unhandledRejection', err => {

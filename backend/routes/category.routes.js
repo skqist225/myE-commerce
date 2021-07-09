@@ -1,14 +1,16 @@
 const express = require('express');
 const {
     addCategory,
-    getCategories,
+    getAllCategories,
     updateCategory,
     deleteCategory,
 } = require('../controllers/catergoryController');
 const router = express.Router();
 const upload = require('../middlewares/multer');
 
-router.get('/categories', getCategories);
+//DEVNOTIFY get categories
+router.get('/categories', getAllCategories);
+
 router.post('/category/add', upload.single('categoryImage'), addCategory);
 
 router

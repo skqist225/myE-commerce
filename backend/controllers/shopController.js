@@ -12,11 +12,10 @@ const catchUniqueError = require('../helpers/catchUniqueError');
 const deleteImage = require('../helpers/deleteImage');
 
 exports.addShop = catchAsyncError(async (req, res, next) => {
-    const userId = req.user._id;
+    const { _id: $user } = req.user;
 
-    if (mongoose.isValidObjectId(userId)) {
-        // const _id = mongoose.Types.ObjectId(userId);
-        const user = await User.findById(userId).select(
+    if (mongoose.isValidObjectId($user)) {
+        const user = await User.findById($user).select(
             'addresses birthday isEmailVerified avatar identityCard'
         );
 
@@ -33,8 +32,6 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
             );
         }
 
-        //Address
-
         if (user.isEmailVerified) {
             if (
                 user.birthday !== null &&
@@ -43,8 +40,8 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
                 user.identityCard.number &&
                 user.identityCard.cardImage.length >= 1
             ) {
-                if (user.role !== 'shop') {
-                    const { shopName, shopDescription } = req.body;
+                if (user.role === 'shop') {
+                    const { shopName, shopDescription, isMallType } = req.body;
                     let shopLogo,
                         homeImages = [];
 
@@ -68,6 +65,7 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
                         shopName,
                         shopDescription,
                         homeImages,
+                        isMallType,
                     });
 
                     shop.save(async (err, shop) => {
@@ -79,10 +77,7 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
                         }
 
                         if (shop) {
-                            await User.findByIdAndUpdate(
-                                { _id: shop.user },
-                                { isShopRequestSent: true }
-                            );
+                            await User.updateOne({ _id: shop.user }, { isShopRequestSent: true });
 
                             return res.status(httpStatusCode.CREATED).json({
                                 successMessage: 'Request for opening a shop has been sent',

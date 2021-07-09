@@ -64,7 +64,10 @@ const productSchema = new Schema(
             type: Boolean,
             default: true,
         },
-        soldNumber: { type: Number, default: 0 },
+        soldInFlashSaleTime: {
+            type: Number,
+            default: 0,
+        },
     },
     {
         timestamps: true,

@@ -533,6 +533,27 @@ exports.getShopProducts = catchAsyncError(async (req, res, next) => {
     });
 });
 
+exports.getSaleProducts = async (req, res, next) => {
+    const products = await Product.aggregate([
+        {
+            $match: {
+                discountPercent: { $gte: 0, $lte: 100 },
+            },
+        },
+        {
+            $sort: {
+                discountPercent: 1,
+                soldInFlashSaleTime: 1,
+            },
+        },
+    ]);
+
+    res.status(httpStatusCode.OK).json({
+        successMessage: 'Sale products fetched successfully',
+        products,
+    });
+};
+
 exports.getSingleProduct = (req, res, next) => {
     const { productId } = req.params;
 

@@ -24,16 +24,12 @@ const shopSchema = new Schema(
             maxLength: [100, 'Shop description can not exceeded 100 characters'],
         },
         homeImages: [{ type: String }],
-        followers_nbm: {
+        number_of_followers: {
             type: Number,
             required: true,
             default: 0,
             max: 100000,
         },
-        // totalProducts: {
-        //     type: Number,
-        //     default: 0,
-        // },
         vouchers: [
             {
                 type: Schema.Types.ObjectId,
@@ -41,6 +37,10 @@ const shopSchema = new Schema(
             },
         ],
         isApproved: {
+            type: Boolean,
+            default: false,
+        },
+        isMallType: {
             type: Boolean,
             default: false,
         },

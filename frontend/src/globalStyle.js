@@ -29,7 +29,12 @@ export const ContentContainer = styled.div`
     margin: 0 auto;
     padding: ${props => props.padding || '0 0'};
     height: ${props => props.height || '100%'};
-    // overflow: auto;
+`;
+
+export const GridLayout = styled.div`
+    display: grid;
+    grid-template-columns: ${props => props.templatecolumn};
+    align-items: center;
 `;
 
 export default GlobalStyle;

@@ -9,12 +9,16 @@ export const ParentContainer = styled.div`
     top: 0;
     left: 0;
     background: linear-gradient(-180deg, #f53d2d, #f63);
+    z-index: 99;
 `;
 
 export const HeaderLine = styled.div`
     display: flex;
     align-items: center;
-    justify-content: space-between;
+
+    &.headerLineOne {
+        justify-content: space-between;
+    }
 
     &:last-child {
         height: 7.3rem;
@@ -65,15 +69,16 @@ export const ItemLink = styled(Link)`
     color: ${colorVariables.textColor};
     cursor: pointer;
     display: inline-block;
-    margin-left: ${props => (props.mL ? '1.3rem' : '0')};
-    padding: ${props => (props.needPaddingLeft ? props.needPaddingLeft : '0')};
+    margin-left: ${props => (props.ml ? '1.3rem' : '0')};
+    padding: ${props => (props.needpaddingleft ? props.needpaddingleft : '0')};
 `;
 
 export const LogoWrapper = styled.div.attrs(props => ({
     children: props.render,
 }))`
-    width: 14.6rem;
-    height: 4.6rem;
+    width: 16.2rem;
+    height: fit-content;
+    margin-right: 5rem;
 `;
 export const HeaderSearchWrapper = styled.div`
     max-width: 84rem;
