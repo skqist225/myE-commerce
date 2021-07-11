@@ -27,6 +27,31 @@ export const HeaderLine = styled.div`
     }
 `;
 
+export const ShopeeCartWrapper = styled.div`
+    @media (max-width: 991px) {
+        display: none;
+    }
+`;
+
+export const Seperator = styled.div`
+    width: 1px;
+    height: calc(6.1rem / 2);
+    background-color: #e36776;
+    position: absolute;
+    left: 7.2rem;
+    top: -2.2rem;
+`;
+
+export const SeconLogoContainer = styled.div`
+    display: flex;
+    align-items: center;
+    width: 32rem;
+
+    @media (min-width: 991px) {
+        justify-content: space-between;
+    }
+`;
+
 var fadeIn = keyframes`
     from {
         opacity: 0;
@@ -106,8 +131,6 @@ export const HeaderList = styled.ul`
 
     &.headerListRight {
         position: relative;
-        max-width: 39rem;
-        width: 100%;
         justify-content: space-between;
     }
 `;
@@ -156,7 +179,7 @@ export const MenuItem = styled.li`
 `;
 
 export const HeaderSearchWrapper = styled.div`
-    max-width: 84rem;
+    max-width: ${props => (props.secondLogo ? '65rem' : '84rem')};
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -170,7 +193,7 @@ export const HeaderForm = styled.form`
 `;
 
 export const HeaderSearchInput = styled.input.attrs(props => ({
-    placeholder: 'Tổng quà 3 tỷ - voucher 150k ',
+    placeholder: props.secondLogo ? 'Tìm trong Shop này' : 'Tổng quà 3 tỷ - voucher 150k',
 }))`
     width: 100%;
     height: 5rem;
@@ -185,7 +208,12 @@ export const HeaderSearchInput = styled.input.attrs(props => ({
     padding-left: 1.25rem;
     font-size: 1.8rem;
     background-color: -internal-light-dark(rgb(255, 255, 255), rgb(59, 59, 59));
-    color: #f5f5f5;
+    color: #222;
+    outline: none;
+
+    &:placeholder {
+        color: #f5f5f5;
+    }
 `;
 export const HeaderSearchButton = styled.button`
     position: absolute;

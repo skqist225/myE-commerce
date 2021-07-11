@@ -1,8 +1,9 @@
 import React, { Fragment } from 'react';
-import { createImage } from '../../helper';
+import { createImage } from '../../helpers';
 import PropTypes from 'prop-types';
 
 import { HeartIcon } from './svgIcon';
+import { ProductCardContainer, CardLocation, CardName } from './ShopProductsComponent';
 import './productCard.css';
 
 function ProductCard({ product }) {
@@ -44,7 +45,7 @@ function ProductCard({ product }) {
 
     return (
         <Fragment>
-            <div className="productCard">
+            <ProductCardContainer>
                 <div className="productCardImageSection">
                     <div
                         style={{
@@ -80,7 +81,7 @@ function ProductCard({ product }) {
                     </div>
                 </div>
                 <div className="productCardProductDetailsSection">
-                    <div className="productCardProductName">{product.productName}</div>
+                    <CardName>{product.productName}</CardName>
                     <div style={{ marginTop: '6.25px' }}>
                         <div
                             style={{
@@ -114,7 +115,6 @@ function ProductCard({ product }) {
                                 alignItems: 'center',
                                 width: '100%',
                                 marginTop: '6.25px',
-                                // justifyContent: 'space-between',
                             }}
                         >
                             <div style={{ marginRight: '10px' }}>
@@ -124,7 +124,7 @@ function ProductCard({ product }) {
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'space-between',
+                                    // justifyContent: 'space-between',
                                     flex: '1',
                                 }}
                             >
@@ -147,10 +147,12 @@ function ProductCard({ product }) {
                                 Đã bán 2K
                             </div>
                         </div>
-                        <div className="productCardSellLocation">TP.Hồ Chí Minh</div>
+                        <CardLocation className="productCardSellLocation">
+                            TP.Hồ Chí Minh
+                        </CardLocation>
                     </div>
                 </div>
-            </div>
+            </ProductCardContainer>
         </Fragment>
     );
 }

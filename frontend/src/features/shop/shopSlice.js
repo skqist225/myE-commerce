@@ -35,7 +35,7 @@ export const fetchShopById = createAsyncThunk(
 const shopSlice = createSlice({
     name: 'shop',
     initialState: {
-        shop: {},
+        shop: null,
         shopProducts: [],
         selectedTab: 1,
         errorMessage: null,

@@ -14,23 +14,6 @@
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-.shopProductsContainer {
-    /* display: flex; */
-}
-
-.shopProductsBackToHomeContainer {
-    width: 100%;
-    padding: 25px 0;
-}
-
-.shopProductsBackToHome {
-    display: flex;
-    align-items: center;
-    color: rgba(0, 0, 0, 0.8);
-    text-transform: uppercase;
-    font-size: 18px;
-}
-
 .shopProductsIcon {
     width: 15px;
     height: 15px;
@@ -133,7 +116,8 @@
 .shopProductsFilterTitle {
     color: rgba(0, 0, 0, 0.8);
     text-transform: uppercase;
-    padding: 0.875rem 0 1.125rem;
+    font-size: 1.8rem;
+    padding: 1.75rem 0 2.25rem;
 }
 
 .shopProductsCategoryFilter {
@@ -215,20 +199,6 @@
 }
 
 .shopProductsSortOption {
-    border-radius: 2px;
-    height: 43px;
-    padding: 0 19px;
-    display: flex;
-    align-items: center;
-    justify-self: center;
-    box-shadow: 0 1px 1px 0 rgb(0 0 0 / 2%);
-    background: #fff;
-    text-transform: capitalize;
-    font-size: 18px;
-    margin-left: 12.5px;
-    font-weight: 400;
-    color: #333;
-    cursor: pointer;
 }
 
 .shopProductsSortOption.shopProductsSelectedOption {
@@ -307,16 +277,6 @@
 }
 
 .shopProductsBtnApplyFilter {
-    height: 1.875rem;
-    margin: 1.25rem 0 0;
-    text-transform: uppercase;
-    font-weight: 400;
-    font-size: 18px;
-    color: #fff;
-    width: 100%;
-    background-color: rgb(238, 77, 45);
-    border: none;
-    outline: none;
 }
 
 .shopProductsFilterOptionDropDown {

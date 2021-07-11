@@ -16,6 +16,14 @@ const GlobalStyle = createGlobalStyle`
     *,*::before, *::after {
         box-sizing: border-box;
     }
+
+    ul {
+        padding-left: 0;
+    }
+
+    a {
+        text-decoration: none;
+    }
 `;
 
 export const colorVariables = {
@@ -33,7 +41,6 @@ export const ContentContainer = styled.div`
 `;
 
 export const Anchor = styled(Link)`
-    text-decoration: none;
     color: ${props => props.color};
     font-weight: ${props => props.fontWeight};
     font-size: ${props => props.fontSize};
@@ -41,16 +48,77 @@ export const Anchor = styled(Link)`
 
 export const GridLayout = styled.div`
     display: grid;
-    grid-template-columns: ${props => props.templatecolumn};
+    grid-template-columns: ${props => props.templateColumns};
     align-items: center;
+    padding: ${props => props.padding};
+`;
+
+export const StandardSelfFlex = styled.div`
+    width: ${props => props.width};
+    height: ${props => props.height};
+    display: flex;
+    align-items: center;
+    justify-content: ${props => props.justifyContent || 'center'};
+`;
+
+export const Flex = styled.div`
+    display: flex;
+    align-items: ${props => props.alignItems || 'center'};
+    justify-content: ${props => props.justifyContent};
+    width: ${props => props.width};
 `;
 
 export const PageBodyContainer = styled.main`
     position: absolute;
-    top: 15rem;
+    top: ${props => props.top || '15rem'};
     left: 0;
     width: 100%;
     padding-top: ${props => props.pt || '4rem'};
+`;
+
+export const MenuList = styled.ul`
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    padding-left: 0;
+`;
+
+export const MenuItem = styled.li`
+    display: inline-block;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-align: center;
+    width: ${props => props.width};
+    font-size: ${props => props.fontSize};
+    padding: ${props => props.padding};
+    color: ${props => props.color};
+`;
+
+export const Button = styled.button`
+    width: ${props => props.width};
+    height: ${props => props.height};
+    padding: ${props => props.padding};
+    color: ${props => props.color};
+    background-color: ${props => props.backgroundColor};
+    font-size: ${props => props.fontSize};
+    font-weight: ${props => props.fontWeight};
+    text-transform: ${props => props.textTransform || 'none'};
+    border-radius: ${props => props.borderRadius || '2px'};
+    border: ${props => props.border || 'none'};
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+`;
+
+export const Image = styled.img`
+    width: ${props => props.width};
+    height: ${props => props.height};
+    object-fit: ${props => props.objectFit};
+    border-radius: ${props => props.borderRadius || '0'};
 `;
 
 export default GlobalStyle;

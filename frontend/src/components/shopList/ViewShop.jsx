@@ -15,11 +15,12 @@ import {
 } from './svgIcon';
 import { Slider } from '../../components';
 import './viewShop.css';
-import { PageBodyContainer, ContentContainer } from '../../globalStyle';
+import { ViewShopButton, ViewShopLogo, ViewShopMallLogo } from './ShopProductsComponent';
+import { PageBodyContainer, ContentContainer, MenuList, MenuItem, Image } from '../../globalStyle';
 
 function ViewShop({ match }) {
-    const dispatch = useDispatch();
     const { shopName } = match.params;
+    const dispatch = useDispatch();
     const { shop, shopProducts, loading, errorMessage, successMessage } = useSelector(
         state => state.shop
     );
@@ -28,9 +29,27 @@ function ViewShop({ match }) {
         dispatch(fetchSingleShop(shopName));
     }, [dispatch, shopName]);
 
-    const menuTabLi = document.getElementsByClassName('viewShopMenuItem');
+    let itemList = [
+        {
+            path: `${match.url}`,
+            title: 'Dạo',
+        },
+        { path: `/shop/${shop._id}/search`, title: 'Tất cả sản phẩm' },
+        {
+            path: `/shop/${shop._id}/search?shopCollection=ipad`,
+            title: 'Sản phẩm bán chạy',
+        },
+        {
+            path: `/shop/${shop._id}/search?shopCollection=ipad`,
+            title: 'Sản phẩm mới',
+        },
+        { path: `/shop/${shop._id}/search?shopCollection=ipad`, title: 'iPhone' },
+        { path: `/shop/${shop._id}/search?shopCollection=ipad`, title: 'iPad' },
+        { path: `/shop/${shop._id}/search??shopCollection=ipad`, title: 'Thêm' },
+    ];
 
-    function handleSelectedTabChange() {
+    function initalizeLogicForComponent() {
+        const menuTabLi = document.getElementsByClassName('viewShopMenuItem');
         menuTabLi[0].classList.add('active');
 
         for (let li of menuTabLi) {
@@ -44,30 +63,25 @@ function ViewShop({ match }) {
         }
     }
 
-    console.log('View Shop rendering');
+    console.log('View Shop rendering...');
 
     React.useEffect(() => {
-        if (!loading) {
-            handleSelectedTabChange();
+        if (!loading && shop) {
+            initalizeLogicForComponent();
         }
-    }, [dispatch, loading, handleSelectedTabChange]);
+    }, [loading]);
 
     return (
         <>
-            {loading === true ? (
-                <p>Loading</p>
-            ) : (
+            {loading && <p>Loading</p>}
+            {!loading && shop && (
                 <PageBodyContainer pt="5rem">
                     <ContentContainer>
                         <div className="viewShopHeaderContainer">
                             <div className="viewShopHeaderLeft">
                                 <div className="viewShopLogoAndNameWrapper">
-                                    <img
-                                        src={createImage(shop.shopLogo, false)}
-                                        alt=""
-                                        className="viewShopLogo"
-                                    />
-                                    <img
+                                    <ViewShopLogo src={createImage(shop.shopLogo, false)} alt="" />
+                                    <ViewShopMallLogo
                                         src={createImage('SM.png')}
                                         alt=""
                                         className="viewShopSM"
@@ -82,20 +96,20 @@ function ViewShop({ match }) {
                                 </div>
                                 <div className="viewShopButtonContainer">
                                     <div className="viewShopBtnWrapper">
-                                        <button className="viewShopHeaderButton">
+                                        <ViewShopButton className="viewShopHeaderButton">
                                             <span>
                                                 <AddIcon className="viewShopBtnIcon" />
                                             </span>
                                             Theo dõi
-                                        </button>
+                                        </ViewShopButton>
                                     </div>
                                     <div className="viewShopBtnWrapper">
-                                        <button className="viewShopHeaderButton">
+                                        <ViewShopButton className="viewShopHeaderButton">
                                             <span>
                                                 <ChatIcon2 className="viewShopBtnIcon" />
                                             </span>
                                             Chat
-                                        </button>
+                                        </ViewShopButton>
                                     </div>
                                 </div>
                             </div>
@@ -171,39 +185,22 @@ function ViewShop({ match }) {
                         </div>
                         <section className="viewShopMenuSection">
                             <div className="viewShopMenuContainer">
-                                <ul className="viewShopMenuList">
-                                    <Link>
-                                        <li className="viewShopMenuItem" data-index={0}>
-                                            Dạo
-                                        </li>
-                                    </Link>
-                                    <Link to={`/shop/${shop._id}/search`}>
-                                        <li className="viewShopMenuItem" data-index={1}>
-                                            TẤT CẢ SẢN PHẨM
-                                        </li>
-                                    </Link>
-                                    <Link>
-                                        <li className="viewShopMenuItem" data-index={2}>
-                                            Sản phẩm bán chạy
-                                        </li>
-                                    </Link>
-                                    <Link>
-                                        <li className="viewShopMenuItem" data-index={3}>
-                                            Sản phẩm mới
-                                        </li>
-                                    </Link>
-                                    <Link>
-                                        <li className="viewShopMenuItem" data-index={4}>
-                                            iPhone
-                                        </li>
-                                    </Link>
-                                    <Link>
-                                        <li className="viewShopMenuItem" data-index={5}>
-                                            iPad
-                                        </li>
-                                    </Link>
-                                    <li>Thêm</li>
-                                </ul>
+                                <MenuList className="viewShopMenuList">
+                                    {itemList.map((item, index) => (
+                                        <Link to={item.path} key={item.title}>
+                                            <MenuItem
+                                                width="calc(1200px /7)"
+                                                fontSize="1.9rem"
+                                                color="rgba(0, 0, 0, 0.8)"
+                                                padding="1.4rem 1rem"
+                                                className="viewShopMenuItem"
+                                                data-index={index}
+                                            >
+                                                {item.title}
+                                            </MenuItem>
+                                        </Link>
+                                    ))}
+                                </MenuList>
                             </div>
                         </section>
                         <section className="viewShopHomeImages">
@@ -211,7 +208,7 @@ function ViewShop({ match }) {
                                 <div>
                                     <img
                                         src={createImage(shop.homeImages[0], false)}
-                                        alt=""
+                                        alt={shop.homeImages[0] || 'no image'}
                                         className="viewShopImage"
                                     />
                                     <p></p>
