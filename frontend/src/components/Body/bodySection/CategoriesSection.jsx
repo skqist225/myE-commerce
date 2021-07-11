@@ -1,5 +1,7 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCategories } from '../../../features/categories';
+
 import { ContentContainer } from '../../../globalStyle';
 import {
     CategorySection,
@@ -15,11 +17,20 @@ import { createImage } from '../../../helpers';
 import { categoriesSelectors } from '../../../features/categories';
 
 function CategoriesSection() {
+    const dispatch = useDispatch();
     const categories = useSelector(categoriesSelectors.selectAll);
 
-    const parentCategories = categories.filter(({ parentId }) => parentId === 'undefined');
+    let parentCategories = categories.filter(({ parentId }) => parentId === 'undefined');
+    parentCategories = parentCategories.map(category => ({
+        ...category,
+        path: `${category.categoryName.replace(/ /g, '-').replace(/-&-/g, '-')}-cat.${
+            category._id
+        }`,
+    }));
 
-    console.log(categories);
+    useEffect(() => {
+        dispatch(fetchCategories());
+    }, [dispatch]);
 
     return (
         <CategorySection>
@@ -28,7 +39,7 @@ function CategoriesSection() {
                     <Title>DANH MỤC</Title>
                     <CategoryContainer>
                         {parentCategories.map(category => (
-                            <Anchor key={category._id} to="/">
+                            <Anchor key={category._id} to={category.path}>
                                 <CategoryBox>
                                     <CategoryImage
                                         src={createImage(category.categoryImage, false)}

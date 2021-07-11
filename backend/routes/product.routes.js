@@ -10,6 +10,7 @@ const {
     updateProductType,
     deleteSingleProduct,
     advancedGetAllProducts,
+    getOneProductPerMallShop,
 } = require('../controllers/productController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const router = express.Router();
@@ -64,6 +65,7 @@ router.put(
 router.get('/products', getAllProducts);
 router.get('/advanced/products', advancedGetAllProducts);
 router.get('/get-sale-products', getSaleProducts);
+router.get('/get-one-product-per-mall-shop/:shopCategory', getOneProductPerMallShop);
 
 router.get('/shop/products', [isAuthenticatedUser, authorizeRoles('shop')], getShopProducts);
 router.route('/product/:productId').get(getSingleProduct);

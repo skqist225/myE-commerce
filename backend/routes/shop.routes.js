@@ -9,6 +9,7 @@ const {
     getShopById,
     cancelShopRequest,
     getShopByName,
+    getMallShop,
 } = require('../controllers/shopController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
@@ -20,7 +21,7 @@ router.post(
     [isAuthenticatedUser, authorizeRoles('user', 'admin')],
     upload.fields([
         { name: 'shopLogo', maxCount: 1 },
-        { name: 'homeImages', maxCount: 5 },
+        { name: 'homeImages', maxCount: 10 },
     ]),
     addShop
 );
@@ -59,6 +60,7 @@ router
 
 router.get('/shop/:shopName', getShopByName);
 router.get('/shop/:shopId/search', getShopById);
+router.get('/shop/shopCategory/:shopCategory', getMallShop);
 
 router.delete(
     '/admin/shops/delete',

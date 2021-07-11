@@ -1,3 +1,9 @@
 export { default as Header } from './Header/Header';
 export { default as Body } from './Body/Body';
 export { default as Slider } from './Slider/Slider';
+
+export { default as LoginHeader } from './Login/LoginHeader';
+export { default as LoginBody } from './Login/LoginBody';
+export { default as Footer } from './Footer/Footer';
+export { default as ProtectedRoute } from './route/ProtectedRoute';
+export { default as CategoryMallBody } from './CategoryMall/CategoryMallBody';

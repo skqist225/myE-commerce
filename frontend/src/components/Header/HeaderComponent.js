@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { colorVariables } from '../../globalStyle';
 
@@ -8,7 +8,7 @@ export const ParentContainer = styled.div`
     position: fixed;
     top: 0;
     left: 0;
-    background: linear-gradient(-180deg, #f53d2d, #f63);
+    background: ${props => props.bgColor || 'linear-gradient(-180deg, #f53d2d, #f63)'};
     z-index: 99;
 `;
 
@@ -27,9 +27,52 @@ export const HeaderLine = styled.div`
     }
 `;
 
+var fadeIn = keyframes`
+    from {
+        opacity: 0;
+    } to {
+        opacity: 1;
+    }
+`;
+
+export const UserMenuModal = styled.div.attrs(props => ({
+    children: props.render,
+}))`
+    position: absolute;
+    top: 2.75rem;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 1.25rem 6.25rem 0 rgba(0 0 0 / 20%);
+    width: 19rem;
+    height: 15.5rem;
+    z-index: 3;
+    overflow: hidden;
+    border-radius: 2px;
+    border-top: 0;
+    display: none;
+    animation: ${fadeIn} 0.2s ease;
+`;
+
+export const Bridge = styled.div`
+    width: 45%;
+    height: 1rem;
+    background-color: transparent;
+    position: absolute;
+    top: 2rem;
+    left: 55%;
+`;
+
 export const ListItem = styled.li`
     display: inline-block;
     padding: 0 0.8375rem;
+
+    &.userItem {
+        cursor: pointer;
+    }
+
+    &.userItem:hover ${UserMenuModal} {
+        display: block;
+    }
 `;
 
 export const HeaderList = styled.ul`
@@ -60,6 +103,13 @@ export const HeaderList = styled.ul`
         font-weight: 500;
         color: ${colorVariables.textColor};
     }
+
+    &.headerListRight {
+        position: relative;
+        max-width: 39rem;
+        width: 100%;
+        justify-content: space-between;
+    }
 `;
 
 export const ItemLink = styled(Link)`
@@ -80,6 +130,31 @@ export const LogoWrapper = styled.div.attrs(props => ({
     height: fit-content;
     margin-right: 5rem;
 `;
+
+export const MenuList = styled.ul`
+    list-style: none;
+    padding-left: 0;
+`;
+
+export const MenuLink = styled(Link)`
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.8);
+    text-transform: capitalize;
+    font-weight: 500;
+    font-size: 1.8rem;
+`;
+
+export const MenuItem = styled.li`
+    padding-left: 1.875rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+
+    &:hover ${MenuLink} {
+        color: #00bfa5;
+    }
+`;
+
 export const HeaderSearchWrapper = styled.div`
     max-width: 84rem;
     width: 100%;
@@ -87,11 +162,13 @@ export const HeaderSearchWrapper = styled.div`
     flex-direction: column;
     height: 100%;
 `;
+
 export const HeaderForm = styled.form`
     position: relative;
     flex: 1;
     padding: 5px;
 `;
+
 export const HeaderSearchInput = styled.input.attrs(props => ({
     placeholder: 'Tổng quà 3 tỷ - voucher 150k ',
 }))`
@@ -119,7 +196,7 @@ export const HeaderSearchButton = styled.button`
     border: none;
     z-index: 1;
     outline: none;
-    background: #fb5533;
+    background: ${props => props.bgColor || '#fb5533'};
     padding: 0 15px;
     min-width: 60px;
     max-width: 190px;

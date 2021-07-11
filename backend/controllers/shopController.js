@@ -14,81 +14,48 @@ const deleteImage = require('../helpers/deleteImage');
 exports.addShop = catchAsyncError(async (req, res, next) => {
     const { _id: $user } = req.user;
 
-    if (mongoose.isValidObjectId($user)) {
-        const user = await User.findById($user).select(
-            'addresses birthday isEmailVerified avatar identityCard'
-        );
+    const { isMallType } = req.body;
 
-        if (!user) {
-            return next(new ErrorHandler('User not exists', httpStatusCode.NOT_FOUND));
-        }
-
-        if (user.isShopRequestSent) {
-            return next(
-                new ErrorHandler(
-                    'You can not make another shop while previous shop is being processed',
-                    httpStatusCode.BAD_REQUEST
-                )
+    if (!isMallType) {
+        if (mongoose.isValidObjectId($user)) {
+            const user = await User.findById($user).select(
+                'addresses birthday isEmailVerified avatar identityCard'
             );
-        }
 
-        if (user.isEmailVerified) {
-            if (
-                user.birthday !== null &&
-                // user.addresses.length >= 1 &&
-                user.avatar &&
-                user.identityCard.number &&
-                user.identityCard.cardImage.length >= 1
-            ) {
-                if (user.role === 'shop') {
-                    const { shopName, shopDescription, isMallType } = req.body;
-                    let shopLogo,
-                        homeImages = [];
+            if (!user) {
+                return next(new ErrorHandler('User not exists', httpStatusCode.NOT_FOUND));
+            }
 
-                    if (req.files && req.files.shopLogo) {
-                        shopLogo = processImagePath(req.files.shopLogo[0].path);
+            if (user.isShopRequestSent) {
+                return next(
+                    new ErrorHandler(
+                        'You can not make another shop while previous shop is being processed',
+                        httpStatusCode.BAD_REQUEST
+                    )
+                );
+            }
+
+            if (user.isEmailVerified) {
+                if (
+                    user.birthday !== null &&
+                    // user.addresses.length >= 1 &&
+                    user.avatar &&
+                    user.identityCard.number &&
+                    user.identityCard.cardImage.length >= 1
+                ) {
+                    if (user.role === 'shop') {
                     } else {
-                        return res
-                            .status(httpStatusCode.BAD_REQUEST)
-                            .json({ errorMessage: "Please select shop's logo" });
+                        return next(
+                            new ErrorHandler(
+                                'This account has already been a shop',
+                                httpStatusCode.BAD_REQUEST
+                            )
+                        );
                     }
-
-                    if (req.files && req.files.homeImages) {
-                        req.files.homeImages.forEach(image => {
-                            homeImages.push(processImagePath(image.path));
-                        });
-                    }
-
-                    const shop = new Shop({
-                        user: req.user._id,
-                        shopLogo,
-                        shopName,
-                        shopDescription,
-                        homeImages,
-                        isMallType,
-                    });
-
-                    shop.save(async (err, shop) => {
-                        if (err) {
-                            catchUniqueError(res, err);
-                            return res
-                                .status(httpStatusCode.BAD_REQUEST)
-                                .json({ errorMessage: err.message });
-                        }
-
-                        if (shop) {
-                            await User.updateOne({ _id: shop.user }, { isShopRequestSent: true });
-
-                            return res.status(httpStatusCode.CREATED).json({
-                                successMessage: 'Request for opening a shop has been sent',
-                                shop,
-                            });
-                        }
-                    });
                 } else {
                     return next(
                         new ErrorHandler(
-                            'This account has already been a shop',
+                            'User was not eligible for creating a shop, please fill in full information',
                             httpStatusCode.BAD_REQUEST
                         )
                     );
@@ -96,22 +63,59 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
             } else {
                 return next(
                     new ErrorHandler(
-                        'User was not eligible for creating a shop, please fill in full information',
-                        httpStatusCode.BAD_REQUEST
+                        'User email has been not confirmed yet',
+                        httpStatusCode.UNAUTHORIZED
                     )
                 );
             }
         } else {
-            return next(
-                new ErrorHandler(
-                    'User email has been not confirmed yet',
-                    httpStatusCode.UNAUTHORIZED
-                )
-            );
+            return next(new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST));
         }
-    } else {
-        return next(new ErrorHandler('User id is invalid', httpStatusCode.BAD_REQUEST));
     }
+
+    const { shopName, shopDescription, shopCategory } = req.body;
+    let shopLogo,
+        homeImages = [];
+
+    if (req.files && req.files.shopLogo) {
+        shopLogo = processImagePath(req.files.shopLogo[0].path);
+    } else {
+        return res
+            .status(httpStatusCode.BAD_REQUEST)
+            .json({ errorMessage: "Please select shop's logo" });
+    }
+
+    if (req.files && req.files.homeImages) {
+        req.files.homeImages.forEach(image => {
+            homeImages.push(processImagePath(image.path));
+        });
+    }
+
+    const shop = new Shop({
+        user: req.user._id,
+        shopLogo,
+        shopName,
+        shopDescription,
+        homeImages,
+        isMallType,
+        shopCategory,
+    });
+
+    shop.save(async (err, shop) => {
+        if (err) {
+            catchUniqueError(res, err);
+            return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+        }
+
+        if (shop) {
+            await User.updateOne({ _id: shop.user }, { isShopRequestSent: true });
+
+            return res.status(httpStatusCode.CREATED).json({
+                successMessage: 'Request for opening a shop has been sent',
+                shop,
+            });
+        }
+    });
 });
 
 exports.getApprovedShops = (req, res, next) => {
@@ -218,6 +222,29 @@ exports.getShopByName = async (req, res, next) => {
                 });
             }
         });
+};
+
+exports.getMallShop = async (req, res) => {
+    const { shopCategory } = req.params;
+    const shopCategoryId = shopCategory.substring(shopCategory.indexOf('.') + 1);
+
+    if (mongoose.isValidObjectId(shopCategoryId)) {
+        const shops = await Shop.aggregate([
+            {
+                $match: {
+                    shopCategory: mongoose.Types.ObjectId(shopCategoryId),
+                    isMallType: true,
+                },
+            },
+        ]);
+
+        res.status(httpStatusCode.OK).json({
+            successMessage: 'All mall shop fetched successfully',
+            shops,
+        });
+    } else {
+        return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: 'Id is invalid' });
+    }
 };
 
 exports.updateShop = catchAsyncError(async (req, res, next) => {

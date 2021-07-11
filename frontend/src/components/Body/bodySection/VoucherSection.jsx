@@ -1,7 +1,6 @@
 import React from 'react';
 import { ContentContainer, GridLayout } from '../../../globalStyle';
 import { VoucherContainer, VoucherImage } from './voucherComponent';
-import { WhiteBgWrapper } from './categoriesComponent';
 import { createImage } from '../../../helpers';
 
 function VoucherSection() {

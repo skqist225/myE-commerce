@@ -1,10 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ContentContainer } from '../../globalStyle';
 import {
     ParentContainer,
     HeaderLine,
     HeaderList,
     ListItem,
+    UserMenuModal,
+    MenuList,
+    MenuItem,
+    MenuLink,
     ItemLink,
     LogoWrapper,
     HeaderSearchWrapper,
@@ -16,14 +21,24 @@ import {
     FacebookIcon,
     InstagramIcon,
     Avatar,
+    Bridge,
 } from './HeaderComponent';
 import { NotifyIcon, HelpIcon, ShopeeLogo, SearchIcon, CartIcon } from './headerIcon.js';
 import { createImage } from '../../helpers';
 import './header.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { userLogout } from '../../features/auth';
 
-function Header() {
+function Header({ bgColor }) {
+    const dispatch = useDispatch();
+    const { user } = useSelector(state => state.auth);
+
+    const handleLogoutRequest = () => {
+        dispatch(userLogout());
+    };
+
     return (
-        <ParentContainer>
+        <ParentContainer bgColor={bgColor}>
             <ContentContainer>
                 <HeaderLine className="headerLineOne">
                     <HeaderList className="headerListLeft">
@@ -55,20 +70,50 @@ function Header() {
                             <HelpIcon className="headerIcon" />
                             <ItemLink needpaddingleft="5px">Hỗ trợ</ItemLink>
                         </ListItem>
-                        <ListItem>
-                            <Avatar />
-                            <span style={{ display: 'inline-block', marginLeft: '0.625rem' }}>
-                                sulanheartme1
+                        <ListItem className="userItem">
+                            <Avatar src={createImage(user.avatar, false)} />
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    marginLeft: '0.625rem',
+                                    color: '#fff',
+                                    fontSize: '1.8rem',
+                                }}
+                            >
+                                {user.username}
                             </span>
+                            <Bridge></Bridge>
+                            <UserMenuModal
+                                render={
+                                    <MenuList>
+                                        <MenuItem>
+                                            <MenuLink>tài khoản của tôi</MenuLink>
+                                        </MenuItem>
+                                        <MenuItem>
+                                            <MenuLink>đơn mua </MenuLink>
+                                        </MenuItem>
+                                        <MenuItem to="/buyer/login" onClick={handleLogoutRequest}>
+                                            <MenuLink>đăng xuất</MenuLink>
+                                        </MenuItem>
+                                    </MenuList>
+                                }
+                            />
                         </ListItem>
                     </HeaderList>
                 </HeaderLine>
                 <HeaderLine>
-                    <LogoWrapper render={<ShopeeLogo />} />
+                    <LogoWrapper
+                        render={
+                            <Link to="/">
+                                {' '}
+                                <ShopeeLogo fillColor="#fff" />
+                            </Link>
+                        }
+                    />
                     <HeaderSearchWrapper>
                         <HeaderForm>
                             <HeaderSearchInput />
-                            <HeaderSearchButton children={<SearchIcon />} />
+                            <HeaderSearchButton children={<SearchIcon />} bgColor={bgColor} />
                         </HeaderForm>
 
                         <HeaderBelowSearchProductName>

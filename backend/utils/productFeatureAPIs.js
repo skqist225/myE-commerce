@@ -24,7 +24,7 @@ class ProductFeatures {
             {
                 $addFields: {
                     avgPrice: { $avg: '$productTypes.typePrice' },
-                    avgStock: { $trunc: { $avg: '$productTypes.typeStock' } },
+                    avgStock: { $round: { $avg: '$productTypes.typeStock' } },
                 },
             },
             {

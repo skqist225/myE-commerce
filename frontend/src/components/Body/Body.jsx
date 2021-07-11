@@ -6,6 +6,7 @@ import {
     FlashSaleSection,
     VoucherSection,
 } from './bodySection';
+
 import styled from 'styled-components';
 import './body.css';
 const BackgroundWrapper = styled.div`

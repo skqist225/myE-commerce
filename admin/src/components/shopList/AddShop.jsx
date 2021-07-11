@@ -1,11 +1,23 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { Fragment } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+import { BootstrapInput } from '../../components';
 import { addShop, clearSuccessMessage } from '../../features/shops';
 import { Input, FileInput } from '../../components';
+import { makeStyles } from '@material-ui/core/styles';
+import { categoriesSelectors } from '../../features/categories';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button } from '@material-ui/core';
+import {
+    InputLabel,
+    Button,
+    FormControl,
+    NativeSelect,
+    RadioGroup,
+    FormLabel,
+    FormControlLabel,
+    Radio,
+} from '@material-ui/core';
 
 const shopSchema = yup.object().shape({
     shopName: yup.string().required(),
@@ -24,8 +36,28 @@ const shopSchema = yup.object().shape({
     shopDescription: yup.string().required(),
 });
 
+const useStyles = makeStyles(theme => ({
+    root: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    formControl: {
+        margin: theme.spacing(3),
+    },
+    margin: {
+        margin: theme.spacing(1),
+    },
+    label: {
+        fontSize: 16,
+    },
+    buttonRoot: {
+        marginTop: theme.spacing(1),
+    },
+}));
+
 function AddShop() {
     const dispatch = useDispatch();
+    const classes = useStyles();
     dispatch(clearSuccessMessage());
     const {
         register,
@@ -36,17 +68,21 @@ function AddShop() {
         mode: 'onBlur',
         resolver: yupResolver(shopSchema),
     });
+    const categories = useSelector(categoriesSelectors.selectAll);
+    const isMallType = register('isMallType');
 
     const onSubmit = (data, e) => {
         e.preventDefault();
         console.log(data);
 
-        const { shopName, shopLogo, shopDescription, homeImages } = data;
+        const { shopName, shopLogo, shopDescription, homeImages, isMallType, shopCategory } = data;
 
         const formData = new FormData();
         formData.set('shopName', shopName);
         formData.set('shopLogo', shopLogo[0]);
         formData.set('shopDescription', shopDescription);
+        formData.set('isMallType', isMallType);
+        formData.set('shopCategory', shopCategory);
         homeImages.forEach(image => formData.append('homeImages', image));
 
         dispatch(addShop(formData));
@@ -76,6 +112,48 @@ function AddShop() {
                     error={!!errors.shopDescription}
                     helperText={errors?.shopDescription?.message}
                 />
+                <FormControl className={classes.margin}>
+                    <InputLabel>Category:</InputLabel>
+                    <Controller
+                        control={control}
+                        name="shopCategory"
+                        render={({ field }) => (
+                            <>
+                                <NativeSelect {...field} input={<BootstrapInput />}>
+                                    <option aria-label="None" value="" />
+                                    {categories.map(category => (
+                                        <Fragment key={category._id}>
+                                            <option value={category._id.toString()}>
+                                                {category.categoryName}
+                                            </option>
+                                        </Fragment>
+                                    ))}
+                                </NativeSelect>
+                            </>
+                        )}
+                    />
+                </FormControl>
+                <FormControl component="fieldset">
+                    <FormLabel component="legend">Is Mall Type:</FormLabel>
+                    <RadioGroup aria-label="isMallType" className={classes.root}>
+                        {[true, false].map((val, index) => (
+                            <FormControlLabel
+                                key={index}
+                                control={
+                                    <Radio
+                                        color="primary"
+                                        name="isMallType"
+                                        onChange={isMallType.onChange}
+                                        value={`${val}`}
+                                        inputRef={isMallType.ref}
+                                        // checked={getValues().isFreeship}
+                                    />
+                                }
+                                label={val ? 'Có' : 'Không'}
+                            />
+                        ))}
+                    </RadioGroup>
+                </FormControl>
                 <FileInput name="homeImages" control={control} />
                 {errors?.homeImage?.message && <p>{errors.homeImage.message}</p>}
                 <Button variant="contained" color="primary" type="submit">

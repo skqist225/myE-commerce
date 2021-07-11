@@ -9,9 +9,10 @@ const connectDatabase = () => {
             useFindAndModify: false,
         })
         .then(({ connection }) => {
-            console.log(
-                `MongoDB database connected with HOST: ${connection.host}`
-            );
+            console.log(`MongoDB database connected with HOST: ${connection.host}`);
+        })
+        .catch(err => {
+            console.log(err);
         });
 };
 

@@ -1,1 +1,5 @@
+export { default as authReducer } from './auth/authSlice';
+
 export { default as categoriesReducer } from './categories/categoriesSlice';
+export { default as shopReducer } from './shop/shopSlice';
+export { default as mallShopsReducer } from './mallShops/mallShopsSlice';

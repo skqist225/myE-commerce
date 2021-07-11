@@ -1,0 +1,164 @@
+.viewShop {
+    max-width: 1170px;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.viewShopHeaderContainer {
+    display: flex;
+    /* justify-content: space-between; */
+}
+
+.viewShopNameWrapper {
+    margin-left: 20px;
+}
+
+.viewShopName {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+    max-height: 3rem;
+    font-weight: 400;
+    margin-bottom: 7px;
+    margin-top: 0;
+    overflow: hidden;
+    word-wrap: break-word;
+    color: white;
+}
+
+.viewShopHeaderLeft {
+    width: 487px;
+    background-color: rgba(0, 0, 0, 0.6);
+    max-height: 170px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.viewShopHeaderRight {
+    padding-left: 37.5px;
+    padding-top: 12.5px;
+    display: flex;
+}
+
+.viewShopInfo {
+    display: flex;
+    align-items: center;
+    padding: 13px 0;
+}
+
+.viewShopInfo div:last-child {
+    font-size: 18px;
+}
+
+.viewShopBtnIcon {
+    fill: #fff;
+    width: 13px;
+    height: 13px;
+}
+
+.viewShopIconWrapper {
+    margin-right: 15px;
+}
+
+.viewShopIcon {
+    stroke: #000;
+    width: 19px;
+    height: 19px;
+}
+
+.viewShopActiveTime {
+    display: block;
+    margin: 7px 0;
+    color: hsla(0, 0%, 100%, 0.7);
+    font-size: 15px;
+}
+
+.viewShopLogoAndNameWrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.viewShopLogo {
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    border: 5px solid #a2a2a2;
+    margin-left: 25px;
+}
+
+.viewShopSM {
+    height: 16px;
+    width: 64px;
+    position: absolute;
+    left: 40px;
+    top: 80%;
+}
+
+.viewShopSpan {
+    color: #d0011b;
+}
+
+.viewShopButtonContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+}
+
+.viewShopHeaderButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5625rem;
+    width: 210px;
+    color: #fff;
+    border: 1px solid #fff;
+    margin-right: 5px;
+    background-color: #666666;
+    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 7px 0;
+    outline: none;
+}
+
+.viewShopHeaderButton span {
+    display: inline-block;
+    margin-right: 12px;
+}
+
+.viewShopMenuSection {
+    width: 100%;
+    padding-top: 25px;
+}
+.viewShopMenuContainer {
+}
+.viewShopMenuList {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.viewShopMenuItem {
+    display: inline-block;
+    padding: 14px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+}
+
+.viewShopMenuItem.active {
+    border-bottom: 3px solid #d0011b;
+}
+
+.viewShopHomeImages {
+    padding-top: 25px;
+    width: 100%;
+}
+
+.viewShopImage {
+    width: 100%;
+}

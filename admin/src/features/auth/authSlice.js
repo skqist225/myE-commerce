@@ -10,7 +10,6 @@ export const userLogin = createAsyncThunk(
             },
             withCredentials: true,
         };
-        dispatch(clearErrorMessage());
 
         try {
             const {

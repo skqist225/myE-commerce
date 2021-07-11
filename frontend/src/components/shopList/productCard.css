@@ -1,0 +1,164 @@
+.productCard {
+    max-width: 190px;
+    max-height: 333px;
+    background: #fff;
+    margin: 6.25px;
+    -webkit-box-shadow: 0px 4px 5px 2px rgb(232 227 232);
+    -moz-box-shadow: 0px 4px 5px 2px rgb(232 227 232);
+    box-shadow: 0px 4px 5px 2px rgb(232 227 232);
+    position: relative;
+    transition: all 0.3s ease-out;
+}
+
+.productCard:hover {
+    transform: scale(1.1);
+}
+
+.productCardImageSection {
+    width: 190px;
+    height: 190px;
+    position: relative;
+}
+
+.productCardProductImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+}
+
+.productCardXLDHWrapper {
+    position: absolute;
+    left: -3;
+    top: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 80px;
+    height: 26px;
+}
+
+.productCardXLDHMask {
+    height: inherit;
+    width: 100%;
+    font-size: 0.75rem;
+    line-height: 0.875rem;
+    padding: 0.1875rem 0.25rem;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+.productCardCoverImage77 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.productCardXLDHMask:before {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    left: 0;
+    bottom: -0.1875rem;
+    border-top: 0.1875rem solid;
+    border-left: 0.1875rem solid transparent;
+    filter: brightness(60%);
+}
+
+.productCardSubImage {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.productCardProductDetailsSection {
+    padding: 12.5px;
+    width: 100%;
+}
+
+.productCardProductName {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 15px;
+    font-weight: 400;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.productCardOrginalPrice {
+    display: inline;
+    max-width: 30%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: rgba(0, 0, 0, 0.54);
+    text-decoration: line-through;
+    margin-right: 5px;
+    font-size: 18px;
+    position: relative;
+    padding-left: 10px;
+}
+
+.productCardDiscountPriceWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.productCardOrginalPriceOrDiscountPrice {
+    font-size: 20px;
+    color: #ee4d2d;
+    display: inline-block;
+    position: relative;
+}
+
+.productCardOrginalPriceCur {
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 15px;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-decoration: underline;
+    display: inline-block;
+    margin-right: 2px;
+}
+
+.productCardOrginalPriceOrDiscountPrice:before {
+    content: 'đ';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    color: #ee4d2d;
+    font-size: 15px;
+    transform: translateY(-50%);
+    text-decoration: underline;
+}
+
+.productCardSoldNumber {
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.87);
+    margin-left: 0.3125rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.productCardSellLocation {
+    margin-top: 0.3125rem;
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 0.75rem;
+    line-height: 0.875rem;
+    min-height: 1em;
+    text-align: right;
+    font-weight: 200;
+}

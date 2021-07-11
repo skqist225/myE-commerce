@@ -1,14 +1,9 @@
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+
 import { Header, Body } from '../../components';
-import { fetchCategories } from '../../features/categories';
 
 function Home() {
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(fetchCategories());
-    }, [dispatch]);
+    console.log('Home rendering...');
 
     return (
         <div className="home">

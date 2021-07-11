@@ -554,6 +554,55 @@ exports.getSaleProducts = async (req, res, next) => {
     });
 };
 
+exports.getOneProductPerMallShop = async (req, res, next) => {
+    const { shopCategory } = req.params;
+    const shopCategoryId = shopCategory.substring(shopCategory.indexOf('.') + 1);
+
+    if (mongoose.isValidObjectId(shopCategoryId)) {
+        const numberOfShops = await Shop.countDocuments({ shopCategory: shopCategoryId });
+        let randomRange = numberOfShops - 8;
+
+        const randomSkipNumber = Math.floor(Math.random() * randomRange);
+        const shopId = await Shop.find({ shopCategory: shopCategoryId })
+            .skip(randomSkipNumber)
+            .limit(8)
+            .select('_id');
+        const shopIds = [];
+        shopId.forEach(({ _id }) => shopIds.push(_id));
+        let products = [];
+        for (let id of shopIds) {
+            const product = await Product.findOne({
+                shop: mongoose.Types.ObjectId(id),
+            })
+                .lean()
+                .populate('shop', 'shopName')
+                .select('_id shop productTypes');
+            products.push(product);
+        }
+
+        // const products = await Product.find({ shop: { $in: 'shopIds' } }, { shop: 1 });
+
+        // const products = await Product.aggregate([
+        //     {
+        //         $match: { shop: { $in: shopIds } },
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: 'shops',
+        //             localField: 'shop',
+        //             foreignField: '_id',
+        //             as: 'shop',
+        //         },
+        //     },
+        // ]);
+
+        res.status(httpStatusCode.OK).json({
+            products: products.filter(product => product !== null),
+            // products,
+        });
+    }
+};
+
 exports.getSingleProduct = (req, res, next) => {
     const { productId } = req.params;
 

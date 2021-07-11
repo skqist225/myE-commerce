@@ -101,7 +101,9 @@ function UserLogin() {
                 dispatch(clearErrorMessage());
             });
         }
-    }, [dispatch, isAuthenticated, errorMessage, history]);
+    }, [dispatch, isAuthenticated, errorMessage]);
+
+    console.log('Login rendering...');
 
     const PasswordInput = forwardRef((props, ref) => {
         return (
@@ -171,7 +173,7 @@ function UserLogin() {
                             className={classes.textField}
                             placeholder=""
                         />
-                        <PasswordInput
+                        <input
                             {...register('password')}
                             name="password"
                             error={!!errors.password}
