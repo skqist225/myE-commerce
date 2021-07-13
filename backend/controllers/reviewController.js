@@ -8,7 +8,7 @@ const catchAsyncError = require('../middlewares/catchAsyncError');
 exports.createProductReview = (req, res, next) => {
     const { productId: product } = req.params; //DEVNOTIFY product coming from req.params
 
-    if (mongoose.isValidObjectId(productId)) {
+    if (mongoose.isValidObjectId(product)) {
         const { comment, rating } = req.body;
 
         let pictures = [];
@@ -28,7 +28,7 @@ exports.createProductReview = (req, res, next) => {
             reviewObj.pictures = pictures;
         }
 
-        Review.findOne({ product: productId, user: req.user._id }).exec(async (err, review) => {
+        Review.findOne({ product, user: req.user._id }).exec(async (err, review) => {
             if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (review) {
@@ -65,20 +65,97 @@ exports.createProductReview = (req, res, next) => {
     }
 };
 
-exports.getProductReviews = catchAsyncError(async (req, res, next) => {
-    const { productId } = req.params;
+exports.likeReview = async (req, res, next) => {
+    const { reviewId: _id } = req.params;
+    const { amount } = req.body;
 
-    if (mongoose.isValidObjectId(productId)) {
-        const reviews = await Review.find({ product: productId })
-            .populate('user', 'firstName lastName')
-            .populate('product', 'productName');
-        let totalRatings = reviews.reduce((acc, review) => acc + Number(review.rating), 0);
+    if (mongoose.Types.ObjectId) {
+        const review = await Review.findOneAndUpdate(
+            { _id },
+            { $inc: { number_of_likes: amount } },
+            { new: true }
+        )
+            .select('number_of_likes')
+            .lean();
 
         res.status(httpStatusCode.OK).json({
-            succesMessage: "Product's review fetched successfully",
-            reviews_nbm: reviews.length,
-            ratings: totalRatings / reviews.length,
+            successMessage: 'Like Review successfully',
+            review,
+        });
+    }
+};
+
+exports.getProductReviews = catchAsyncError(async (req, res, next) => {
+    const { productId: product } = req.params;
+
+    if (mongoose.isValidObjectId(product)) {
+        const reviews = await Review.aggregate([
+            {
+                $match: { product: mongoose.Types.ObjectId(product) },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'user',
+                },
+            },
+            {
+                $unwind: '$user',
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'product',
+                    foreignField: '_id',
+                    as: 'product',
+                },
+            },
+            {
+                $unwind: '$product',
+            },
+
+            {
+                $addFields: {
+                    avgRatings: { $avg: '$rating' },
+                },
+            },
+            {
+                $project: {
+                    'user.username': 1,
+                    'user.avatar': 1,
+                    'product.productTypes': 1,
+                    productTypeId: 1,
+                    comment: 1,
+                    pictures: 1,
+                    video: 1,
+                    rating: 1,
+                    number_of_likes: 1,
+                    maskName: 1,
+                    createdAt: {
+                        $toDate: '$_id',
+                    },
+                },
+            },
+        ]);
+
+        const ratingsPerStar = await Review.aggregate([
+            {
+                $match: { product: mongoose.Types.ObjectId(product) },
+            },
+            {
+                $group: {
+                    _id: '$rating',
+                    number_of_ratings: { $sum: 1 },
+                },
+            },
+        ]);
+
+        res.status(httpStatusCode.OK).json({
+            succesMessage: "Product's reviews fetched successfully",
             reviews,
+            ratingsPerStar,
         });
     }
 });

@@ -117,6 +117,7 @@ export const Button = styled.button`
     align-items: center;
     justify-content: center;
     outline: none;
+    cursor: pointer;
 `;
 
 export const Image = styled.img`
@@ -131,6 +132,7 @@ export const WhiteBgWrapper = styled.div`
     height: 100%;
     background-color: #fff;
     padding: ${props => props.padding};
+    margin-top: ${props => props.mt};
 `;
 
 export default GlobalStyle;

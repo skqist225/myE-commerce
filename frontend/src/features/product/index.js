@@ -2,5 +2,6 @@ export {
     fetchProductById,
     clearErrorMessage,
     clearSuccessMessage,
-    fetchCategoryPath,
+    _setCategoryPath,
+    clearCategoryPath,
 } from './productSlice';

@@ -5,6 +5,7 @@ const {
     deleteReview,
     getUserReviews,
     getAllReviews,
+    likeReview,
 } = require('../controllers/reviewController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
@@ -16,8 +17,9 @@ router.post(
     createProductReview
 );
 
-router.get('/user/reviews', [isAuthenticatedUser, authorizeRoles('user')], getUserReviews);
+router.put('/review/:reviewId', likeReview);
 
+router.get('/user/reviews', [isAuthenticatedUser, authorizeRoles('user')], getUserReviews);
 router.get('/product/reviews/:productId', [isAuthenticatedUser], getProductReviews);
 router.get('/reviews', getAllReviews);
 

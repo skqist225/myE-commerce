@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // import { MetaData } from '../../components';
-import './viewProduct.css';
-import { categoriesSelectors, fetchCategories } from '../../features/categories';
+
 import ProductSlider from '../Slider/ProductSlider';
 import { createImage } from '../../helpers';
 import { ContentContainer, Flex } from '../../globalStyle';
+import { _setCategoryPath, clearCategoryPath } from '../../features/product';
 import {
     MallIcon,
     StarIcon,
@@ -39,29 +39,21 @@ import {
     Second,
     Third,
 } from './ViewProductComponent';
-import { fetchProductById } from '../../features/product';
+import './viewProduct.css';
 
 function ViewProduct({ match, bgColor }) {
     const dispatch = useDispatch();
-
     const {
         productEntity: product,
         loading,
         errorMessage,
         successMessage,
+        categoryPath,
     } = useSelector(state => state.product);
-    const categories = useSelector(categoriesSelectors.selectAll);
-
-    const { productId } = match.params;
-
-    useEffect(() => {
-        dispatch(fetchProductById({ productId }));
-    }, [dispatch, productId]);
 
     const [productTypeStock, setProductTypeStock] = useState(1000);
     const [selectedImage, setSelectedImage] = useState('');
     const [allProductImages, setAllProductImages] = useState([]);
-    const [categoryPath, setCategoryPath] = useState([]);
 
     const getAllImages = product => {
         const productTypesImages = product.productTypes.map((productType, index) => ({
@@ -73,20 +65,6 @@ function ViewProduct({ match, bgColor }) {
             imgUrl: image,
         }));
         return productImages.concat(productTypesImages);
-    };
-
-    let categoryList = [];
-    const renderCategoryPath = (categories, parentId) => {
-        const parent = categories.find(category => category._id === parentId);
-
-        if (parent) {
-            categoryList.push(parent);
-            if (parent.parentId) {
-                renderCategoryPath(categories, parent.parentId);
-            }
-        }
-
-        return categoryList;
     };
 
     const seperateNumber = number => {
@@ -138,12 +116,8 @@ function ViewProduct({ match, bgColor }) {
     const isMallShop = true;
 
     useEffect(() => {
-        dispatch(fetchCategories());
-    }, [dispatch]);
-
-    useEffect(() => {
         if (successMessage) {
-            setCategoryPath(renderCategoryPath(categories, product.category.parentId));
+            // setCategoryPath(handleCategoryPath(categories, product.category.parentId));
             setSelectedImage(product.images[0]);
             setAllProductImages(getAllImages(product));
         }
@@ -166,28 +140,32 @@ function ViewProduct({ match, bgColor }) {
             {/* <MetaData title="Product's detail" /> */}
             {!loading && product && (
                 <ContentContainer>
-                    <CategoryPath>
-                        {categoryPath.length > 0 &&
-                            categoryPath.map(category => (
-                                <Fragment key={category._id}>
-                                    <div>{category.categoryName}</div>
-                                    <ArrowRight
-                                        style={{
-                                            margin: '0 1rem',
-                                            width: '1.5rem',
-                                            height: '1.5rem',
-                                        }}
-                                    />
-                                </Fragment>
-                            ))}
-                        <ProductCategory>{`${product.category.categoryName}`}</ProductCategory>
+                    <div style={{ margin: '2.5rem 0' }}>
+                        <CategoryPath>
+                            {categoryPath.length > 0 &&
+                                categoryPath.map(category => (
+                                    <Fragment key={category._id}>
+                                        <div style={{ fontSize: '1.8rem', lineHeight: '2rem' }}>
+                                            {category.categoryName}
+                                        </div>
+                                        <ArrowRight
+                                            style={{
+                                                margin: '0 1rem',
+                                                width: '1.5rem',
+                                                height: '1.5rem',
+                                            }}
+                                        />
+                                    </Fragment>
+                                ))}
+                            <ProductCategory>{`${product.category.categoryName}`}</ProductCategory>
 
-                        <ArrowRight
-                            style={{ margin: '0 1rem', width: '1.5rem', height: '1.5rem' }}
-                        />
+                            <ArrowRight
+                                style={{ margin: '0 1rem', width: '1.5rem', height: '1.5rem' }}
+                            />
 
-                        <PrdName>{product.productName}</PrdName>
-                    </CategoryPath>
+                            <PrdName>{product.productName}</PrdName>
+                        </CategoryPath>
+                    </div>
 
                     <Flex
                         className="viewProductContainer"
@@ -278,9 +256,11 @@ function ViewProduct({ match, bgColor }) {
                                             </>
                                         )}
                                     </PriceRange>
-                                    <DiscountPercent bgColor={bgColor}>
-                                        {product.discountPercent} % GIẢM
-                                    </DiscountPercent>
+                                    {product.discountPercent > 0 && (
+                                        <DiscountPercent bgColor={bgColor}>
+                                            {product.discountPercent} % GIẢM
+                                        </DiscountPercent>
+                                    )}
                                 </Flex>
                                 <Flex width="100%" height="4.5rem" justifyContent="flex-start">
                                     <Flex

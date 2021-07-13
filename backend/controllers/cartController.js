@@ -18,8 +18,9 @@ function runUpdate(condition, updateData) {
 
 exports.addToCart = (req, res, next) => {
     const { cartProduct } = req.body;
+    const { _id: user } = req.user;
 
-    Cart.findOne({ user: req.user._id }).exec((err, cart) => {
+    Cart.findOne({ user }).exec((err, cart) => {
         if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
         if (cart) {
@@ -31,9 +32,18 @@ exports.addToCart = (req, res, next) => {
 
             if (_product) {
                 condition = {
-                    user: req.user._id,
+                    user,
                     'cartProducts.productId': cartProduct.productId,
                 };
+
+                //DEVNOTIFY it should work in 2 case: product have 1 types and many types
+                if (req.body.productTypeId) {
+                    condition = {
+                        ...condition,
+                        'cartProducts.productTypeId': cartProduct.productTypeId,
+                    };
+                }
+
                 update = {
                     $set: {
                         'cartProducts.$': cartProduct,
@@ -41,7 +51,7 @@ exports.addToCart = (req, res, next) => {
                 };
             } else {
                 condition = {
-                    user: req.user._id,
+                    user,
                 };
                 update = {
                     $push: {
@@ -57,8 +67,8 @@ exports.addToCart = (req, res, next) => {
                 .catch(error => res.status(httpStatusCode.BAD_REQUEST).json({ error }));
         } else {
             const cart = new Cart({
-                user: req.user._id,
-                cartProducts: [req.body.cartProduct],
+                user,
+                cartProducts: [cartProduct],
             });
 
             cart.save((err, cart) => {
@@ -66,8 +76,7 @@ exports.addToCart = (req, res, next) => {
 
                 if (cart) {
                     return res.status(httpStatusCode.CREATED).json({
-                        success: true,
-                        message: 'Cart created successfully',
+                        successMessage: 'Cart created successfully',
                         cart,
                     });
                 }

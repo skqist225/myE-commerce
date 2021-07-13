@@ -615,7 +615,7 @@ exports.getSingleProduct = (req, res, next) => {
             .populate('transporters', 'transporterName transportFee -_id')
             .populate('supplier', 'supplierName headquarterAddress -_id')
             .populate('category', 'categoryName _id parentId')
-            .populate('shop', '_id shopName shopLogo isMallType')
+            .populate('shop', '_id shopName shopLogo isMallType shopLocation')
             .lean()
             .exec(async (err, product) => {
                 if (err)
@@ -628,7 +628,12 @@ exports.getSingleProduct = (req, res, next) => {
                         shop: product.shop._id,
                     });
 
-                    const $product = { ...product, number_of_products };
+                    const number_of_stocks = product.productTypes.reduce(
+                        (acc, type) => acc + type.typeStock,
+                        0
+                    );
+
+                    const $product = { ...product, number_of_products, number_of_stocks };
 
                     res.status(httpStatusCode.OK).json({
                         successMessage: `${product.productName} fetched successfully`,

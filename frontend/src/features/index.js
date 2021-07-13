@@ -5,3 +5,4 @@ export { default as shopReducer } from './shop/shopSlice';
 export { default as mallShopsReducer } from './mallShops/mallShopsSlice';
 export { default as transportersReducer } from './transporters/transportersSlice';
 export { default as productReducer } from './product/productSlice';
+export { default as reviewsReducer } from './reviews/reviewsSlice';

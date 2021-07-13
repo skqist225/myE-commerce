@@ -105,7 +105,6 @@ export const PriceRange = styled.div`
 `;
 
 export const CategoryPath = styled(Flex)`
-    margin: 2.5rem 0;
     width: 100%;
     height: fit-content;
     white-space: nowrap;

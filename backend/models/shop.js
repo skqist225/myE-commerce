@@ -40,6 +40,7 @@ const shopSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        shopLocation: { type: String },
         isMallType: { type: Boolean, default: false },
         shopCategory: { type: mongoose.Types.ObjectId, ref: 'Category', required: true },
         approvedAt: {

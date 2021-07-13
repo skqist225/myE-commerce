@@ -52,7 +52,7 @@ export const ViewShopButton = styled(AddToCartBtn).attrs(() => ({
 
 export const InfoTitle = styled.label`
     color: rgba(0, 0, 0, 0.4);
-    margin-right: 1.25rem;
+    margin-right: ${props => props.mr || '1.25rem'};
     font-size: 1.8rem;
     text-transform: capitalize;
 `;

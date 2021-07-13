@@ -27,7 +27,10 @@ const productSlice = createSlice({
         successMessage: null,
     },
     reducers: {
-        fetchCategoryPath(state, { payload }) {
+        clearCategoryPath(state) {
+            state.categoryPath = [];
+        },
+        _setCategoryPath(state, { payload }) {
             state.categoryPath = payload;
         },
         clearSuccessMessage(state) {
@@ -54,6 +57,7 @@ const productSlice = createSlice({
     },
 });
 
-export const { clearErrorMessage, clearSuccessMessage, fetchCategoryPath } = productSlice.actions;
+export const { clearErrorMessage, clearSuccessMessage, _setCategoryPath, clearCategoryPath } =
+    productSlice.actions;
 
 export default productSlice.reducer;
