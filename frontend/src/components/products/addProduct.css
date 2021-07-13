@@ -1,0 +1,62 @@
+.addProduct {
+    width: 100%;
+}
+
+.addProductFirstLine {
+}
+
+.addProductSecondLine {
+    display: flex;
+}
+
+.productTypesContainer {
+    display: flex;
+    align-items: center;
+}
+
+.addProductCheckboxArea {
+    display: flex;
+    flex-direction: column;
+}
+
+.productTypesInputWrapper {
+    flex: 3;
+}
+
+.productTypesTypeImagePreview {
+    flex: 1;
+    align-self: center;
+    justify-self: center;
+}
+
+.addProductPriceOffer {
+    display: flex;
+    flex-direction: column;
+}
+
+.productTypesInput {
+    height: 50px;
+    border: 1px solid green;
+    outline: none;
+    font-size: 20px;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    margin: 8px;
+}
+
+.productTypeTypeImagePreview {
+    width: 100px;
+    /* height: 50px; */
+    object-fit: contain;
+}
+
+.productTypeTypeImagePreview:hover {
+    border: 2px solid rgb(30, 30, 189);
+    transform: scale(2);
+    transition: 0.2s transform ease;
+}
+
+.productTypesDeleteButtonWrapper {
+    flex: 1;
+}

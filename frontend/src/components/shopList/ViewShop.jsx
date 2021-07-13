@@ -19,33 +19,28 @@ import { ViewShopButton, ViewShopLogo, ViewShopMallLogo } from './ShopProductsCo
 import { PageBodyContainer, ContentContainer, MenuList, MenuItem, Image } from '../../globalStyle';
 
 function ViewShop({ match }) {
-    const { shopName } = match.params;
     const dispatch = useDispatch();
     const { shop, shopProducts, loading, errorMessage, successMessage } = useSelector(
         state => state.shop
     );
-
-    React.useEffect(() => {
-        dispatch(fetchSingleShop(shopName));
-    }, [dispatch, shopName]);
 
     let itemList = [
         {
             path: `${match.url}`,
             title: 'Dạo',
         },
-        { path: `/shop/${shop._id}/search`, title: 'Tất cả sản phẩm' },
+        { path: `/shop/${shop ? shop._id : ''}/search`, title: 'Tất cả sản phẩm' },
         {
-            path: `/shop/${shop._id}/search?shopCollection=ipad`,
+            path: `/shop/${shop ? shop._id : ''}/search?shopCollection=ipad`,
             title: 'Sản phẩm bán chạy',
         },
         {
-            path: `/shop/${shop._id}/search?shopCollection=ipad`,
+            path: `/shop/${shop ? shop._id : ''}/search?shopCollection=ipad`,
             title: 'Sản phẩm mới',
         },
-        { path: `/shop/${shop._id}/search?shopCollection=ipad`, title: 'iPhone' },
-        { path: `/shop/${shop._id}/search?shopCollection=ipad`, title: 'iPad' },
-        { path: `/shop/${shop._id}/search??shopCollection=ipad`, title: 'Thêm' },
+        { path: `/shop/${shop ? shop._id : ''}/search?shopCollection=ipad`, title: 'iPhone' },
+        { path: `/shop/${shop ? shop._id : ''}/search?shopCollection=ipad`, title: 'iPad' },
+        { path: `/shop/${shop ? shop._id : ''}/search??shopCollection=ipad`, title: 'Thêm' },
     ];
 
     function initalizeLogicForComponent() {
@@ -69,7 +64,7 @@ function ViewShop({ match }) {
         if (!loading && shop) {
             initalizeLogicForComponent();
         }
-    }, [loading]);
+    }, [loading, shop]);
 
     return (
         <>

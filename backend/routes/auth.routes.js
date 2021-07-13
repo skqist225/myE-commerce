@@ -49,7 +49,7 @@ router.route('/user/update').put(
     updateUser
 );
 
-router.get('/logout', [isAuthenticatedUser, authorizeRoles('user')], logoutUser);
+router.get('/logout', [isAuthenticatedUser], logoutUser);
 
 router.post('/user/forgot-password', forgotPassword);
 

@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import BtnSlider from './BtnSlider';
 import PropTypes from 'prop-types';
 import './productSlider.css';
-import { createImage } from '../../helper';
+import { createImage } from '../../helpers';
 
 function ProductSlider({ dataSlider, handleSelectedImage }) {
     const [slideIndex, setSlideIndex] = React.useState(1);

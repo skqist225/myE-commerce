@@ -7,3 +7,4 @@ export { default as LoginBody } from './Login/LoginBody';
 export { default as Footer } from './Footer/Footer';
 export { default as ProtectedRoute } from './route/ProtectedRoute';
 export { default as CategoryMallBody } from './CategoryMall/CategoryMallBody';
+export { default as ShopInfoSection } from './ShopInfo/ShopInfo';

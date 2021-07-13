@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, memo } from 'react';
 import { createImage } from '../../helpers';
 import PropTypes from 'prop-types';
 
@@ -161,4 +161,4 @@ ProductCard.propTypes = {
     product: PropTypes.object.isRequired,
 };
 
-export default ProductCard;
+export default memo(ProductCard);

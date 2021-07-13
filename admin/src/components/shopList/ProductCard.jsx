@@ -8,11 +8,11 @@ import './productCard.css';
 function ProductCard({ product }) {
     let dotNum = 0;
     const countDotNum = number => {
-        const r = number / 1000;
+        const resultOfDivisionOperator = number / 1000;
 
         if (r >= 1) {
             dotNum++;
-            const _number = number / 1000;
+            const _number = resultOfDivisionOperator;
             countDotNum(_number);
         } else {
             return;

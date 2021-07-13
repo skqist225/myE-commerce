@@ -24,7 +24,7 @@
 }
 
 .productSlide:hover img {
-    border: 2px dashed blue;
+    border: 2px solid #ee4d2d;
 }
 
 #toggle-width {

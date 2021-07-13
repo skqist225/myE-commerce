@@ -17,6 +17,35 @@ export const fetchSingleShop = createAsyncThunk(
     }
 );
 
+export const getProductsByFilter = createAsyncThunk(
+    '/shop/getProductsByFilter',
+    async (
+        { shopId, transportersFilter, categoriesFilter, minPrice, maxPrice },
+        { rejectWithValue }
+    ) => {
+        try {
+            const transporters = [...transportersFilter].join(',');
+            const categories = [...categoriesFilter].join(',');
+            // console.log(transporters);
+
+            console.log(minPrice);
+            console.log(maxPrice);
+
+            console.log(categories);
+
+            const {
+                data: { products, successMessage },
+            } = await axios.get(
+                `/advanced/${shopId}/products?transporters=${transporters}&categories=${categories}&minPrice=${minPrice}&maxPrice=${maxPrice}`
+            );
+
+            return { products, successMessage };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
 export const fetchShopById = createAsyncThunk(
     '/shop/fetchShopById',
     async (shopId, { rejectWithValue }) => {
@@ -37,6 +66,7 @@ const shopSlice = createSlice({
     initialState: {
         shop: null,
         shopProducts: [],
+        filterProducts: [],
         selectedTab: 1,
         errorMessage: null,
         successMessage: null,
@@ -55,6 +85,11 @@ const shopSlice = createSlice({
     },
     extraReducers: builder => {
         builder
+            .addCase(getProductsByFilter.fulfilled, (state, { payload }) => {
+                state.loading = false;
+                state.shopProducts = payload.products;
+                state.successMessage = payload.successMessage;
+            })
             .addMatcher(isAnyOf(fetchSingleShop.pending, fetchShopById.pending), state => {
                 state.loading = true;
             })

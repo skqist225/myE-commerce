@@ -486,7 +486,10 @@ exports.getAllProducts = (req, res, next) => {
 
 exports.advancedGetAllProducts = async (req, res, next) => {
     try {
-        let features = new ProductFeatures(Product, req.query).filter().sort().paginate();
+        let features = new ProductFeatures(Product, req.query, req.params.shopId)
+            .filter()
+            .sort()
+            .paginate();
 
         if (req.query.ratingFilter) {
             const productsRatings = await Review.aggregate([
@@ -511,6 +514,7 @@ exports.advancedGetAllProducts = async (req, res, next) => {
 
         res.status(httpStatusCode.OK).json({
             successMessage: 'All products fetched successfully',
+            number_of_products: products.length,
             products,
         });
     } catch (error) {
@@ -611,17 +615,26 @@ exports.getSingleProduct = (req, res, next) => {
             .populate('transporters', 'transporterName transportFee -_id')
             .populate('supplier', 'supplierName headquarterAddress -_id')
             .populate('category', 'categoryName _id parentId')
-            .exec((err, product) => {
+            .populate('shop', '_id shopName shopLogo isMallType')
+            .lean()
+            .exec(async (err, product) => {
                 if (err)
                     return res
                         .status(httpStatusCode.BAD_REQUEST)
                         .json({ errorMessage: 'something went wrong' });
 
-                if (product)
+                if (product) {
+                    const number_of_products = await Product.countDocuments({
+                        shop: product.shop._id,
+                    });
+
+                    const $product = { ...product, number_of_products };
+
                     res.status(httpStatusCode.OK).json({
                         successMessage: `${product.productName} fetched successfully`,
-                        product,
+                        product: $product,
                     });
+                }
             });
     } else {
         return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));

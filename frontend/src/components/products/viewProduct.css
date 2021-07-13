@@ -1,0 +1,189 @@
+.viewProductCategoryPathContainer {
+    margin: 25px 0;
+    width: 100%;
+    height: fit-content;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.viewProductArrowRightIcon {
+    width: 13px;
+    height: 13px;
+}
+
+.viewProductIconWrapper {
+    margin: 0 10px;
+}
+
+.viewProductContainer {
+    display: flex;
+}
+
+.viewProductProductImageBig {
+    width: 450px;
+    height: 450px;
+    display: block;
+}
+.viewProductSmallImageContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.viewProductProductImageSmall {
+    width: 82px;
+    height: 82px;
+    object-fit: contain;
+    cursor: pointer;
+}
+.viewProductFavorite {
+    display: inline-block;
+    border-radius: 2px;
+    width: 72px;
+    padding: 5px 3.75px;
+    background-color: rgb(238, 77, 45);
+    color: #fff;
+    font-size: 15px;
+    margin-right: 10px;
+    text-align: center;
+}
+
+.viewProductProductName {
+    font-size: 25px;
+    font-weight: 500;
+    line-height: 25px;
+}
+
+.checked {
+    color: #ee4d2d;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.seperator {
+    width: 2px;
+    color: gray;
+}
+
+.viewProductNumberOfRating {
+    font-size: 18px;
+    color: #767676;
+}
+
+.undelineText {
+    color: rgba(0, 0, 0, 0.8);
+    text-decoration: underline;
+}
+
+.viewProductSoldNumber {
+    font-size: 18px;
+    color: #767676;
+}
+.viewProductTypePriceWrapper {
+    padding: 15px 20px;
+}
+
+/* .viewProductTypePriceRange span {
+   
+} */
+
+.viewProductTransporter {
+    padding-bottom: 25px;
+}
+
+.viewProductVoucher {
+    color: #ee4d2d;
+    font-size: 14px;
+    border-radius: 2px;
+    padding: 3px 6px;
+    max-width: 450px;
+    cursor: pointer;
+    border: 1px solid #ee4d2d;
+}
+
+.viewProductTransporterFreeShip {
+    display: flex;
+    align-items: center;
+}
+.viewProductTransportInfoTitle {
+    color: #636363;
+    font-size: 18px;
+    margin-right: 10px;
+}
+.viewProductTransportTo {
+    font-size: 18px;
+    color: #222222;
+}
+.viewProductTransportInfoTitle {
+}
+.viewProductProductTypesContainer {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    height: fit-content;
+}
+.viewProductProductTypesTitle {
+    color: #757575;
+    flex: 1;
+}
+.viewProductProductType {
+    flex: 3;
+}
+.viewProductProductTypeButton {
+    width: 100px;
+    height: 42px;
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    background-color: #fff;
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 16px;
+    padding: 5px 15px;
+    cursor: pointer;
+    margin: 0 8px 8px 0;
+    font-weight: 500;
+}
+
+.viewProductProductTypeButton:hover {
+    color: rgb(238, 77, 45);
+    border: 1px solid rgb(238, 77, 45);
+    transition: all 0.3s ease;
+}
+
+.viewProductTypeStockContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+}
+
+.viewProductChangeStockBtn {
+    width: 32px;
+    height: 32px;
+    padding: 1px 6px;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    background-color: white;
+    color: black;
+}
+
+.viewProductQuantity {
+    width: 50px;
+    font-size: 15px;
+    height: 32px;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.viewProductProductTypeStock {
+    font-size: 18px;
+    color: #767676;
+}

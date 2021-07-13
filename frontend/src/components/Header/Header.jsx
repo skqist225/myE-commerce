@@ -54,20 +54,20 @@ function Header({ bgColor, noBelowSeachForm, secondLogo }) {
                 <HeaderLine className="headerLineOne">
                     <HeaderList className="headerListLeft">
                         <ListItem>
-                            <ItemLink>Kênh người bán</ItemLink>
+                            <ItemLink to="/">Kênh người bán</ItemLink>
                         </ListItem>
                         <ListItem>
-                            <ItemLink> Tải ứng dụng</ItemLink>
+                            <ItemLink to="/"> Tải ứng dụng</ItemLink>
                         </ListItem>
                         <ListItem>
                             <span style={{ display: 'inline-block', marginRight: '5px' }}>
                                 {' '}
                                 Kết Nối
                             </span>
-                            <ItemLink to="">
+                            <ItemLink to="/">
                                 <FacebookIcon src={createImage('LOGOBIGTECH.png')} />{' '}
                             </ItemLink>
-                            <ItemLink to="">
+                            <ItemLink to="/">
                                 <InstagramIcon src={createImage('LOGOBIGTECH.png')} />
                             </ItemLink>
                         </ListItem>
@@ -75,11 +75,15 @@ function Header({ bgColor, noBelowSeachForm, secondLogo }) {
                     <HeaderList className="headerListRight">
                         <ListItem>
                             <NotifyIcon className="headerIcon" />
-                            <ItemLink needpaddingleft="5px">Thông Báo</ItemLink>
+                            <ItemLink needpaddingleft="5px" to="/">
+                                Thông Báo
+                            </ItemLink>
                         </ListItem>
                         <ListItem>
                             <HelpIcon className="headerIcon" />
-                            <ItemLink needpaddingleft="5px">Hỗ trợ</ItemLink>
+                            <ItemLink needpaddingleft="5px" to="/">
+                                Hỗ trợ
+                            </ItemLink>
                         </ListItem>
                         <ListItem className="userItem">
                             <Avatar src={createImage(user.avatar, false)} />
@@ -98,10 +102,10 @@ function Header({ bgColor, noBelowSeachForm, secondLogo }) {
                                 render={
                                     <MenuList>
                                         <MenuItem>
-                                            <MenuLink>tài khoản của tôi</MenuLink>
+                                            <MenuLink to="/">tài khoản của tôi</MenuLink>
                                         </MenuItem>
                                         <MenuItem>
-                                            <MenuLink>đơn mua </MenuLink>
+                                            <MenuLink to="/">đơn mua </MenuLink>
                                         </MenuItem>
                                         <MenuItem to="/buyer/login" onClick={handleLogoutRequest}>
                                             <MenuLink>đăng xuất</MenuLink>

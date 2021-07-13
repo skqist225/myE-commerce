@@ -90,8 +90,7 @@ exports.logoutUser = (req, res, next) => {
     });
 
     return res.status(httpStatusCode.OK).json({
-        success: true,
-        message: 'User logged out',
+        successMessage: 'User logged out',
     });
 };
 

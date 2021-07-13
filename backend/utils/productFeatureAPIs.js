@@ -1,8 +1,11 @@
+const mongoose = require('mongoose');
+
 class ProductFeatures {
-    constructor(modal, queryString) {
+    constructor(modal, queryString, shopId) {
         this.modal = modal;
         this.query = null;
         this.queryString = queryString;
+        this.shopId = shopId;
     }
 
     filter() {
@@ -20,7 +23,7 @@ class ProductFeatures {
         excludedFields.forEach(el => delete queryObj[el]);
 
         this.query = this.modal.aggregate([
-            // { $unwind: '$productTypes' },
+            { $match: { shop: mongoose.Types.ObjectId(this.shopId) } },
             {
                 $addFields: {
                     avgPrice: { $avg: '$productTypes.typePrice' },
@@ -35,10 +38,40 @@ class ProductFeatures {
                     },
                 },
             },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category',
+                },
+            },
+            {
+                $unwind: '$category',
+            },
+            {
+                $project: {
+                    description: 0,
+                    supplier: 0,
+                    shop: 0,
+                    images: 0,
+                    'category.parentId': 0,
+                    'category.categoryImage': 0,
+                    'category.__v': 0,
+                    'category.createdAt': 0,
+                    'category.updatedAt': 0,
+                },
+            },
         ]);
 
-        if (this.queryString.category) {
-            this.query.match({ category: mongoose.Types.ObjectId('60d58d7e0168b3277df08b2a') });
+        if (this.queryString.categories) {
+            this.query.match({
+                'category._id': {
+                    $in: this.queryString.categories
+                        .split(',')
+                        .map(cat => new mongoose.Types.ObjectId(cat)),
+                },
+            });
         }
 
         if (this.queryString.transporters) {

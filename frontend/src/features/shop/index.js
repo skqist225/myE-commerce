@@ -1,1 +1,6 @@
-export { clearErrorMessage, clearSuccessMessage, setSelectedTab } from './shopSlice';
+export {
+    clearErrorMessage,
+    clearSuccessMessage,
+    setSelectedTab,
+    getProductsByFilter,
+} from './shopSlice';

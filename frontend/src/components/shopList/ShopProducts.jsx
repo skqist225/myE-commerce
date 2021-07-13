@@ -1,9 +1,9 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { BackIcon } from './svgIcon';
 import { createImage } from '../../helpers';
-import { fetchShopById, setSelectedTab } from '../../features/shop/shopSlice';
+import { fetchShopById, setSelectedTab, getProductsByFilter } from '../../features/shop/shopSlice';
 import slugify from 'slugify';
 import {
     ArrowLeft,
@@ -13,14 +13,41 @@ import {
     StarEmptyBodyIcon,
 } from './svgIcon';
 import ProductCard from './ProductCard';
-import { transportersSelector } from '../../features/transporters';
-import { PageBodyContainer, ContentContainer, Anchor, GridLayout, Flex } from '../../globalStyle';
-import { BackToHomeContainer, FilterButton, ShopProductsFilter } from './ShopProductsComponent';
+import { fetchTransporters, transportersSelector } from '../../features/transporters';
+import { PageBodyContainer, ContentContainer, Anchor, Flex } from '../../globalStyle';
+import {
+    BackToHomeContainer,
+    FilterButton,
+    ShopProductsFilter,
+    ShopName,
+    ShopLogo,
+    ShopeeMallLogo,
+    ListItem,
+    FilterTitle,
+    FlexWithPadding,
+    InputWrapper,
+    CheckboxInput,
+    LabelWrapper,
+    Label,
+    TextField,
+    TFWrapper,
+    GridLayoutExtend,
+    FilterLabel,
+    SortByPrice,
+    SortByPriceModal,
+    SortTitle,
+    ModalTitle,
+} from './ShopProductsComponent';
 import './shopProducts.css';
 
 function ShopProducts({ match }) {
     const { shopId } = match.params;
     const dispatch = useDispatch();
+    const [transportersFilter, setTransportersFilter] = useState(new Set());
+    const [categoriesFilter, setCategoriesFilter] = useState(new Set());
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+
     const { shop, successMessage, errorMessage, shopProducts, loading, selectedTab } = useSelector(
         state => state.shop
     );
@@ -75,6 +102,24 @@ function ShopProducts({ match }) {
         }
     };
 
+    let itemList = [
+        {
+            title: 'Sản phẩm',
+            value: '',
+        },
+        { title: 'Sản phẩm bán chạy', value: '' },
+        ,
+        {
+            title: 'Sản phẩm mới',
+            value: '',
+        },
+        { title: 'iPhone', value: '' },
+        { title: 'iPad', value: '' },
+        { title: 'Apple Watch', value: '' },
+        { title: 'Macbook', value: '' },
+        { title: 'Phụ kiện Apple', value: '' },
+    ];
+
     const serviceAndPromotion = [
         'Freeship Xtra',
         'Hoàn xu Xtra',
@@ -87,20 +132,73 @@ function ShopProducts({ match }) {
 
     console.log('Shop products rendering...');
 
-    React.useEffect(() => {
+    function setFilter(value, key, initialState) {
+        let prevStateSet = initialState;
+        let newStateSet;
+
+        if (prevStateSet.has(value)) {
+            prevStateSet.delete(value);
+            newStateSet = new Set([...prevStateSet]);
+        } else if (value !== true && !prevStateSet.has(value)) {
+            newStateSet = new Set([...prevStateSet, value]);
+        }
+
+        switch (key) {
+            case 'transportersFilter': {
+                console.log(key, value, initialState);
+
+                setTransportersFilter(newStateSet);
+            }
+            case 'categoriesFilter': {
+                setCategoriesFilter(newStateSet);
+            }
+        }
+    }
+
+    const handleCheckedTransporters = e => {
+        setFilter(e.target.value, 'transportersFilter', transportersFilter);
+    };
+
+    const handleCheckedCategories = e => {
+        setFilter(e.target.value, 'categoriesFilter', categoriesFilter);
+    };
+
+    const handlePriceFilter = e => {
+        e.preventDefault();
+
+        dispatch(
+            getProductsByFilter({
+                shopId,
+                transportersFilter,
+                categoriesFilter,
+                minPrice,
+                maxPrice,
+            })
+        );
+    };
+
+    useEffect(() => {
         dispatch(fetchShopById(shopId));
     }, [dispatch, shopId]);
 
-    React.useEffect(() => {
-        if (!loading) {
+    useEffect(() => {
+        dispatch(getProductsByFilter({ shopId, transportersFilter, categoriesFilter }));
+    }, [shopId, transportersFilter, categoriesFilter]);
+
+    useEffect(() => {
+        dispatch(fetchTransporters());
+    }, []);
+
+    useEffect(() => {
+        if (!loading && shop) {
             handleSelectedOption();
             handleSelectedTab();
         }
-    }, [loading]);
+    }, [loading, shop]);
 
     return (
         <>
-            {!loading && successMessage && (
+            {!loading && shop && (
                 <PageBodyContainer pt="2.5rem">
                     <ContentContainer>
                         <div className="shopProductsContainer ">
@@ -130,235 +228,190 @@ function ShopProducts({ match }) {
                                         ></div>
                                         <div className="shopProductsMask"></div>
 
-                                        <img
+                                        <ShopLogo
                                             src={createImage(shop.shopLogo, false)}
-                                            alt="image"
-                                            className="shopProductsShopLogo"
+                                            alt="ShopLoo"
                                         />
-                                        <img
+                                        <ShopeeMallLogo
                                             src={createImage('SM.png')}
-                                            alt=""
-                                            className="shopProductsSM"
+                                            alt="ShopeeMall logo"
                                         />
-                                        <div className="shopProductsShopName">{shop.shopName}</div>
+                                        <ShopName>{shop.shopName}</ShopName>
                                         <span className="shopProductsActiveTime">Active time</span>
                                     </div>
                                     <div className="shopProductsMenuFilterBar">
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
-                                                DANH MỤC SHOP
-                                            </div>
-                                            <ul className="shopProductsListFilter">
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={1}
-                                                >
-                                                    Sản phẩm
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={2}
-                                                >
-                                                    Sản phẩm bán chạy
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={3}
-                                                >
-                                                    Sản phẩm mới{' '}
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={4}
-                                                >
-                                                    iPhone
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={5}
-                                                >
-                                                    iPad
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={6}
-                                                >
-                                                    Apple Watch
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={7}
-                                                >
-                                                    MacBook
-                                                </li>
-                                                <li
-                                                    className="shopProductsItemFilter"
-                                                    data-index={8}
-                                                >
-                                                    Phụ kiện Apple
-                                                </li>
+                                            <FilterTitle>DANH MỤC SHOP</FilterTitle>
+                                            <ul style={{ listStyle: 'none' }}>
+                                                {itemList.map((item, index) => (
+                                                    <ListItem
+                                                        data-index={index + 1}
+                                                        key={item.title}
+                                                    >
+                                                        {item.title}
+                                                    </ListItem>
+                                                ))}
                                             </ul>
                                         </div>
-                                        <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
+                                        <div>
+                                            <FilterTitle className="shopProductsFilterTitle">
                                                 THEO DANH MỤC
-                                            </div>
-                                            <div className="shopProductsCategoryFilter">
+                                            </FilterTitle>
+                                            <Flex flexDirection="column" alignItems="flex-start">
                                                 {shopProducts.map(({ category }) => (
-                                                    <div
+                                                    <FlexWithPadding
                                                         key={category._id}
-                                                        className="shopProductsCategoryItem"
+                                                        alignItems="flex-start"
                                                     >
-                                                        <div className="shopProductsInputWrapper">
-                                                            <input
-                                                                type="checkbox"
-                                                                name="category"
+                                                        <InputWrapper>
+                                                            <CheckboxInput
                                                                 value={category._id}
+                                                                onChange={handleCheckedCategories}
                                                             />
-                                                        </div>
-                                                        <div className="shopProductsLabelWrapper">
-                                                            <label>{category.categoryName}</label>
-                                                        </div>
-                                                    </div>
+                                                        </InputWrapper>
+                                                        <LabelWrapper>
+                                                            <Label>{category.categoryName}</Label>
+                                                        </LabelWrapper>
+                                                    </FlexWithPadding>
                                                 ))}
-                                            </div>
+                                            </Flex>
                                         </div>
-                                        <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">NƠI BÁN</div>
+                                        <div>
+                                            <FilterTitle className="shopProductsFilterTitle">
+                                                NƠI BÁN
+                                            </FilterTitle>
                                             <div>
-                                                <div className="shopProductsCategoryItem">
-                                                    <div className="shopProductsInputWrapper">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="transporters"
-                                                            // value={service}
+                                                <FlexWithPadding className="shopProductsCategoryItem">
+                                                    <InputWrapper className="shopProductsInputWrapper">
+                                                        <CheckboxInput
+
+                                                        // value={service}
                                                         />
-                                                    </div>
-                                                    <div className="shopProductsLabelWrapper">
-                                                        <label>TP.Hồ Chí Minh</label>
-                                                    </div>
-                                                </div>
-                                                <div className="shopProductsCategoryItem">
-                                                    <div className="shopProductsInputWrapper">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="transporters"
-                                                            // value={service}
+                                                    </InputWrapper>
+                                                    <LabelWrapper className="shopProductsLabelWrapper">
+                                                        <Label>TP.Hồ Chí Minh</Label>
+                                                    </LabelWrapper>
+                                                </FlexWithPadding>
+                                                <FlexWithPadding className="shopProductsCategoryItem">
+                                                    <InputWrapper>
+                                                        <CheckboxInput
+
+                                                        // value={service}
                                                         />
-                                                    </div>
-                                                    <div className="shopProductsLabelWrapper">
-                                                        <label>Hà Nội</label>
-                                                    </div>
-                                                </div>
+                                                    </InputWrapper>
+                                                    <LabelWrapper className="shopProductsLabelWrapper">
+                                                        <Label>Hà Nội</Label>
+                                                    </LabelWrapper>
+                                                </FlexWithPadding>
                                             </div>
                                         </div>
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
+                                            <FilterTitle className="shopProductsFilterTitle">
                                                 ĐƠN VỊ VẬN CHUYỂN
-                                            </div>
+                                            </FilterTitle>
                                             {transporters.map(transporter => (
-                                                <div
+                                                <FlexWithPadding
                                                     key={transporter._id}
                                                     className="shopProductsCategoryItem"
                                                 >
-                                                    <div className="shopProductsInputWrapper">
-                                                        <input
-                                                            type="checkbox"
+                                                    <InputWrapper>
+                                                        <CheckboxInput
                                                             name="transporters"
+                                                            onChange={handleCheckedTransporters}
                                                             value={transporter._id}
                                                         />
-                                                    </div>
-                                                    <div className="shopProductsLabelWrapper">
-                                                        <label>{transporter.transporterName}</label>
-                                                    </div>
-                                                </div>
+                                                    </InputWrapper>
+                                                    <LabelWrapper>
+                                                        <Label>{transporter.transporterName}</Label>
+                                                    </LabelWrapper>
+                                                </FlexWithPadding>
                                             ))}
                                         </div>
 
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
-                                                KHOẢNG GIÁ
-                                            </div>
-                                            <div className="shopProductsPriceFilterWrapper">
-                                                <div className="shopProductsPriceFilterContainer">
-                                                    <input
-                                                        type="text"
-                                                        className="shopProductsPriceRange"
-                                                        placeholder="đ TỪ"
-                                                    />
-                                                </div>
-                                                <div>-</div>
-                                                <div className="shopProductsPriceFilterContainer">
-                                                    <input
-                                                        type="text"
-                                                        className="shopProductsPriceRange"
-                                                        placeholder="đ ĐẾN"
-                                                    />
-                                                </div>
-                                            </div>{' '}
-                                            <div>
-                                                <FilterButton>ÁP DỤNG</FilterButton>
-                                            </div>
+                                            <form action="" onSubmit={handlePriceFilter}>
+                                                <FilterTitle className="shopProductsFilterTitle">
+                                                    KHOẢNG GIÁ
+                                                </FilterTitle>
+                                                <Flex justifyContent="space-between">
+                                                    <TFWrapper className="shopProductsPriceFilterContainer">
+                                                        <TextField
+                                                            onChange={e =>
+                                                                setMinPrice(e.target.value)
+                                                            }
+                                                            value={minPrice}
+                                                            placeholder="đ TỪ"
+                                                        />
+                                                    </TFWrapper>
+                                                    <div>-</div>
+                                                    <TFWrapper className="shopProductsPriceFilterContainer">
+                                                        <TextField
+                                                            onChange={e =>
+                                                                setMaxPrice(e.target.value)
+                                                            }
+                                                            value={maxPrice}
+                                                            placeholder="đ ĐẾN"
+                                                        />
+                                                    </TFWrapper>
+                                                </Flex>
+                                                <FilterButton type="submit">ÁP DỤNG</FilterButton>
+                                            </form>
                                         </div>
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
+                                            <FilterTitle className="shopProductsFilterTitle">
                                                 TÌNH TRẠNG
-                                            </div>
+                                            </FilterTitle>
                                             <div>
-                                                <div className="shopProductsCategoryItem">
-                                                    <div className="shopProductsInputWrapper">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="transporters"
-                                                            // value={service}
-                                                        />
-                                                    </div>
-                                                    <div className="shopProductsLabelWrapper">
-                                                        <label>Mới</label>
-                                                    </div>
-                                                </div>
-                                                <div className="shopProductsCategoryItem">
-                                                    <div className="shopProductsInputWrapper">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="transporters"
-                                                            // value={service}
-                                                        />
-                                                    </div>
-                                                    <div className="shopProductsLabelWrapper">
-                                                        <label>Đã sử dụng</label>
-                                                    </div>
-                                                </div>
+                                                {[
+                                                    {
+                                                        title: 'Mới',
+                                                        value: '',
+                                                    },
+                                                    {
+                                                        title: 'Đã sử dụng',
+                                                        value: '',
+                                                    },
+                                                ].map((item, index) => (
+                                                    <FlexWithPadding key={item + index}>
+                                                        <InputWrapper>
+                                                            <CheckboxInput value={item.value} />
+                                                        </InputWrapper>
+                                                        <LabelWrapper>
+                                                            <Label>{item.title}</Label>
+                                                        </LabelWrapper>
+                                                    </FlexWithPadding>
+                                                ))}
                                             </div>
                                         </div>
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
+                                            <FilterTitle className="shopProductsFilterTitle">
                                                 LỰA CHỌN THANH TOÁN
-                                            </div>
+                                            </FilterTitle>
                                             <div>
-                                                <div className="shopProductsCategoryItem">
-                                                    <div className="shopProductsInputWrapper">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="transporters"
-                                                            // value={service}
+                                                <FlexWithPadding>
+                                                    <InputWrapper>
+                                                        <CheckboxInput
+
+                                                        // value={service}
                                                         />
-                                                    </div>
-                                                    <div className="shopProductsLabelWrapper">
-                                                        <label>0% TRẢ GÓP</label>
-                                                    </div>
-                                                </div>
+                                                    </InputWrapper>
+                                                    <LabelWrapper>
+                                                        <Label>0% TRẢ GÓP</Label>
+                                                    </LabelWrapper>
+                                                </FlexWithPadding>
                                             </div>
                                         </div>
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">ĐÁNH GIÁ</div>
+                                            <FilterTitle className="shopProductsFilterTitle">
+                                                ĐÁNH GIÁ
+                                            </FilterTitle>
                                             <div>
                                                 {[5, 4, 3, 2, 1].map(value => {
                                                     return (
-                                                        <div
+                                                        <Flex
+                                                            style={{ margin: '1.25rem 0 ' }}
                                                             data-value={`ratingFilter=${value}`}
                                                             key={`ratingFilter=${value}`}
-                                                            className="shopProductsRatingFilter"
                                                         >
                                                             {Array.from({ length: value }).map(
                                                                 (_, index) => {
@@ -366,6 +419,10 @@ function ShopProducts({ match }) {
                                                                         <span
                                                                             className="fa fa-star checked"
                                                                             key={index}
+                                                                            style={{
+                                                                                fontSize: '1.8rem',
+                                                                                marginRight: '1rem',
+                                                                            }}
                                                                         ></span>
                                                                     );
                                                                 }
@@ -374,41 +431,50 @@ function ShopProducts({ match }) {
                                                                 length: 5 - value,
                                                             }).map((_, index) => {
                                                                 return (
-                                                                    <StarEmptyBodyIcon
-                                                                        className="unchecked"
-                                                                        key={index + 5}
-                                                                    />
+                                                                    // <StarEmptyBodyIcon
+                                                                    //     className="unchecked"
+                                                                    //     key={index + 5}
+                                                                    //     style={{
+                                                                    //         fontSize: '1.8rem',
+                                                                    //         marginRight: '1rem',
+                                                                    //     }}
+                                                                    // />
+                                                                    <span
+                                                                        className="fa fa-star"
+                                                                        key={index}
+                                                                        style={{
+                                                                            fontSize: '1.8rem',
+                                                                            marginRight: '0.7rem',
+                                                                            display: 'inline-flex',
+                                                                            justifyContent:
+                                                                                'center',
+                                                                            alignItems: 'center',
+                                                                        }}
+                                                                    ></span>
                                                                 );
                                                             })}
                                                             {/* trở lên */}
-                                                        </div>
+                                                        </Flex>
                                                     );
                                                 })}
                                             </div>
                                         </div>
                                         <div className="shopProductsShopCategories">
-                                            <div className="shopProductsFilterTitle">
+                                            <FilterTitle className="shopProductsFilterTitle">
                                                 DỊCH VỤ & KHUYẾN MÃI
-                                            </div>
-                                            <div>
+                                            </FilterTitle>
+                                            <Flex flexDirection="column" alignItems="flex-start">
                                                 {serviceAndPromotion.map((service, index) => (
-                                                    <div
-                                                        key={index + `${service}`}
-                                                        className="shopProductsCategoryItem"
-                                                    >
-                                                        <div className="shopProductsInputWrapper">
-                                                            <input
-                                                                type="checkbox"
-                                                                name="transporters"
-                                                                value={service}
-                                                            />
-                                                        </div>
-                                                        <div className="shopProductsLabelWrapper">
-                                                            <label>{service}</label>
-                                                        </div>
-                                                    </div>
+                                                    <FlexWithPadding key={index + `${service}`}>
+                                                        <InputWrapper>
+                                                            <CheckboxInput value={service} />
+                                                        </InputWrapper>
+                                                        <LabelWrapper>
+                                                            <Label>{service}</Label>
+                                                        </LabelWrapper>
+                                                    </FlexWithPadding>
                                                 ))}
-                                            </div>
+                                            </Flex>
                                         </div>
                                         <div>
                                             <FilterButton>Xóa Tất Cả</FilterButton>
@@ -417,62 +483,43 @@ function ShopProducts({ match }) {
                                 </div>
                                 <div className="shopProductsRight">
                                     <div className="shopProductsFilterBar">
-                                        <div
+                                        <FilterLabel
                                             className="shopProductsOptionTitle "
                                             style={{ width: '11rem' }}
                                         >
                                             Sắp xếp theo
-                                        </div>
+                                        </FilterLabel>
                                         <Flex justifyContent="space-between" width="89%">
                                             <Flex>
                                                 <ShopProductsFilter>Phổ biến</ShopProductsFilter>
                                                 <ShopProductsFilter>Mới nhất</ShopProductsFilter>
                                                 <ShopProductsFilter>Bán chạy</ShopProductsFilter>
-                                                <div className="shopProductsDropDownOption">
-                                                    <span
-                                                        style={{
-                                                            fontSize: '18px',
-                                                            fontWeight: '400',
-                                                            margin: '0 4px',
-                                                        }}
-                                                        id="shopProductsDisplaySelectedPriceFilterOption"
-                                                    >
+                                                <SortByPrice className="shopProductsDropDownOption">
+                                                    <SortTitle id="shopProductsDisplaySelectedPriceFilterOption">
                                                         Giá
-                                                    </span>
+                                                    </SortTitle>
                                                     <span>
                                                         <DropDownIcon className="shopProductsDropDowniCcon" />
                                                     </span>
-                                                    <div className="shopProductsFilterOptionDropDownModal">
+                                                    <SortByPriceModal>
                                                         <div className="shopProductsFilterOptionDropDown">
-                                                            <span
-                                                                data-value="order=asc&sortBy=price"
-                                                                style={{
-                                                                    fontSize: '18px',
-                                                                    fontWeight: '400',
-                                                                }}
-                                                            >
+                                                            <ModalTitle data-value="order=asc&sortBy=price">
                                                                 Giá: Thấp đến Cao
-                                                            </span>
+                                                            </ModalTitle>
                                                             <span>
                                                                 <SelectedDropDownIcon className="shopProductsDropDownIcon" />
                                                             </span>
                                                         </div>
                                                         <div className="shopProductsFilterOptionDropDown">
-                                                            <span
-                                                                data-value="order=desc&sortBy=price"
-                                                                style={{
-                                                                    fontSize: '18px',
-                                                                    fontWeight: '400',
-                                                                }}
-                                                            >
+                                                            <ModalTitle data-value="order=desc&sortBy=price">
                                                                 Giá: Cao đến Thấp
-                                                            </span>
+                                                            </ModalTitle>
                                                             <span>
                                                                 <SelectedDropDownIcon className="shopProductsDropDownIcon" />
                                                             </span>
                                                         </div>
-                                                    </div>
-                                                </div>
+                                                    </SortByPriceModal>
+                                                </SortByPrice>
                                             </Flex>
                                             <Flex>
                                                 <div className="shopProductsPageDisplay">
@@ -487,7 +534,10 @@ function ShopProducts({ match }) {
                                             </Flex>
                                         </Flex>
                                     </div>
-                                    <GridLayout templateColumns="repeat(5, 1fr)" padding="1.5rem 0">
+                                    <GridLayoutExtend
+                                        templateColumns="repeat(4, 1fr)"
+                                        padding="1rem 0"
+                                    >
                                         {selectedTab === 1 &&
                                             shopProducts.map(product => (
                                                 <Link
@@ -497,7 +547,7 @@ function ShopProducts({ match }) {
                                                     <ProductCard product={product} />
                                                 </Link>
                                             ))}
-                                    </GridLayout>
+                                    </GridLayoutExtend>
                                 </div>
                             </Flex>
                         </div>

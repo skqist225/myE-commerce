@@ -63,9 +63,12 @@ export const StandardSelfFlex = styled.div`
 
 export const Flex = styled.div`
     display: flex;
+    flex-direction: ${props => props.flexDirection || 'row'};
     align-items: ${props => props.alignItems || 'center'};
     justify-content: ${props => props.justifyContent};
     width: ${props => props.width};
+    height: ${props => props.height};
+    padding: ${props => props.padding};
 `;
 
 export const PageBodyContainer = styled.main`
@@ -74,11 +77,13 @@ export const PageBodyContainer = styled.main`
     left: 0;
     width: 100%;
     padding-top: ${props => props.pt || '4rem'};
+    background-color: ${props => props.backgroundColor};
 `;
 
 export const MenuList = styled.ul`
     list-style-type: none;
     display: flex;
+
     align-items: center;
     padding-left: 0;
 `;
@@ -119,6 +124,13 @@ export const Image = styled.img`
     height: ${props => props.height};
     object-fit: ${props => props.objectFit};
     border-radius: ${props => props.borderRadius || '0'};
+`;
+
+export const WhiteBgWrapper = styled.div`
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    padding: ${props => props.padding};
 `;
 
 export default GlobalStyle;

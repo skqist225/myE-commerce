@@ -202,26 +202,19 @@ exports.getShopById = (req, res, next) => {
 
 exports.getShopByName = async (req, res, next) => {
     const { shopName } = req.params;
-
     const _shopName = shopName.replace(/_/g, ' ');
 
-    Shop.findOne({ shopName: { $regex: new RegExp(_shopName, 'i') } })
-        .populate('user')
-        .exec(async (err, shop) => {
-            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+    const shop = await Shop.findOne({
+        shopName: { $regex: new RegExp(_shopName, 'i') },
+    }).lean();
 
-            if (shop) {
-                const shopProducts = await Product.find({ shop: shop._id })
-                    .populate('category', 'categoryName _id')
-                    .populate('transporters', 'transporterName transportFee _id');
+    const shopProducts = await Product.find({ shop: shop._id });
 
-                return res.status(httpStatusCode.OK).json({
-                    successMessage: `${shop.shopName} fetched successfully`,
-                    shopProducts,
-                    shop,
-                });
-            }
-        });
+    return res.status(httpStatusCode.OK).json({
+        successMessage: `${shop.shopName} fetched successfully`,
+        shopProducts,
+        shop,
+    });
 };
 
 exports.getMallShop = async (req, res) => {

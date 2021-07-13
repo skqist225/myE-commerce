@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { ProtectedRoute } from './components';
-import { Home, Login, CategoryMall, ViewShop, ShopProducts } from './pages';
+import { Home, Login, CategoryMall, ViewShop, ShopProducts, ViewProduct } from './pages';
 
 import './App.css';
 
@@ -15,6 +15,7 @@ function App() {
                     <ProtectedRoute component={CategoryMall} path="/:shopCategory" exact />
                     <ProtectedRoute component={ShopProducts} path="/shop/:shopId/search" exact />
                     <ProtectedRoute component={ViewShop} path="/shop/:shopName" exact />
+                    <ProtectedRoute component={ViewProduct} path="/product/:productId" />
                 </Switch>
             </Router>
         </div>
