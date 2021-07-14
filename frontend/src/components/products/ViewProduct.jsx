@@ -40,6 +40,7 @@ import {
     Third,
 } from './ViewProductComponent';
 import './viewProduct.css';
+import { addToCart } from '../../features/cart';
 
 function ViewProduct({ match, bgColor }) {
     const dispatch = useDispatch();
@@ -53,6 +54,7 @@ function ViewProduct({ match, bgColor }) {
 
     const [productTypeStock, setProductTypeStock] = useState(1000);
     const [selectedImage, setSelectedImage] = useState('');
+    const [quantity, setQuantity] = useState(1);
     const [allProductImages, setAllProductImages] = useState([]);
 
     const getAllImages = product => {
@@ -115,14 +117,6 @@ function ViewProduct({ match, bgColor }) {
 
     const isMallShop = true;
 
-    useEffect(() => {
-        if (successMessage) {
-            // setCategoryPath(handleCategoryPath(categories, product.category.parentId));
-            setSelectedImage(product.images[0]);
-            setAllProductImages(getAllImages(product));
-        }
-    }, [successMessage]);
-
     const handleSelectedImage = useCallback(e => {
         setSelectedImage(e.target.name);
     }, []);
@@ -134,6 +128,38 @@ function ViewProduct({ match, bgColor }) {
         const productType = JSON.parse(e.target.dataset.productType);
         setProductTypeStock(productType.typeStock);
     };
+
+    const handleAddToCart = e => {
+        const cartInfo = {
+            cartProduct: {
+                productId: match.params.productId,
+                productTypeId: product.productTypes[0]._id,
+                quantity,
+            },
+        };
+
+        dispatch(addToCart(cartInfo));
+    };
+
+    const handleDescStock = () => {
+        setQuantity(prevState => (prevState === 1 ? 1 : prevState - 1));
+    };
+
+    const handleIncStock = useCallback(() => {
+        const typeStock = document
+            .getElementsByClassName('viewProductProductTypeStock')[0]
+            .textContent.replace(' sản phẩm có sẵn', '');
+
+        setQuantity(prevState => (prevState === Math.abs(typeStock) ? prevState : prevState + 1));
+    }, [successMessage]);
+
+    useEffect(() => {
+        if (successMessage) {
+            handleIncStock();
+            setSelectedImage(product.images[0]);
+            setAllProductImages(getAllImages(product));
+        }
+    }, [successMessage]);
 
     return (
         <>
@@ -386,9 +412,19 @@ function ViewProduct({ match, bgColor }) {
                             <div className="viewProductTypeStockContainer">
                                 <TransportTitle>Số Lượng</TransportTitle>
                                 <Flex>
-                                    <button className="viewProductChangeStockBtn">-</button>
-                                    <p className="viewProductQuantity">1</p>
-                                    <button className="viewProductChangeStockBtn">+</button>
+                                    <button
+                                        className="viewProductChangeStockBtn"
+                                        onClick={handleDescStock}
+                                    >
+                                        -
+                                    </button>
+                                    <p className="viewProductQuantity">{quantity}</p>
+                                    <button
+                                        className="viewProductChangeStockBtn"
+                                        onClick={handleIncStock}
+                                    >
+                                        +
+                                    </button>
                                 </Flex>
 
                                 <p className="viewProductProductTypeStock">
@@ -411,6 +447,7 @@ function ViewProduct({ match, bgColor }) {
                                             <span>Thêm vào giỏ hàng</span>
                                         </>
                                     }
+                                    onClick={handleAddToCart}
                                 />
                                 <BuyProductBtn bgColor={bgColor} />
                             </Flex>

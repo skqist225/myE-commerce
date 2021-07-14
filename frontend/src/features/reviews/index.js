@@ -1,1 +1,6 @@
-export { fetchProductReviews, reviewsSelector, likeReview } from './reviewsSlice';
+export {
+    fetchProductReviews,
+    fetchReviewsByStar,
+    reviewsSelector,
+    likeReview,
+} from './reviewsSlice';

@@ -6,14 +6,37 @@ const productReviewsAdapter = createEntityAdapter({
 });
 
 export const fetchProductReviews = createAsyncThunk(
-    'product/fetchProductReviews',
+    'reviews/fetchProductReviews',
     async (productId, { rejectWithValue }) => {
         try {
             const {
-                data: { ratingsPerStar, reviews, successMessage },
+                data: { avgRatings, ratingsPerStar, reviews, successMessage },
             } = await axios.get(`/product/reviews/${productId}`);
 
-            return { ratingsPerStar, reviews, successMessage };
+            return { ratingsPerStar, reviews, successMessage, avgRatings };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
+export const fetchReviewsByStar = createAsyncThunk(
+    'reviews/fetchReviewsByStar',
+    async ([productId, star], { rejectWithValue, getState, requestId }) => {
+        try {
+            const { loading, currentRequestId } = getState().reviews;
+
+            console.log(currentRequestId, requestId);
+
+            if (loading === true && currentRequestId !== requestId) {
+                return rejectWithValue('Be patient');
+            }
+
+            const {
+                data: { avgRatings, ratingsPerStar, reviews, successMessage },
+            } = await axios.get(`/product/reviews/${productId}?star=${star}`);
+
+            return { ratingsPerStar, reviews, successMessage, avgRatings };
         } catch ({ data: { errorMessage } }) {
             return rejectWithValue(errorMessage);
         }
@@ -21,21 +44,26 @@ export const fetchProductReviews = createAsyncThunk(
 );
 
 export const likeReview = createAsyncThunk(
-    'product/likeReview',
-    async ([reviewId, amount], { rejectWithValue }) => {
+    'reviews/likeReview',
+    async (reviewId, { dispatch, rejectWithValue }) => {
         try {
-            const config = {
-                headers: { 'Content-Type': 'application/json' },
-            };
-
             const {
                 data: { successMessage, review },
-            } = await axios.put(`/review/${reviewId}`, { amount }, config);
+            } = await axios.put(`/review/${reviewId}`);
 
             return { successMessage, review };
         } catch ({ data: { errorMessage } }) {
             return rejectWithValue(errorMessage);
         }
+    },
+    {
+        condition: (reviewId, { getState }) => {
+            const { likeReviewId, likeLoading } = getState().reviews;
+
+            if (likeLoading === true && likeReviewId === reviewId) {
+                return false;
+            }
+        },
     }
 );
 
@@ -43,11 +71,23 @@ const reviewsSlice = createSlice({
     name: 'reviews',
     initialState: productReviewsAdapter.getInitialState({
         ratingsPerStar: [],
-        loading: true,
-        successMessage: null,
+        avgRatings: [],
+        currentRequestId: undefined,
+        loading: false,
+        likeLoading: null,
+        likeReviewId: null,
+        successMessage1: null,
+        successMessage2: null,
         errorMessage: null,
+        activeTab: 1,
     }),
     reducers: {
+        setActiveTab(state, { payload }) {
+            state.activeTab = payload;
+        },
+        setLikeReviewId(state, { payload }) {
+            state.likeReviewId = payload;
+        },
         clearSuccessMessage(state) {
             state.successMessage = null;
         },
@@ -57,32 +97,72 @@ const reviewsSlice = createSlice({
     },
     extraReducers: builder => {
         builder
-            .addCase(fetchProductReviews.fulfilled, (state, { payload }) => {
-                state.loading = false;
-                state.ratingsPerStar = payload.ratingsPerStar;
-                state.successMessage = payload.successMessage;
-                productReviewsAdapter.setAll(state, payload.reviews);
+            .addCase(fetchProductReviews.fulfilled, (state, action) => {
+                const { requestId } = action.meta;
+                const { ratingsPerStar, successMessage, avgRatings, reviews } = action.payload;
+                if (state.loading === true && state.currentRequestId === requestId) {
+                    state.loading = false;
+                    state.ratingsPerStar = ratingsPerStar;
+                    state.successMessage1 = successMessage;
+                    state.avgRatings = avgRatings;
+                    state.currentRequestId = undefined;
+                    productReviewsAdapter.setAll(state, reviews);
+                }
             })
             .addCase(likeReview.fulfilled, (state, { payload: { successMessage, review } }) => {
-                state.loading = false;
-                state.successMessage = successMessage;
+                state.likeLoading = false;
+                state.successMessage2 = successMessage;
+                state.likeReviewId = null;
                 productReviewsAdapter.updateOne(state, {
                     id: review._id,
-                    changes: { number_of_likes: review.number_of_likes },
+                    changes: { userLikes: review.userLikes },
                 });
             })
-            .addMatcher(isAnyOf(fetchProductReviews.pending, likeReview.pending), state => {
-                state.loading = true;
+            .addCase(fetchReviewsByStar.fulfilled, (state, action) => {
+                const { requestId } = action.meta;
+                const { ratingsPerStar, successMessage, avgRatings, reviews } = action.payload;
+
+                if (state.loading === true && state.currentRequestId === requestId) {
+                    state.loading = false;
+                    state.ratingsPerStar = ratingsPerStar;
+                    state.successMessage1 = successMessage;
+                    state.avgRatings = avgRatings;
+                    state.currentRequestId = undefined;
+                    productReviewsAdapter.setAll(state, reviews);
+                }
+            })
+            .addCase(likeReview.pending, state => {
+                state.likeLoading = true;
+            })
+            .addCase(likeReview.rejected, (state, { payload }) => {
+                state.likeLoading = false;
+                state.likeReviewId = null;
+                state.errorMessage = payload;
             })
             .addMatcher(
-                isAnyOf(fetchProductReviews.rejected, likeReview.rejected),
-                (state, { payload }) => {
-                    state.loading = false;
-                    state.errorMessage = payload;
+                isAnyOf(fetchProductReviews.pending, fetchReviewsByStar.pending),
+                (state, action) => {
+                    if (state.loading === false) {
+                        state.currentRequestId = action.meta.requestId;
+                        state.loading = true;
+                    }
+                }
+            )
+            .addMatcher(
+                isAnyOf(fetchProductReviews.rejected, fetchReviewsByStar.rejected),
+                (state, action) => {
+                    const { requestId } = action.meta;
+                    if (state.loading === 'pending' && state.currentRequestId === requestId) {
+                        state.loading = false;
+                        state.errorMessage = action.payload;
+                        state.currentRequestId = undefined;
+                    }
                 }
             );
     },
 });
+
+export const { setLikeReviewId, setActiveTab } = reviewsSlice.actions;
 
 export const reviewsSelector = productReviewsAdapter.getSelectors(state => state.reviews);
 

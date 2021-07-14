@@ -49,7 +49,6 @@ function VP({ match }) {
 
     useEffect(() => {
         dispatch(fetchProductById({ productId }));
-        // dispatch(fetchProductReviews(match.params.productId));
     }, [dispatch, productId]);
 
     useEffect(() => {

@@ -12,6 +12,12 @@ export const PaddingLayout = styled.div`
     padding: 3.125rem;
 `;
 
+export const Line = styled.div`
+    height: 1px;
+    width: 100%;
+    background-color: red;
+`;
+
 export const RatingBox = styled.div`
     padding: 3.125rem;
     width: 100%;
@@ -35,6 +41,15 @@ export const RatingWrapper = styled.div`
     & span.second {
         font-size: 2.25rem;
     }
+`;
+
+export const ReviewImg = styled.img`
+    width: 9rem;
+    height: 9rem;
+    object-fit: cover;
+    display: inline-block;
+    margin-right: 1.25rem;
+    margin-bottom: 1.25rem;
 `;
 
 export const StarWrapper = styled.div``;
