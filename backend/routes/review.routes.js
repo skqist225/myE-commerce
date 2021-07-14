@@ -17,7 +17,7 @@ router.post(
     createProductReview
 );
 
-router.put('/review/:reviewId', likeReview);
+router.put('/review/:reviewId', [isAuthenticatedUser], likeReview);
 
 router.get('/user/reviews', [isAuthenticatedUser, authorizeRoles('user')], getUserReviews);
 router.get('/product/reviews/:productId', [isAuthenticatedUser], getProductReviews);

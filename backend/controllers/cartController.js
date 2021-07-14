@@ -62,7 +62,10 @@ exports.addToCart = (req, res, next) => {
 
             runUpdate(condition, update)
                 .then(result => {
-                    res.status(httpStatusCode.CREATED).json({ result });
+                    res.status(httpStatusCode.CREATED).json({
+                        successMessage: 'acs',
+                        cart: result,
+                    });
                 })
                 .catch(error => res.status(httpStatusCode.BAD_REQUEST).json({ error }));
         } else {

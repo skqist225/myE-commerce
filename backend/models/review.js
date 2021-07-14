@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const User = require('./user');
 
 const reviewSchema = new Schema(
     {
@@ -29,7 +30,13 @@ const reviewSchema = new Schema(
             max: 5,
             required: true,
         },
-        number_of_likes: { type: Number, default: 0 },
+        userLikes: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+                unique: [true, 'One user just like review one time'],
+            },
+        ],
         maskName: { type: Boolean, default: false },
     },
     { timestamps: true }
