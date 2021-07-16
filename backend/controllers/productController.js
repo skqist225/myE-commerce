@@ -618,10 +618,11 @@ exports.getSingleProduct = (req, res, next) => {
             .populate('shop', '_id shopName shopLogo isMallType shopLocation')
             .lean()
             .exec(async (err, product) => {
-                if (err)
-                    return res
-                        .status(httpStatusCode.BAD_REQUEST)
-                        .json({ errorMessage: 'something went wrong' });
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+
+                if (!product) {
+                    res.status(httpStatusCode.NOT_FOUND).json({ message: 'Product not found' });
+                }
 
                 if (product) {
                     const number_of_products = await Product.countDocuments({

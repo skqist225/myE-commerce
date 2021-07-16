@@ -58,7 +58,7 @@ export const PolicyText = styled.div`
 `;
 
 export const OriginalPrice = styled.div`
-    font-size: 2rem;
+    font-size: ${props => props.fontSize || '2rem'};
     margin-right: 1rem;
     text-decoration: line-through;
     color: #929292;

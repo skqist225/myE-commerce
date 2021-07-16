@@ -16,6 +16,8 @@ export const HeaderLine = styled.div`
     display: flex;
     align-items: center;
 
+    ${props => props.getBgInCartPage === true && ' background-color: #fff'};
+
     &.headerLineOne {
         justify-content: space-between;
     }
@@ -251,6 +253,7 @@ export const CartWrapper = styled.div.attrs(props => ({ children: props.render }
     align-items: center;
     justify-content: center;
     height: 100%;
+    position: relative;
 `;
 
 export const Avatar = styled.img`
@@ -271,4 +274,22 @@ export const FacebookIcon = styled.div`
 
 export const InstagramIcon = styled(FacebookIcon)`
     background-position: 58.064516129032256% 16.129032258064516%;
+`;
+
+export const Badge = styled.span.attrs(props => ({ children: props.innertext }))`
+    position: absolute;
+    width: 3.1rem;
+    height: 2.5rem;
+    background-color: #fff;
+    border-radius: 5.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem;
+    font-size: 1.8rem;
+    font-weight: 400;
+    // color: ${props => props.color};
+    color: #f6422d;
+    bottom: 4rem;
+    right: 3.5rem;
 `;

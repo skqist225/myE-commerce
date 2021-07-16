@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ContentContainer, StandardSelfFlex } from '../../globalStyle';
 import {
@@ -25,6 +25,7 @@ import {
     Bridge,
     Seperator,
     ShopeeCartWrapper,
+    Badge,
 } from './HeaderComponent';
 import {
     NotifyIcon,
@@ -39,19 +40,27 @@ import { createImage } from '../../helpers';
 import './header.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { userLogout } from '../../features/auth';
+import { fetchUserCart } from '../../features/cart';
 
-function Header({ bgColor, noBelowSeachForm, secondLogo }) {
+function Header({ bgColor, noBelowSeachForm, secondLogo, getBgInCartPage }) {
     const dispatch = useDispatch();
-    const { user } = useSelector(state => state.auth);
+    const { user, isAuthenticated } = useSelector(state => state.auth);
+    const { cart, successMessage } = useSelector(state => state.cart);
 
     const handleLogoutRequest = () => {
         dispatch(userLogout());
     };
 
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchUserCart());
+        }
+    }, [dispatch, isAuthenticated]);
+
     return (
         <ParentContainer bgColor={bgColor}>
             <ContentContainer>
-                <HeaderLine className="headerLineOne">
+                <HeaderLine className="headerLineOne" bgColor={bgColor}>
                     <HeaderList className="headerListLeft">
                         <ListItem>
                             <ItemLink to="/">Kênh người bán</ItemLink>
@@ -116,7 +125,7 @@ function Header({ bgColor, noBelowSeachForm, secondLogo }) {
                         </ListItem>
                     </HeaderList>
                 </HeaderLine>
-                <HeaderLine>
+                <HeaderLine getBgInCartPage={getBgInCartPage}>
                     {secondLogo ? (
                         <SeconLogoContainer>
                             <ShopeeCartWrapper style={{ position: 'relative' }}>
@@ -175,7 +184,24 @@ function Header({ bgColor, noBelowSeachForm, secondLogo }) {
                             )}
                         </HeaderBelowSearchProductName>
                     </HeaderSearchWrapper>
-                    <CartWrapper render={<CartIcon />} />
+
+                    <CartWrapper
+                        render={
+                            <>
+                                <Link to="/cart">
+                                    <CartIcon />
+                                    <Badge
+                                        innertext={
+                                            cart.length > 0
+                                                ? cart.reduce((acc, item) => acc + item.count, 0)
+                                                : 0
+                                        }
+                                        color={bgColor}
+                                    />
+                                </Link>
+                            </>
+                        }
+                    />
                 </HeaderLine>
             </ContentContainer>
         </ParentContainer>

@@ -1,6 +1,48 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, isAnyOf } from '@reduxjs/toolkit';
 import axios from '../../axios';
-import { categoriesSelectors, fetchCategories } from '../categories';
+
+export const fetchUserCart = createAsyncThunk(
+    'cart/fetchUserCart',
+    async (_, { rejectWithValue }) => {
+        try {
+            const {
+                data: { cart, successMessage },
+            } = await axios.get(`/user/cart`);
+
+            return { cart, successMessage };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
+export const deleteProductInCart = createAsyncThunk(
+    'cart/deleteProductInCart',
+    async (productId, { dispatch, rejectWithValue }) => {
+        try {
+            const config = {
+                headers: { 'Content-Type': 'application/json' },
+            };
+
+            const {
+                data: { successMessage },
+            } = await axios.put(
+                `/user/cart/remove-cart-products`,
+                {
+                    removedProducts: [productId],
+                },
+                config
+            );
+            if (successMessage) {
+                dispatch(fetchUserCart());
+            }
+
+            return { successMessage };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
 
 export const addToCart = createAsyncThunk(
     'cart/addToCart',
@@ -11,13 +53,16 @@ export const addToCart = createAsyncThunk(
                     'Content-Type': 'application/json',
                 },
             };
-            console.log(cartInfo);
 
             const {
-                data: { cart, successMessage },
+                data: { successMessage },
             } = await axios.post(`/user/cart/add-to-cart`, cartInfo, config);
 
-            return { cart, successMessage };
+            if (successMessage) {
+                dispatch(fetchUserCart());
+            }
+
+            return { successMessage };
         } catch ({ data: { errorMessage } }) {
             return rejectWithValue(errorMessage);
         }
@@ -27,7 +72,7 @@ export const addToCart = createAsyncThunk(
 const cartSlice = createSlice({
     name: 'cart',
     initialState: {
-        cart: {},
+        cart: [],
         loading: 'idle',
         errorMessage: null,
         successMessage: null,
@@ -45,15 +90,27 @@ const cartSlice = createSlice({
             .addCase(addToCart.fulfilled, (state, { payload }) => {
                 state.loading = 'idle';
                 state.successMessage = payload.successMessage;
+                // state.cart = payload.cart;
+            })
+            .addCase(fetchUserCart.fulfilled, (state, { payload }) => {
+                state.loading = 'idle';
+                state.successMessage = payload.successMessage;
                 state.cart = payload.cart;
             })
-            .addCase(addToCart.pending, state => {
+            .addCase(deleteProductInCart.fulfilled, (state, { payload }) => {
+                state.loading = 'idle';
+                state.successMessage = payload.successMessage;
+            })
+            .addMatcher(isAnyOf(addToCart.pending, fetchUserCart.pending), state => {
                 state.loading = 'pending';
             })
-            .addCase(addToCart.rejected, (state, { payload }) => {
-                state.loading = 'idle';
-                state.errorMessage = payload;
-            });
+            .addMatcher(
+                isAnyOf(addToCart.rejected, fetchUserCart.rejected),
+                (state, { payload }) => {
+                    state.loading = 'idle';
+                    state.errorMessage = payload;
+                }
+            );
     },
 });
 

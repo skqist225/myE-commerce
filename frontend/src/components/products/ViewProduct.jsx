@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 // import { MetaData } from '../../components';
 
 import ProductSlider from '../Slider/ProductSlider';
-import { createImage } from '../../helpers';
+import { createImage, separateNumberWithDot } from '../../helpers';
 import { ContentContainer, Flex } from '../../globalStyle';
 import { _setCategoryPath, clearCategoryPath } from '../../features/product';
 import {
@@ -69,34 +69,34 @@ function ViewProduct({ match, bgColor }) {
         return productImages.concat(productTypesImages);
     };
 
-    const seperateNumber = number => {
-        let dotNum = 0;
+    // const seperateNumber = number => {
+    //     let dotNum = 0;
 
-        const countDotNum = number => {
-            const resultOfDivisionOperator = number / 1000;
+    //     const countDotNum = number => {
+    //         const resultOfDivisionOperator = number / 1000;
 
-            if (resultOfDivisionOperator >= 1) {
-                dotNum++;
-                const _number = resultOfDivisionOperator;
-                countDotNum(_number);
-            } else {
-                return;
-            }
-        };
+    //         if (resultOfDivisionOperator >= 1) {
+    //             dotNum++;
+    //             const _number = resultOfDivisionOperator;
+    //             countDotNum(_number);
+    //         } else {
+    //             return;
+    //         }
+    //     };
 
-        countDotNum(number);
+    //     countDotNum(number);
 
-        let finalString = [];
-        let numString = String(number);
+    //     let finalString = [];
+    //     let numString = String(number);
 
-        for (let i = 0; i < dotNum; i++) {
-            const subString = '.' + numString.substr(-3);
-            numString = numString.substring(0, numString.length - 3);
-            finalString.unshift(subString);
-        }
+    //     for (let i = 0; i < dotNum; i++) {
+    //         const subString = '.' + numString.substr(-3);
+    //         numString = numString.substring(0, numString.length - 3);
+    //         finalString.unshift(subString);
+    //     }
 
-        return numString + finalString.join('');
-    };
+    //     return numString + finalString.join('');
+    // };
 
     const calculatePrice = ({ productTypes }) => {
         if (productTypes.length > 1) {
@@ -264,21 +264,25 @@ function ViewProduct({ match, bgColor }) {
                                     <OriginalPrice>
                                         <span>đ</span>
                                         {product.productTypes.length === 1
-                                            ? seperateNumber(product.productTypes[0].typePrice)
-                                            : seperateNumber(170000)}
+                                            ? separateNumberWithDot(
+                                                  product.productTypes[0].typePrice
+                                              )
+                                            : separateNumberWithDot(170000)}
                                     </OriginalPrice>
                                     <PriceRange className="viewProductTypePriceRange">
                                         {Array.isArray(calculatePrice(product)) ? (
                                             <>
                                                 <span>₫</span>
-                                                {seperateNumber(calculatePrice(product)[0])} -
-                                                <span>₫</span>
-                                                {seperateNumber(calculatePrice(product)[1])}
+                                                {separateNumberWithDot(
+                                                    calculatePrice(product)[0]
+                                                )}{' '}
+                                                -<span>₫</span>
+                                                {separateNumberWithDot(calculatePrice(product)[1])}
                                             </>
                                         ) : (
                                             <>
                                                 <span>₫</span>
-                                                {seperateNumber(calculatePrice(product))}
+                                                {separateNumberWithDot(calculatePrice(product))}
                                             </>
                                         )}
                                     </PriceRange>

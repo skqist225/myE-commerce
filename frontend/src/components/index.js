@@ -10,3 +10,4 @@ export { default as CategoryMallBody } from './CategoryMall/CategoryMallBody';
 export { default as ShopInfoSection } from './ShopInfo/ShopInfo';
 export { default as ProductDescriptionSection } from './ProductDescription/ProductDescription';
 export { default as ProductRatingSection } from './ProductRating/ProductRating';
+export { default as ViewCart } from './Cart/ViewCart';

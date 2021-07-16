@@ -80,7 +80,6 @@ exports.addToCart = (req, res, next) => {
                 if (cart) {
                     return res.status(httpStatusCode.CREATED).json({
                         successMessage: 'Cart created successfully',
-                        cart,
                     });
                 }
             });
@@ -118,46 +117,118 @@ exports.removeCartProducts = (req, res, next) => {
         }
     });
 
-    Promise.all(promiseArray).then(response =>
-        res
-            .status(httpStatusCode.ACCEPTED)
-            .json({
-                success: true,
-                message: 'Products cart updated successfully',
-                response,
+    Promise.all(promiseArray)
+        .then(response =>
+            res.status(httpStatusCode.ACCEPTED).json({
+                successMessage: 'Products cart updated successfully',
             })
-            .catch(err => res.status(httpStatusCode.BAD_REQUEST).json({ err }))
-    );
+        )
+        .catch(err => next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST)));
 };
 
-exports.getUserCart = (req, res, next) => {
-    Cart.findOne({ user: req.user._id })
-        .populate('cartProducts.productId', 'productName productType')
-        .exec((err, cart) => {
-            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+exports.getUserCart = async (req, res, next) => {
+    const cart = await Cart.aggregate([
+        {
+            $match: { user: mongoose.Types.ObjectId(req.user._id) },
+        },
+        {
+            $unwind: '$cartProducts',
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'cartProducts.productId',
+                foreignField: '_id',
+                as: 'product',
+            },
+        },
+        {
+            $project: {
+                'product.description': 0,
+                'product.category': 0,
+                'product.supplier': 0,
+                'product.images': 0,
+                'product.transporters': 0,
+                'product.soldNumber': 0,
+                'product.productWeight': 0,
+                'product.createdAt': 0,
+                'product.updatedAt': 0,
+                'product.__v': 0,
+                user: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                __v: 0,
+            },
+        },
+        {
+            $unwind: '$product',
+        },
+        {
+            $unwind: '$product.productTypes',
+        },
+        {
+            $redact: {
+                $cond: {
+                    if: { $eq: ['$cartProducts.productTypeId', '$product.productTypes._id'] },
+                    then: '$$KEEP',
+                    else: '$$PRUNE',
+                },
+            },
+        },
+        {
+            $lookup: {
+                from: 'shops',
+                localField: 'product.shop',
+                foreignField: '_id',
+                as: 'shop',
+            },
+        },
+        { $unwind: '$shop' },
+        {
+            $project: {
+                'shop.homeImages': 0,
+                'shop.isApproved': 0,
+                'shop.vouchers': 0,
+                'shop.shopDescription': 0,
+                'shop.user': 0,
+                'shop.followers_nbm': 0,
+                'shop.createdAt': 0,
+                'shop.updatedAt': 0,
+                'shop.shopCategory': 0,
+                'shop.__v': 0,
+            },
+        },
+        {
+            $addFields: {
+                quantity: '$cartProducts.quantity',
+            },
+        },
+        {
+            $project: {
+                cartProducts: 0,
+            },
+        },
+        {
+            $group: {
+                _id: '$shop.shopName',
+                shop: { $mergeObjects: '$shop' },
+                products: {
+                    $push: '$$ROOT',
+                },
+                count: { $sum: 1 },
+            },
+        },
+        {
+            $project: {
+                'products.shop': 0,
+            },
+        },
+    ]);
 
-            if (cart) {
-                let _cart = cart;
-                let i = 0;
-
-                cart.cartProducts.forEach(cartProduct => {
-                    let _productType;
-                    _productType = cartProduct.productId.productType.filter(
-                        ({ _id }) => _id.toString() === cartProduct.productTypeId.toString()
-                    );
-
-                    _cart.cartProducts[i].productId.productType = _productType;
-                    i++;
-                });
-
-                return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: 'Cart created successfully',
-                    cart_products_nbm: cart.cartProducts.length,
-                    cart: _cart,
-                });
-            }
-        });
+    res.status(httpStatusCode.OK).json({
+        successMessage: "Fetch user's cart successfully",
+        cart,
+    });
 };
 
 //Testing
