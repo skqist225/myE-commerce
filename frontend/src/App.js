@@ -1,8 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { ProtectedRoute } from './components';
-import { Home, Login, CategoryMall, ViewShop, ShopProducts, ViewProduct, Cart } from './pages';
-
+import {
+    Home,
+    Login,
+    CategoryMall,
+    ViewShop,
+    ShopProducts,
+    ViewProduct,
+    Cart,
+    Checkout,
+} from './pages';
 import './App.css';
 
 function App() {
@@ -12,6 +20,7 @@ function App() {
                 <Switch>
                     <Route component={Login} path="/buyer/login" exact />{' '}
                     <ProtectedRoute component={Home} path="/" exact />
+                    <ProtectedRoute component={Checkout} path="/checkout" exact />
                     <ProtectedRoute component={Cart} path="/cart" exact />
                     <ProtectedRoute component={CategoryMall} path="/:shopCategory" exact />
                     <ProtectedRoute component={ShopProducts} path="/shop/:shopId/search" exact />

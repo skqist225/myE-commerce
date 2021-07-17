@@ -221,6 +221,7 @@ exports.getUserCart = async (req, res, next) => {
         {
             $project: {
                 'products.shop': 0,
+                'products.product.shop': 0,
             },
         },
     ]);

@@ -76,6 +76,7 @@ const cartSlice = createSlice({
         loading: 'idle',
         errorMessage: null,
         successMessage: null,
+        deleteSuccessMessage: null,
     },
     reducers: {
         clearSuccessMessage(state) {
@@ -99,7 +100,7 @@ const cartSlice = createSlice({
             })
             .addCase(deleteProductInCart.fulfilled, (state, { payload }) => {
                 state.loading = 'idle';
-                state.successMessage = payload.successMessage;
+                state.deleteSuccessMessage = payload.successMessage;
             })
             .addMatcher(isAnyOf(addToCart.pending, fetchUserCart.pending), state => {
                 state.loading = 'pending';

@@ -61,7 +61,7 @@ function VP({ match }) {
             const categoryPath = handleCategoryPath(categories, product.category.parentId);
             dispatch(_setCategoryPath(categoryPath));
         }
-    }, [successMessage]);
+    }, [dispatch, successMessage]);
 
     return (
         <PageContainer>

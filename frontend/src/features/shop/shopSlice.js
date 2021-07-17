@@ -26,12 +26,6 @@ export const getProductsByFilter = createAsyncThunk(
         try {
             const transporters = [...transportersFilter].join(',');
             const categories = [...categoriesFilter].join(',');
-            // console.log(transporters);
-
-            console.log(minPrice);
-            console.log(maxPrice);
-
-            console.log(categories);
 
             const {
                 data: { products, successMessage },

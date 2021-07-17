@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, ContentContainer, Flex, WhiteBgWrapper } from '../../globalStyle';
 import { createImage, separateNumberWithDot } from '../../helpers';
 import { OriginalPrice } from '../products/ViewProductComponent';
 import { CheckboxInput, Label } from '../shopList/ShopProductsComponent';
 import { FreeshipIcon, ChatIcon2, ProductIcon, DropDownIcon, Voucher } from '../shopList/svgIcon';
-import { deleteProductInCart, fetchUserCart } from '../../features/cart';
+import { deleteProductInCart } from '../../features/cart';
 
 import {
     FreeshipNotification,
@@ -31,17 +32,32 @@ import {
     SaveFavorite,
     BuyButton,
     TotalPay,
+    OpacityBackground,
+    Modal,
+    YesButton,
+    CancelButton,
+    ModalContainer,
+    OKButton,
 } from './ViewCartComponent';
+import OutsideClickHandler from './OutsideClickHandler';
+import { useHistory } from 'react-router-dom';
 
 function ViewCart() {
     const dispatch = useDispatch();
-    const { cart, loading, successMessage } = useSelector(state => state.cart);
+    const history = useHistory();
+    const { cart, loading, successMessage, deleteSuccessMessage } = useSelector(
+        state => state.cart
+    );
     const [quantity, setQuantity] = useState(new Map());
+    const [showModal, setShowModal] = useState({ anchor: null });
+    const [showNotifyModal, setShowNotifyModal] = useState({ anchor: null });
     const [allCartProducts, setAllCartProducts] = useState(false);
     const [allShopProducts, setAllShopProducts] = useState(false);
-    const [numberOfSelectedProducts, setNumberOfSelectedProducts] = useState(0);
     const [finalPrice, setFinalPrice] = useState(0);
     const [savedPrice, setSavedPrice] = useState(0);
+    const [productName, setProductName] = useState('');
+    const [productId, setProductId] = useState('');
+    const [numberOfSelectedProducts, setNumberOfSelectedProducts] = useState(0);
 
     const handleQuantityChangeAndAllProductsSeleted = () => {
         const _finalPrice = document.getElementsByClassName('finalPrice');
@@ -53,8 +69,6 @@ function ViewCart() {
 
         const savedPrice = Array.from(originalPrice).reduce((acc, item, index) => {
             if (item.textContent !== '') {
-                console.log(item);
-
                 return (
                     acc +
                     Math.abs(item.textContent.replace('đ', '').replace(/\./g, '')) *
@@ -69,20 +83,126 @@ function ViewCart() {
         setFinalPrice(totalPrice);
     };
 
+    const DeleteProductInCartModal = ({ children }) => {
+        const parent = document.getElementById('root');
+        return ReactDOM.createPortal(children, parent);
+    };
+
+    const NotifySelectProductInCart = ({ children }) => {
+        const parent = document.getElementById('root');
+        return ReactDOM.createPortal(children, parent);
+    };
+
+    const Child = () => {
+        const handleDeleteProduct = () => {
+            dispatch(deleteProductInCart(productId));
+        };
+
+        const handleCloseModal = e => {
+            setShowModal({ anchor: null });
+        };
+
+        console.log('Child rendering...');
+
+        return (
+            <ModalContainer>
+                <OpacityBackground>
+                    <OutsideClickHandler onClickOutside={handleCloseModal}>
+                        <Modal className="insideModal">
+                            <div className="modalHeader">
+                                Bạn chắc chắn muốn xóa bỏ sản phẩm này ?{' '}
+                            </div>
+
+                            <div style={{ flex: '1' }}>{productName}</div>
+                            <Flex width="100%" justifyContent="space-between">
+                                <YesButton children="Có" onClick={handleDeleteProduct} />
+                                <CancelButton children="Không" onClick={handleCloseModal} />
+                            </Flex>
+                        </Modal>
+                    </OutsideClickHandler>
+                </OpacityBackground>
+            </ModalContainer>
+        );
+    };
+
+    const SelectProductNotification = () => {
+        const handleCloseModal = e => {
+            setShowNotifyModal({ anchor: null });
+        };
+
+        return (
+            <ModalContainer>
+                <OpacityBackground>
+                    <OutsideClickHandler onClickOutside={handleCloseModal}>
+                        <Modal className="insideModal">
+                            <div className="modalHeader">
+                                Bạn vẫn chưa chọn sản phẩm nào để mua.
+                            </div>
+                            <div style={{ flex: '1' }}></div>
+                            <Flex width="100%" justifyContent="space-between">
+                                <OKButton children="OK" onClick={handleCloseModal} />
+                            </Flex>
+                        </Modal>
+                    </OutsideClickHandler>
+                </OpacityBackground>
+            </ModalContainer>
+        );
+    };
+
+    const deleteModal = useMemo(() => {
+        return showModal.anchor ? (
+            <DeleteProductInCartModal>
+                <Child />
+            </DeleteProductInCartModal>
+        ) : null;
+    }, [showModal.anchor]);
+
+    const notifyModal = useMemo(() => {
+        return showNotifyModal.anchor ? (
+            <NotifySelectProductInCart>
+                <SelectProductNotification />
+            </NotifySelectProductInCart>
+        ) : null;
+    }, [showNotifyModal.anchor]);
+
     const handleDescStock = e => {
         const { productId } = e.target.dataset;
+        let product;
 
-        setQuantity(prevState =>
-            prevState.get(productId) === 1
-                ? new Map(prevState)
-                : new Map(prevState.set(productId, prevState.get(productId) - 1))
-        );
+        if (quantity.get(productId) - 1 === 0) {
+            cart.forEach(
+                ({ products }) =>
+                    (product = products.find(
+                        ({ product }) => product._id.toString() === productId.toString()
+                    ))
+            );
+            const {
+                product: { productName },
+            } = product;
 
-        if (allCartProducts) {
-            handleQuantityChangeAndAllProductsSeleted();
-        } else {
-            return;
+            setProductName(productName);
+            setProductId(productId);
+            setShowModal(prevState => {
+                if (prevState.anchor) {
+                    return { anchor: null };
+                }
+                return { anchor: e.target };
+            });
         }
+
+        (() => {
+            setQuantity(prevState =>
+                prevState.get(productId) - 1 === 0
+                    ? new Map(prevState)
+                    : new Map(prevState.set(productId, prevState.get(productId) - 1))
+            );
+
+            if (allCartProducts) {
+                handleQuantityChangeAndAllProductsSeleted();
+            } else {
+                return;
+            }
+        })();
     };
 
     const handleIncStock = e => {
@@ -112,6 +232,7 @@ function ViewCart() {
                 }
             }
             setNumberOfSelectedProducts(allCb.length);
+            handleQuantityChangeAndAllProductsSeleted();
         } else {
             for (let cb of allCb) {
                 if (cb.dataset.shopId === e.target.value) {
@@ -119,6 +240,7 @@ function ViewCart() {
                 }
             }
             setNumberOfSelectedProducts(0);
+            setFinalPrice(0);
         }
     };
 
@@ -152,35 +274,68 @@ function ViewCart() {
         dispatch(deleteProductInCart(productId));
     };
 
-    const handleProcessToOrder = () => {
+    const handleProcessToOrder = e => {
         const allCb = document.getElementsByClassName('cbProductSelected');
-        const selectedProductInfo = [];
+        const selectedProductInfo = new Map();
         for (let cb of allCb) {
             if (cb.checked) {
-                cart.forEach(({ products }) => {
+                cart.forEach(({ products, shop }) => {
                     products.forEach(({ product }) => {
                         if (product._id === cb.value) {
-                            selectedProductInfo.push({
-                                product: product._id,
-                                productTypeId: product.productTypes._id,
+                            const productObj = {
+                                ...product,
+                                afterDiscountPrice: product.discountPercent
+                                    ? product.productTypes.typePrice -
+                                      product.productTypes.typePrice *
+                                          (product.discountPercent / 100)
+                                    : product.productTypes.typePrice,
                                 _quantity: quantity.get(product._id),
-                            });
+                            };
+
+                            selectedProductInfo.has(shop.shopName)
+                                ? selectedProductInfo.set(
+                                      shop.shopName,
+                                      selectedProductInfo.get(shop.shopName).concat(productObj)
+                                  )
+                                : selectedProductInfo.set(shop.shopName, [productObj]);
                         }
                     });
                 });
             }
         }
+
+        if (selectedProductInfo.length < 1) {
+            setShowNotifyModal(prevState => {
+                if (prevState.anchor) {
+                    return { anchor: null };
+                } else {
+                    return { anchor: e.target };
+                }
+            });
+
+            return;
+        }
+
+        const cartLocalStore = localStorage.getItem('cart');
+
+        if (cartLocalStore) {
+            localStorage.removeItem('cart');
+        }
+
+        localStorage.setItem('cart', JSON.stringify(Array.from(selectedProductInfo.entries())));
+        history.push('/checkout');
     };
+
     console.log('view cart rendering...');
 
-    // useEffect(() => {
-    //     if (successMessage) {
-    //         dispatch(fetchUserCart());
-    //     }
-    // }, [successMessage]);
+    useEffect(() => {
+        if (deleteSuccessMessage) {
+            setShowModal(false);
+        }
+    }, [deleteSuccessMessage]);
 
     useEffect(() => {
-        if (loading !== 'pending' && cart.length > 0) {
+        if (cart.length > 0) {
             const productAndStock = new Map();
             cart.forEach($cart => {
                 $cart.products.forEach(product =>
@@ -189,12 +344,14 @@ function ViewCart() {
             });
             setQuantity(productAndStock);
         }
-    }, [loading, cart]);
+    }, [cart]);
 
     return (
         <>
             {loading !== 'pending' && cart.length > 0 ? (
-                <>
+                <div id="viewCartParent">
+                    {deleteModal}
+                    {notifyModal}
                     <FreeshipNotification>
                         <FreeshipIcon width="3rem" height="1.8rem" />
                         <Text>
@@ -347,6 +504,7 @@ function ViewCart() {
                                                     className="viewProductChangeStockBtn"
                                                     onClick={handleDescStock}
                                                     data-product-id={product._id}
+                                                    data-product-name={product.productName}
                                                 >
                                                     -
                                                 </button>
@@ -502,7 +660,7 @@ function ViewCart() {
                             </WhiteBgWrapper>
                         </ContentContainer>
                     </BuyProductBar>
-                </>
+                </div>
             ) : (
                 <h1>Không có sản phẩm</h1>
             )}

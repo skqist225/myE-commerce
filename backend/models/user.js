@@ -96,6 +96,7 @@ const userSchema = new Schema(
                 },
             ],
         },
+        coin: { type: Number, default: 0 },
         isActive: {
             type: Boolean,
             default: false,
@@ -142,10 +143,7 @@ userSchema.methods = {
     getResetPasswordToken() {
         const resetToken = crypto.randomBytes(20).toString('hex');
 
-        this.resetPasswordToken = crypto
-            .createHash('sha256')
-            .update(resetToken)
-            .digest('hex');
+        this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
         this.resetPasswordExpire = Date.now() + 30 * 60 * 1000; // 30minutes
 

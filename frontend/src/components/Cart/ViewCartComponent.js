@@ -237,3 +237,71 @@ export const BuyButton = styled(Button)`
     color: #fff;
     background-color: #ee4d2d;
 `;
+
+export const OpacityBackground = styled.div`
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+export const Modal = styled.main`
+    width: 67.8rem;
+    height: 39rem;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 2.25rem;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px 0 rgb(0 0 0 / 5%);
+
+    & div.modalHeader {
+        font-size: 3rem;
+        color: #ee4d2d;
+        margin-top: 1.875rem;
+    }
+
+    & div {
+        margin-top: 2.5rem;
+        font-size: 2rem;
+        line-height: 2.5rem;
+    }
+`;
+
+export const YesButton = styled(Button)`
+    flex: 1;
+    background-color: #ee4d2d;
+    color: #fff;
+    height: 4rem;
+    padding: 0 2rem;
+    box-shadow: 0 1px 1px 0 rgb(0 0 0 / 9%);
+    border-radius: 2px;
+    overflow: hidden;
+    font-size: 1.4rem;
+    marin-right: 1.25rem;
+    max-width: 48%;
+`;
+
+export const CancelButton = styled(YesButton)`
+    background-color: #fff;
+    color: #222;
+    border: 1px solid #222;
+`;
+
+export const ModalContainer = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 99;
+`;
+
+export const OKButton = styled(YesButton)`
+    flex: 1;
+    max-width: 100%;
+
+    justify-self: flex-end;
+`;

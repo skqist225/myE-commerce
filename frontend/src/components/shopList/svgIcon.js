@@ -265,14 +265,27 @@ export const JoinIcon = ({ className }) => (
     </svg>
 );
 
-export const AddIcon = ({ className }) => (
-    <svg enableBackground="new 0 0 10 10" viewBox="0 0 10 10" x="0" y="0" className={className}>
+export const AddIcon = ({ className, ...props }) => (
+    <svg
+        enableBackground="new 0 0 10 10"
+        viewBox="0 0 10 10"
+        x="0"
+        y="0"
+        className={className}
+        {...props}
+    >
         <polygon points="10 4.5 5.5 4.5 5.5 0 4.5 0 4.5 4.5 0 4.5 0 5.5 4.5 5.5 4.5 10 5.5 10 5.5 5.5 10 5.5"></polygon>
     </svg>
 );
 
 export const ChatIcon2 = ({ className, fill, ...restProps }) => (
-    <svg viewBox="0 0 16 16" className={className} fill={fill} {...restProps}>
+    <svg
+        viewBox="0 0 16 16"
+        className={className}
+        fill={fill}
+        {...restProps}
+        style={{ cursor: 'pointer' }}
+    >
         <g fillRule="evenodd">
             <path d="M15 4a1 1 0 01.993.883L16 5v9.932a.5.5 0 01-.82.385l-2.061-1.718-8.199.001a1 1 0 01-.98-.8l-.016-.117-.108-1.284 8.058.001a2 2 0 001.976-1.692l.018-.155L14.293 4H15zm-2.48-4a1 1 0 011 1l-.003.077-.646 8.4a1 1 0 01-.997.923l-8.994-.001-2.06 1.718a.5.5 0 01-.233.108l-.087.007a.5.5 0 01-.492-.41L0 11.732V1a1 1 0 011-1h11.52zM3.646 4.246a.5.5 0 000 .708c.305.304.694.526 1.146.682A4.936 4.936 0 006.4 5.9c.464 0 1.02-.062 1.608-.264.452-.156.841-.378 1.146-.682a.5.5 0 10-.708-.708c-.185.186-.445.335-.764.444a4.004 4.004 0 01-2.564 0c-.319-.11-.579-.258-.764-.444a.5.5 0 00-.708 0z"></path>
         </g>
@@ -454,13 +467,13 @@ export const MallIcon = () => (
     </svg>
 );
 
-export const FreeshipIcon = ({ width, height, ...props }) => (
+export const FreeshipIcon = ({ width, height, className, ...props }) => (
     <svg
         height="12"
         viewBox="0 0 20 12"
         width={width}
         height={height}
-        className="shopee-svg-icon pcmall-cart_3pBte4 icon-free-shipping"
+        className={className}
         {...props}
     >
         <g fill="none" fillRule="evenodd" transform="">
@@ -523,5 +536,32 @@ export const Voucher = ({ ...props }) => (
                 <feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"></feBlend>
             </filter>
         </defs>
+    </svg>
+);
+
+export const MarkLocationIcon = ({ className, ...restProps }) => (
+    <svg height="16" viewBox="0 0 12 16" width="12" className={className} {...restProps}>
+        <path
+            d="M6 3.2c1.506 0 2.727 1.195 2.727 2.667 0 1.473-1.22 2.666-2.727 2.666S3.273 7.34 3.273 5.867C3.273 4.395 4.493 3.2 6 3.2zM0 6c0-3.315 2.686-6 6-6s6 2.685 6 6c0 2.498-1.964 5.742-6 9.933C1.613 11.743 0 8.498 0 6z"
+            fillRule="evenodd"
+        ></path>
+    </svg>
+);
+
+export const ShopeeCoin = ({ className, ...restProps }) => (
+    <svg viewBox="0 0 18 18" className={className} {...restProps} fill="none">
+        <path
+            stroke="#FFA600"
+            stroke-width="1.3"
+            d="M17.35 9A8.35 8.35 0 11.65 9a8.35 8.35 0 0116.7 0z"
+        ></path>
+        <path
+            fill="#FFA600"
+            fillRule="evenodd"
+            stroke="#FFA600"
+            strokeWidth=".2"
+            d="M6.86 4.723c-.683.576-.998 1.627-.75 2.464.215.725.85 1.258 1.522 1.608.37.193.77.355 1.177.463.1.027.2.051.3.08.098.03.196.062.294.096.06.021.121.044.182.067.017.006.107.041.04.014-.07-.028.071.03.087.037.286.124.56.27.82.44.114.076.045.024.151.111a2.942 2.942 0 01.322.303c.087.093.046.042.114.146.18.275.245.478.235.8-.01.328-.14.659-.325.867-.47.53-1.232.73-1.934.696a4.727 4.727 0 01-1.487-.307c-.45-.182-.852-.462-1.242-.737-.25-.176-.643-.04-.788.197-.17.279-.044.574.207.75.753.532 1.539.946 2.474 1.098.885.144 1.731.124 2.563-.224.78-.326 1.416-.966 1.607-1.772.198-.838-.023-1.644-.61-2.29-.683-.753-1.722-1.17-2.706-1.43a4.563 4.563 0 01-.543-.183c.122.048-.044-.02-.078-.035a4.77 4.77 0 01-.422-.212c-.594-.338-.955-.722-.872-1.369.105-.816.757-1.221 1.555-1.28.808-.06 1.648.135 2.297.554.614.398 1.19-.553.58-.947-1.33-.86-3.504-1.074-4.77-.005z"
+            clipRule="evenodd"
+        ></path>
     </svg>
 );

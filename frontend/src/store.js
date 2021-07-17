@@ -10,6 +10,7 @@ import {
     productReducer,
     reviewsReducer,
     cartReducer,
+    userAddressesReducer,
 } from './features';
 
 const rootReducer = {
@@ -21,6 +22,7 @@ const rootReducer = {
     product: productReducer,
     reviews: reviewsReducer,
     cart: cartReducer,
+    userAddresses: userAddressesReducer,
 };
 
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;

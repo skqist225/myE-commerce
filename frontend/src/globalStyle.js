@@ -51,6 +51,7 @@ export const GridLayout = styled.div`
     grid-template-columns: ${props => props.templateColumns};
     align-items: center;
     padding: ${props => props.padding};
+    gap: ${props => props.gap};
 `;
 
 export const StandardSelfFlex = styled.div`

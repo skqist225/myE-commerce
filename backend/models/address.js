@@ -12,14 +12,17 @@ const addressSchema = new Schema({
     country: {
         type: String,
         required: true,
-        default: 'Viet Nam',
+        default: 'Việt Nam',
     },
+    province: { type: String },
     city: { type: String, required: true },
-    county: { type: String, required: true },
+    county: { type: String },
     ward: { type: String, required: true },
     street: { type: String, required: true },
     isDefault: { type: Boolean, default: false },
     addressType: { type: String, required: true, enum: ['home', 'office'] },
 });
+
+addressSchema.index({ isDefault: 1 }, { unique: true, partialFilterExpression: { oneTrue: true } });
 
 module.exports = mongoose.model('Address', addressSchema);
