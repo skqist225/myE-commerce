@@ -6,6 +6,7 @@ const {
     addOrder,
     updateOrder,
     deleteOrder,
+    deleteAllOrders,
 } = require('../controllers/orderController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
@@ -35,5 +36,8 @@ router
     )
     .put([isAuthenticatedUser, authorizeRoles('shop')], updateOrder)
     .delete([isAuthenticatedUser, authorizeRoles('admin', 'shop')], deleteOrder);
+
+//DEVNOTIFY testing purpose
+router.delete('/orders/delete', deleteAllOrders);
 
 module.exports = router;

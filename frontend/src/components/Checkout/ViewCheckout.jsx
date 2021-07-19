@@ -32,16 +32,20 @@ import {
     SettingAddressButton,
     SelectAddress,
     Coin,
+    SelectPayment,
+    GI,
 } from './ViewCheckoutComponent';
 import { separateNumberWithDot } from '../../helpers';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import { addOrder, clearSuccessMessage } from '../../features/orders';
 import slugify from 'slugify';
+import { deleteUserCart } from '../../features/cart';
 
 function ViewCheckout({ userAddresses }) {
     const selectedProductInCart = localStorage.getItem('cart')
         ? JSON.parse(localStorage.getItem('cart'))
         : [];
-
+    const dispatch = useDispatch();
     const defaultAddress = userAddresses.find(address => address.isDefault);
     const {
         user: { coin },
@@ -50,6 +54,8 @@ function ViewCheckout({ userAddresses }) {
     const [selectedAddress, setSelectedAddress] = useState(defaultAddress);
     const [selectAddress, setSelectAddress] = useState(false);
     const [totalPrice, setTotalPrice] = useState(0);
+    const { addOrderSuccess } = useSelector(state => state.orders);
+    const history = useHistory();
 
     const handleAddress = address => {
         let computedAddress = '';
@@ -87,6 +93,10 @@ function ViewCheckout({ userAddresses }) {
         setTotalPrice(totalPrice);
     };
 
+    const handleDescTotalPrice = () => {
+        setTotalPrice(totalPrice - coin);
+    };
+
     useEffect(() => {
         calculateTotalPrice();
     }, []);
@@ -115,6 +125,44 @@ function ViewCheckout({ userAddresses }) {
             }
         }
     };
+
+    const processToOrder = () => {
+        const ordersArray = [];
+        selectedProductInCart.forEach(([shopInfo, products], index) => {
+            const paymentType = 'cod';
+            const transporter = '60d425b983c4499a2e571c64';
+
+            const _products = products.map(product => ({
+                productId: product._id,
+                productTypeId: product.productTypes._id,
+                quantity: product._quantity,
+            }));
+
+            ordersArray.push({
+                shop: shopInfo.split(',')[1],
+                products: _products,
+                modeOfPayment: paymentType,
+                transporter,
+                deliveryAddress: selectedAddress._id,
+            });
+        });
+
+        if (ordersArray.length > 0) {
+            console.log(ordersArray);
+
+            dispatch(addOrder(ordersArray));
+        }
+    };
+
+    useEffect(() => {
+        if (addOrderSuccess) {
+            history.push('/order');
+            localStorage.removeItem('cart');
+
+            dispatch(clearSuccessMessage());
+            dispatch(deleteUserCart());
+        }
+    }, [addOrderSuccess]);
 
     return (
         <>
@@ -258,18 +306,18 @@ function ViewCheckout({ userAddresses }) {
                     </Flex>
                 </Flex>
 
-                {selectedProductInCart.map(([shopName, products]) => (
-                    <>
+                {selectedProductInCart.map(([shopInfo, products]) => (
+                    <React.Fragment key={shopInfo.split(',')[1]}>
                         <Flex height="5rem">
                             <ProductIcon width="1.7rem" height="1.6rem" />{' '}
                             <Link
-                                to={`/shop/${slugify(shopName, {
+                                to={`/shop/${slugify(shopInfo.split(',')[0], {
                                     replacement: '_',
                                     lower: true,
                                 })}`}
                             >
                                 {' '}
-                                <ShopName>{shopName}</ShopName>
+                                <ShopName>{shopInfo.split(',')[0]}</ShopName>
                             </Link>
                             <Flex>
                                 <ChatIcon2 width="2.75rem" height="2rem" fill="#00bfa5" />
@@ -312,7 +360,7 @@ function ViewCheckout({ userAddresses }) {
                                 </Flex>
                             </Flex>
                         ))}
-                    </>
+                    </React.Fragment>
                 ))}
             </ProductInfo>
             <VoucherContainer>
@@ -418,13 +466,76 @@ function ViewCheckout({ userAddresses }) {
                             >
                                 [-₫{separateNumberWithDot(coin)}]
                             </div>{' '}
-                            <input type="checkbox" />
+                            <input type="checkbox" onClick={handleDescTotalPrice} />
                         </Flex>
                     </Flex>
                 </Flex>
-                <Flex>
-                    <Flex></Flex>
-                </Flex>
+                <SelectPayment flexDirection="column">
+                    <Flex width="100%" height="9rem" padding="0 3rem">
+                        <div style={{ fontSize: '1.8rem', flex: '1' }}>Phương thức thanh toán</div>
+                        <Flex>
+                            <div style={{ fontSize: '1.4rem', color: '#222' }}>
+                                Thanh toán khi nhận hàng
+                            </div>
+                            <Button
+                                backgroundColor="transparent"
+                                color="#0055aa"
+                                width="11rem"
+                                fontSize="1.75rem"
+                                style={{ marginLeft: '4rem', display: 'inline-block' }}
+                            >
+                                Thay Đổi
+                            </Button>
+                        </Flex>
+                    </Flex>
+                    <Flex width="100%" height="16rem">
+                        <div style={{ flex: '1' }}></div>
+                        <GridLayout
+                            templateColumns="1fr 1fr"
+                            style={{
+                                gridTemplateRows: '1fr 1fr 1fr',
+                                width: '25%',
+                                gridColumnGap: '1rem',
+                                height: '100%',
+                            }}
+                        >
+                            <GI>Tổng tiền hàng</GI>
+                            <GI>{separateNumberWithDot(totalPrice)}</GI>
+                            <GI>Phí vận chuyển</GI>
+                            <GI>{separateNumberWithDot(30000)}</GI>
+                            <GI>Tổng thanh toán</GI>
+                            <GI>{separateNumberWithDot(totalPrice + 30000)}</GI>
+                        </GridLayout>
+                    </Flex>
+                    <Flex
+                        width="100%"
+                        height="9.6rem"
+                        style={{
+                            padding: '0 3rem',
+                            borderTop: '1px dashed rgba(0,0,0,.09)',
+                            marginTop: '1rem',
+                            backgroundColor: '#fff',
+                        }}
+                    >
+                        <div style={{ padding: '1.2rem 1.4rem', fontSize: '1.4rem' }}>
+                            Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo{' '}
+                            <Link to="/">Điều khoản Shopee</Link>
+                        </div>
+                        <div style={{ flex: '1' }}></div>
+                        <div>
+                            <Button
+                                height="4rem"
+                                width="24rem"
+                                backgroundColor="#ee4d2d"
+                                color="#fff"
+                                fontSize="1.6rem"
+                                onClick={processToOrder}
+                            >
+                                Đặt Hàng
+                            </Button>
+                        </div>
+                    </Flex>
+                </SelectPayment>
             </Flex>
         </>
     );

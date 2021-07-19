@@ -12,3 +12,4 @@ export { default as ProductDescriptionSection } from './ProductDescription/Produ
 export { default as ProductRatingSection } from './ProductRating/ProductRating';
 export { default as ViewCart } from './Cart/ViewCart';
 export { default as ViewCheckout } from './Checkout/ViewCheckout';
+export { default as User } from './user/User';

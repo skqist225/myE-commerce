@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, isAnyOf } from '@reduxjs/toolkit';
+import getObjectSize from '../../helpers/getObjectSize';
 
 import axios from '../../axios';
 
@@ -18,20 +19,44 @@ export const fetchSingleShop = createAsyncThunk(
 );
 
 export const getProductsByFilter = createAsyncThunk(
-    '/shop/getProductsByFilter',
-    async (
-        { shopId, transportersFilter, categoriesFilter, minPrice, maxPrice },
-        { rejectWithValue }
-    ) => {
+    'shop/getProductsByFilter',
+    async (filter, { rejectWithValue }) => {
         try {
-            const transporters = [...transportersFilter].join(',');
-            const categories = [...categoriesFilter].join(',');
+            let queryPineLine = `/advanced/${filter.shopId}/products?`;
+            delete filter['shopId'];
+            const filterSize = getObjectSize(filter);
+
+            Object.keys(filter).forEach((key, index) => {
+                if (key === 'transportersFilter' && filter['transportersFilter'].size > 0) {
+                    const transporters = [...filter['transportersFilter']].join(',');
+
+                    if (index + 1 < filterSize) {
+                        queryPineLine += `transporters=${transporters}&`;
+                    } else {
+                        queryPineLine += `transporters=${transporters}`;
+                    }
+                } else if (key === 'categoriesFilter' && filter['categoriesFilter'].size > 0) {
+                    const categories = [...filter['categoriesFilter']].join(',');
+
+                    if (index + 1 < filterSize) {
+                        queryPineLine += `categories=${categories}&`;
+                    } else {
+                        queryPineLine += `transporters=${categories}`;
+                    }
+                } else if (key !== 'transportersFilter' && key !== 'categoriesFilter') {
+                    if (index + 1 < filterSize) {
+                        queryPineLine += `${key}=${filter[key]}&`;
+                    } else {
+                        queryPineLine += `${key}=${filter[key]}`;
+                    }
+                }
+            });
+
+            console.log(queryPineLine);
 
             const {
                 data: { products, successMessage },
-            } = await axios.get(
-                `/advanced/${shopId}/products?transporters=${transporters}&categories=${categories}&minPrice=${minPrice}&maxPrice=${maxPrice}`
-            );
+            } = await axios.get(queryPineLine);
 
             return { products, successMessage };
         } catch ({ data: { errorMessage } }) {
@@ -41,11 +66,14 @@ export const getProductsByFilter = createAsyncThunk(
 );
 
 export const fetchShopById = createAsyncThunk(
-    '/shop/fetchShopById',
+    'shop/fetchShopById',
     async (shopId, { rejectWithValue }) => {
         try {
             const {
-                data: { shop, shopProducts, successMessage },
+                data: {
+                    shopAndProducts: { shop, shopProducts },
+                    successMessage,
+                },
             } = await axios.get(`/shop/${shopId}/search`);
 
             return { shop, shopProducts, successMessage };
@@ -64,7 +92,7 @@ const shopSlice = createSlice({
         selectedTab: 1,
         errorMessage: null,
         successMessage: null,
-        loading: true,
+        loading: false,
     },
     reducers: {
         setSelectedTab(state, { payload }) {
@@ -79,30 +107,44 @@ const shopSlice = createSlice({
     },
     extraReducers: builder => {
         builder
+            .addCase(fetchShopById.fulfilled, (state, { payload }) => {
+                state.loading = false;
+                state.successMessage = payload.successMessage;
+                state.shop = payload.shop;
+                state.shopProducts = payload.shopProducts;
+            })
             .addCase(getProductsByFilter.fulfilled, (state, { payload }) => {
                 state.loading = false;
                 state.shopProducts = payload.products;
                 state.successMessage = payload.successMessage;
             })
-            .addMatcher(isAnyOf(fetchSingleShop.pending, fetchShopById.pending), state => {
-                state.loading = true;
-            })
             .addMatcher(
-                isAnyOf(fetchSingleShop.rejected, fetchShopById.rejected),
+                isAnyOf(
+                    fetchSingleShop.pending,
+                    fetchShopById.pending,
+                    getProductsByFilter.pending
+                ),
+                state => {
+                    state.loading = true;
+                }
+            )
+            .addMatcher(
+                isAnyOf(
+                    fetchSingleShop.rejected,
+                    fetchShopById.rejected,
+                    getProductsByFilter.rejected
+                ),
                 (state, { payload }) => {
                     state.loading = false;
                     state.errorMessage = payload;
                 }
             )
-            .addMatcher(
-                isAnyOf(fetchSingleShop.fulfilled, fetchShopById.fulfilled),
-                (state, { payload }) => {
-                    state.loading = false;
-                    state.successMessage = payload.successMessage;
-                    state.shop = payload.shop;
-                    state.shopProducts = payload.shopProducts;
-                }
-            );
+            .addMatcher(isAnyOf(fetchSingleShop.fulfilled), (state, { payload }) => {
+                state.loading = false;
+                state.successMessage = payload.successMessage;
+                state.shop = payload.shop;
+                state.shopProducts = payload.shopProducts;
+            });
     },
 });
 

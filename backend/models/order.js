@@ -28,6 +28,7 @@ const orderSchema = new Schema(
         products: [
             {
                 productId: { type: Schema.Types.ObjectId, ref: 'Product' },
+                productTypeId: { type: Schema.Types.ObjectId },
                 quantity: { type: Number, required: true },
             },
         ],
@@ -35,17 +36,10 @@ const orderSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'Product.transporters',
         },
-        paymentType: { type: String, required: true, enum: ['cod', 'card'] },
+        modeOfPayment: { type: String, required: true, enum: ['cod', 'card', 'shopeeWallet'] },
         orderStatus: {
             type: String,
-            enum: [
-                'confirming',
-                'packing',
-                'shipping',
-                'delivered',
-                'cancelled',
-                'refund',
-            ],
+            enum: ['confirming', 'packing', 'shipping', 'delivered', 'cancelled', 'refund'],
             default: 'confirming',
         },
         isPaid: {

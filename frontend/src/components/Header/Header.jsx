@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ContentContainer, StandardSelfFlex } from '../../globalStyle';
 import {
@@ -41,14 +41,29 @@ import './header.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { userLogout } from '../../features/auth';
 import { fetchUserCart } from '../../features/cart';
+import { getProductsByFilter } from '../../features/shop/shopSlice';
 
-function Header({ bgColor, noBelowSeachForm, secondLogo, getBgInCartPage }) {
+function Header({ bgColor, noBelowSeachForm, secondLogo, getBgInCartPage, match }) {
     const dispatch = useDispatch();
     const { user, isAuthenticated } = useSelector(state => state.auth);
     const { cart, successMessage } = useSelector(state => state.cart);
+    const [productName, setProductName] = useState('');
 
     const handleLogoutRequest = () => {
         dispatch(userLogout());
+    };
+
+    const handleFindProductByName = e => {
+        if (match && match.url.includes('search')) {
+            console.log(productName);
+
+            dispatch(
+                getProductsByFilter({
+                    shopId: match.params.shopId,
+                    productName,
+                })
+            );
+        }
     };
 
     useEffect(() => {
@@ -114,7 +129,7 @@ function Header({ bgColor, noBelowSeachForm, secondLogo, getBgInCartPage }) {
                                             <MenuLink to="/">tài khoản của tôi</MenuLink>
                                         </MenuItem>
                                         <MenuItem>
-                                            <MenuLink to="/">đơn mua </MenuLink>
+                                            <MenuLink to="/user/account/profile">đơn mua </MenuLink>
                                         </MenuItem>
                                         <MenuItem to="/buyer/login" onClick={handleLogoutRequest}>
                                             <MenuLink>đăng xuất</MenuLink>
@@ -157,8 +172,16 @@ function Header({ bgColor, noBelowSeachForm, secondLogo, getBgInCartPage }) {
                     {secondLogo && <div style={{ flex: '1' }}></div>}
                     <HeaderSearchWrapper secondLogo={secondLogo}>
                         <HeaderForm>
-                            <HeaderSearchInput secondLogo={secondLogo} />
-                            <HeaderSearchButton children={<SearchIcon />} bgColor={bgColor} />
+                            <HeaderSearchInput
+                                secondLogo={secondLogo}
+                                value={productName}
+                                onChange={e => setProductName(e.target.value)}
+                            />
+                            <HeaderSearchButton
+                                children={<SearchIcon />}
+                                bgColor={bgColor}
+                                onClick={handleFindProductByName}
+                            />
                         </HeaderForm>
 
                         <HeaderBelowSearchProductName>

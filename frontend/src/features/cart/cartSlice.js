@@ -69,6 +69,25 @@ export const addToCart = createAsyncThunk(
     }
 );
 
+export const deleteUserCart = createAsyncThunk(
+    'cart/deleteUserCart',
+    async (_, { dispatch, rejectWithValue }) => {
+        try {
+            const {
+                data: { successMessage },
+            } = await axios.delete(`/user/cart/delete`);
+
+            if (successMessage) {
+                dispatch(fetchUserCart());
+            }
+
+            return { successMessage };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
+    }
+);
+
 const cartSlice = createSlice({
     name: 'cart',
     initialState: {
@@ -77,6 +96,7 @@ const cartSlice = createSlice({
         errorMessage: null,
         successMessage: null,
         deleteSuccessMessage: null,
+        deleteCartSuccessMessage: null,
     },
     reducers: {
         clearSuccessMessage(state) {
@@ -101,6 +121,10 @@ const cartSlice = createSlice({
             .addCase(deleteProductInCart.fulfilled, (state, { payload }) => {
                 state.loading = 'idle';
                 state.deleteSuccessMessage = payload.successMessage;
+            })
+            .addCase(deleteUserCart.fulfilled, (state, { payload }) => {
+                state.loading = 'idle';
+                state.deleteCartSuccessMessage = payload.successMessage;
             })
             .addMatcher(isAnyOf(addToCart.pending, fetchUserCart.pending), state => {
                 state.loading = 'pending';

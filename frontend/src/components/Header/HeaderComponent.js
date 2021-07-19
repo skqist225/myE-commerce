@@ -188,7 +188,7 @@ export const HeaderSearchWrapper = styled.div`
     height: 100%;
 `;
 
-export const HeaderForm = styled.form`
+export const HeaderForm = styled.div`
     position: relative;
     flex: 1;
     padding: 5px;
@@ -292,4 +292,8 @@ export const Badge = styled.span.attrs(props => ({ children: props.innertext }))
     color: #f6422d;
     bottom: 4rem;
     right: 3.5rem;
+
+    @media (max-width: 991px) {
+        right: 1.5rem;
+    }
 `;

@@ -9,99 +9,65 @@ const httpStatusCode = require('../utils/constansts');
 const ErrorHandler = require('../utils/errorHandler');
 
 exports.addOrder = catchAsyncError(async (req, res, next) => {
-    let products = [],
-        shopIds = [];
-    const userId = req.user._id;
+    const { _id: user } = req.user;
 
-    if (req.body.products) {
-        req.body.products.forEach(({ productId, quantity }) => {
-            products.push({
-                productId: mongoose.Types.ObjectId(productId),
-                quantity,
-            });
-        });
-    }
-
-    if (products.length > 0) {
-        // products.forEach(async ({ productId }) => {
-        //     let productObj = await Product.findById(productId).select('shop');
-
-        //     shopIds.push(productObj.shop);
-        //     console.log(shopIds);
-        // });
-        let productObj = await Product.findById(products[0].productId).select('shop');
-
-        if (!shopIds.every(id => id.toString() === shopIds[0].toString())) {
-            console.log('false');
-
-            return next(
-                new ErrorHandler(
-                    'Can not add product of different shop to an order',
-                    httpStatusCode.BAD_REQUEST
-                )
-            );
-        }
-
-        let deliveryAddress;
-
-        if (req.body.deliveryAddress) {
-            deliveryAddress = req.body.deliveryAddress;
-        } else {
-            let address = await Address.findOne({
-                user: userId,
-                isDefault: true,
-            }).select('_id');
-
-            if (address) {
-                deliveryAddress = address;
+    if (req.body.length > 0) {
+        req.body.forEach(async $order => {
+            let deliveryAddress;
+            if ($order.deliveryAddress) {
+                deliveryAddress = $order.deliveryAddress;
             } else {
-                return res.status(httpStatusCode.BAD_REQUEST).json({
-                    suceess: false,
-                    message: 'Please add address',
-                });
-            }
-        }
-
-        const { paymentType, transporter } = req.body;
-
-        const order = new Order({
-            user: userId,
-            shop: productObj.shop,
-            products,
-            deliveryAddress,
-            paymentType,
-            transporter,
-        });
-
-        order.save(
-            catchAsyncError(async (err, order) => {
-                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-                if (order) {
-                    return res.status(httpStatusCode.CREATED).json({
-                        success: true,
-                        message: 'Order created successfully',
-                        order,
+                let address = await Address.findOne({
+                    user,
+                    isDefault: true,
+                }).select('_id');
+                if (address) {
+                    deliveryAddress = address;
+                } else {
+                    return res.status(httpStatusCode.BAD_REQUEST).json({
+                        errorMessage: 'Please add address',
                     });
                 }
-            })
-        );
+            }
+            const { modeOfPayment, transporter, products, shop } = $order;
+            const order = new Order({
+                user,
+                shop,
+                products,
+                deliveryAddress,
+                modeOfPayment,
+                transporter,
+            });
+            order.save(
+                catchAsyncError(async (err, order) => {
+                    if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+                    if (order) {
+                        return res.status(httpStatusCode.CREATED).json({
+                            successMessage: 'Order created successfully',
+                            order,
+                        });
+                    }
+                })
+            );
+        });
     } else {
-        return next(new ErrorHandler('Can not make an order without product'));
+        return res
+            .status(httpStatusCode.FORBIDDEN)
+            .json({ errorMessage: 'There is no product to process' });
     }
 });
 
 exports.getUserOrders = (req, res, next) => {
-    Order.find({ user: req.user._id }).exec((err, orders) => {
+    const { _id: user } = req.user;
+
+    Order.find({ user }).exec((err, orders) => {
         if (err) {
             return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
         }
 
         if (orders) {
             return res.status(httpStatusCode.OK).json({
-                success: true,
-                message: "User's orders fetched successfully",
-                orders_nbm: orders.length,
+                successMessage: "User's orders fetched successfully",
                 orders,
             });
         }
@@ -303,3 +269,11 @@ exports.getUserSingleOrder = catchAsyncError(async (req, res, next) => {
         message: "User's order fetched successfully",
     });
 });
+
+exports.deleteAllOrders = async (req, res, next) => {
+    const response = await Order.deleteMany();
+
+    if (response) {
+        res.status(httpStatusCode.OK).json({ successMessage: 'Delete all orders successfully' });
+    }
+};

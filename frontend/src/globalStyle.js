@@ -84,8 +84,8 @@ export const PageBodyContainer = styled.main`
 export const MenuList = styled.ul`
     list-style-type: none;
     display: flex;
-
-    align-items: center;
+    flex-direction: ${props => props.flexDirection || 'row'};
+    align-items: ${props => props.alignItems || 'center'};
     padding-left: 0;
 `;
 

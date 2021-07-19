@@ -233,17 +233,14 @@ exports.getUserCart = async (req, res, next) => {
 };
 
 //Testing
-exports.deleteCart = catchAsyncError(async (req, res, next) => {
-    const cart = await Cart.findOne({ user: req.user._id });
+exports.deleteUserCart = catchAsyncError(async (req, res, next) => {
+    const { _id: user } = req.user;
 
-    if (cart.cartProducts.length === 0) {
-        Cart.deleteOne({ user: req.user._id }).exec(err => {
-            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+    Cart.deleteOne({ user }).exec(err => {
+        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
-            return res.status(httpStatusCode.OK).json({
-                success: true,
-                message: 'Cart deleted successfully',
-            });
+        return res.status(httpStatusCode.OK).json({
+            successMessage: 'Cart deleted successfully',
         });
-    }
+    });
 });

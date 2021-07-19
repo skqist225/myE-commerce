@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Button, Flex } from '../../globalStyle';
+import { Button, Flex, StandardSelfFlex } from '../../globalStyle';
 
 export const ShippingAddress = styled.div`
     width: 100%;
@@ -187,4 +187,75 @@ export const Coin = styled.div`
     color: #929292;
     margin-left: 17px;
     font-size: 1.75rem;
+`;
+
+export const SelectPayment = styled(Flex)`
+    width: 100%;
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 0 rgb(0 0 0 / 5%);
+    margin-bottom: 1.2rem;
+`;
+
+export const GI = styled(StandardSelfFlex)`
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.54);
+
+    &:first-child {
+        grid-column-start: 1;
+        grid-column-end: 2;
+    }
+
+    &:nth-child(2) {
+        grid-column-start: 2;
+        grid-column-end: 3;
+    }
+
+    &:nth-child(3) {
+        grid-column-start: 1;
+        grid-column-end: 2;
+
+        grid-row-start: 2;
+        grid-row-end: 3;
+    }
+    &:nth-child(4) {
+        grid-column-start: 2;
+        grid-column-end: 3;
+
+        grid-row-start: 2;
+        grid-row-end: 3;
+    }
+
+    &:nth-child(5) {
+        grid-column-start: 1;
+        grid-column-end: 2;
+
+        grid-row-start: 3;
+        grid-row-end: 4;
+    }
+
+    &:last-child {
+        grid-column-start: 2;
+        grid-column-end: 3;
+
+        grid-row-start: 3;
+        grid-row-end: 4;
+
+        color: #ee4d2d;
+        font-size: 2.5rem;
+    }
+
+    &:nth-child(even) {
+        justify-content: flex-end;
+        padding-right: 2.5rem;
+    }
+
+    &:nth-child(even):before {
+        content: 'đ';
+        text-direction: underline;
+    }
+
+    &:nth-child(odd) {
+        justify-content: flex-start;
+    }
 `;

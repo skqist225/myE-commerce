@@ -5,10 +5,20 @@ import { fetchUserAddresses, userAddressesSelector } from '../../features/userAd
 import { Header } from '../../components';
 import { PageBodyContainer, ContentContainer } from '../../globalStyle';
 import { ViewCheckout } from '../../components';
+import { useHistory } from 'react-router-dom';
 
 const Checkout = () => {
     const dispatch = useDispatch();
+    const history = useHistory();
     const userAddresses = useSelector(userAddressesSelector.selectAll);
+
+    const selectedProductInCart = localStorage.getItem('cart');
+
+    useEffect(() => {
+        if (selectedProductInCart === null) {
+            history.push('/');
+        }
+    }, []);
 
     React.useEffect(() => {
         dispatch(fetchUserAddresses());

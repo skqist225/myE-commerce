@@ -175,26 +175,58 @@ exports.getAllShops = async (req, res, next) => {
 //     });
 // };
 
-exports.getShopById = (req, res, next) => {
-    const { shopId } = req.params;
-    if (mongoose.isValidObjectId(shopId)) {
-        Shop.findById(shopId)
-            .populate('user')
-            .exec(async (err, shop) => {
-                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+exports.getShopById = async (req, res, next) => {
+    const { shopId: shop } = req.params;
 
-                if (shop) {
-                    const shopProducts = await Product.find({ shop: shop._id })
-                        .populate('category', 'categoryName _id')
-                        .populate('transporters', 'transporterName transportFee _id');
+    if (mongoose.isValidObjectId(shop)) {
+        const shopAndProducts = await Product.aggregate([
+            {
+                $match: { shop: mongoose.Types.ObjectId(shop) },
+            },
+            {
+                $lookup: {
+                    from: 'shops',
+                    localField: 'shop',
+                    foreignField: '_id',
+                    as: 'shop',
+                },
+            },
+            {
+                $unwind: '$shop',
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'category',
+                    foreignField: '_id',
+                    as: 'category',
+                },
+            },
+            {
+                $unwind: '$category',
+            },
+            {
+                $group: {
+                    _id: '$shop._id',
+                    shop: { $mergeObjects: '$shop' },
+                    shopProducts: { $push: '$$ROOT' },
+                },
+            },
+            {
+                $project: {
+                    'shopProducts.shop': 0,
+                    'shopProducts.description': 0,
+                    'shopProducts.supplier': 0,
+                    'shopProducts.productWeight': 0,
+                    'shopProducts.transporters': 0,
+                },
+            },
+        ]);
 
-                    return res.status(httpStatusCode.OK).json({
-                        successMessage: `${shop.shopName} fetched successfully`,
-                        shopProducts,
-                        shop,
-                    });
-                }
-            });
+        res.status(httpStatusCode.OK).json({
+            successMessage: `${shop.shopName} fetched successfully`,
+            shopAndProducts: shopAndProducts[0],
+        });
     } else {
         return next(new ErrorHandler('Shop id is invalid', httpStatusCode.BAD_REQUEST));
     }

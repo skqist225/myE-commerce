@@ -169,12 +169,14 @@ function ShopProducts({ match }) {
         dispatch(
             getProductsByFilter({
                 shopId,
-                transportersFilter,
-                categoriesFilter,
                 minPrice,
                 maxPrice,
             })
         );
+    };
+
+    const resetFilter = () => {
+        dispatch(fetchShopById(shopId));
     };
 
     useEffect(() => {
@@ -183,7 +185,7 @@ function ShopProducts({ match }) {
 
     useEffect(() => {
         dispatch(getProductsByFilter({ shopId, transportersFilter, categoriesFilter }));
-    }, [shopId, transportersFilter, categoriesFilter]);
+    }, [dispatch, shopId, transportersFilter, categoriesFilter]);
 
     useEffect(() => {
         dispatch(fetchTransporters());
@@ -477,7 +479,9 @@ function ShopProducts({ match }) {
                                             </Flex>
                                         </div>
                                         <div>
-                                            <FilterButton>Xóa Tất Cả</FilterButton>
+                                            <FilterButton onClick={resetFilter}>
+                                                Xóa Tất Cả
+                                            </FilterButton>
                                         </div>
                                     </div>
                                 </div>

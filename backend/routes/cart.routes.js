@@ -2,7 +2,7 @@ const router = require('express').Router();
 const {
     addToCart,
     removeCartProducts,
-    deleteCart,
+    deleteUserCart,
     getUserCart,
 } = require('../controllers/cartController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
@@ -17,6 +17,6 @@ router.put(
     removeCartProducts
 );
 
-router.delete('/user/cart/delete', [isAuthenticatedUser, authorizeRoles('user')], deleteCart);
+router.delete('/user/cart/delete', [isAuthenticatedUser, authorizeRoles('user')], deleteUserCart);
 
 module.exports = router;

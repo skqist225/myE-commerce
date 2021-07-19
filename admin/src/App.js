@@ -43,22 +43,18 @@ function App() {
                 <Switch>
                     <Route path="/login" component={UserLogin} />
                     <ProtectedRoute path="/uploads/images" component={Home} />
-
                     <ProtectedRoute path="/users" component={UserList} />
                     <ProtectedRoute path="/user/account/profile" component={User} exact />
-
                     <ProtectedRoute path="/products" component={ProductList} />
                     <ProtectedRoute path="/product/add" component={AddProduct} exact />
                     <ProtectedRoute path="/product/:productId/edit" component={EditProduct} />
-
                     <ProtectedRoute path="/product/:productId" component={ViewProduct} />
-
                     <ProtectedRoute path="/shop/add" component={AddShop} exact />
                     {/* <ProtectedRoute path="/shop" component={SaleChannel} exact /> */}
-
                     <ProtectedRoute path="/shop/:shopId/edit" component={EditShop} exact />
                     <ProtectedRoute path="/shop/:shopId/search" component={ShopProducts} exact />
                     <ProtectedRoute path="/shop/:shopName" component={ViewShop} exact />
+
                     <ProtectedRouteWithLayout
                         parent={SaleChannel}
                         path={`/shop/sale/order`}

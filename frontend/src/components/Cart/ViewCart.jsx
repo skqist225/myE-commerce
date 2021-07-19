@@ -279,8 +279,10 @@ function ViewCart() {
         const selectedProductInfo = new Map();
         for (let cb of allCb) {
             if (cb.checked) {
-                cart.forEach(({ products, shop }) => {
+                cart.forEach(({ products, shop: { shopName, _id: shopId } }) => {
                     products.forEach(({ product }) => {
+                        const shopObj = `${shopName},${shopId}`;
+
                         if (product._id === cb.value) {
                             const productObj = {
                                 ...product,
@@ -292,19 +294,19 @@ function ViewCart() {
                                 _quantity: quantity.get(product._id),
                             };
 
-                            selectedProductInfo.has(shop.shopName)
+                            selectedProductInfo.has(shopObj)
                                 ? selectedProductInfo.set(
-                                      shop.shopName,
-                                      selectedProductInfo.get(shop.shopName).concat(productObj)
+                                      shopObj,
+                                      selectedProductInfo.get(shopObj).concat(productObj)
                                   )
-                                : selectedProductInfo.set(shop.shopName, [productObj]);
+                                : selectedProductInfo.set(shopObj, [productObj]);
                         }
                     });
                 });
             }
         }
 
-        if (selectedProductInfo.length < 1) {
+        if (selectedProductInfo.size < 1) {
             setShowNotifyModal(prevState => {
                 if (prevState.anchor) {
                     return { anchor: null };
@@ -316,6 +318,9 @@ function ViewCart() {
             return;
         }
 
+        const [[shopInfo, products]] = selectedProductInfo;
+
+        console.log(shopInfo, products);
         const cartLocalStore = localStorage.getItem('cart');
 
         if (cartLocalStore) {
