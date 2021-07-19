@@ -233,11 +233,11 @@ exports.getShopById = async (req, res, next) => {
 };
 
 exports.getShopByName = async (req, res, next) => {
-    const { shopName } = req.params;
-    const _shopName = shopName.replace(/_/g, ' ');
+    let { shopName } = req.params;
+    shopName = shopName.replace(/_/g, ' ');
 
     const shop = await Shop.findOne({
-        shopName: { $regex: new RegExp(_shopName, 'i') },
+        shopName: { $regex: new RegExp(shopName, 'i') },
     }).lean();
 
     const shopProducts = await Product.find({ shop: shop._id });
@@ -250,14 +250,14 @@ exports.getShopByName = async (req, res, next) => {
 };
 
 exports.getMallShop = async (req, res) => {
-    const { shopCategory } = req.params;
-    const shopCategoryId = shopCategory.substring(shopCategory.indexOf('.') + 1);
+    let { shopCategory } = req.params;
+    shopCategory = shopCategory.substring(shopCategory.indexOf('.') + 1);
 
-    if (mongoose.isValidObjectId(shopCategoryId)) {
+    if (mongoose.isValidObjectId(shopCategory)) {
         const shops = await Shop.aggregate([
             {
                 $match: {
-                    shopCategory: mongoose.Types.ObjectId(shopCategoryId),
+                    shopCategory: mongoose.Types.ObjectId(shopCategory),
                     isMallType: true,
                 },
             },

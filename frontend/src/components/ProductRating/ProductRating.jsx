@@ -116,7 +116,6 @@ function ProductRating({ match, bgColor }) {
 
     useEffect(() => {
         handleClickForButton();
-        // handleLike();
     }, []);
 
     useEffect(() => {

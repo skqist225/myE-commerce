@@ -104,6 +104,10 @@ function ViewCart() {
 
         console.log('Child rendering...');
 
+        useEffect(() => {
+            return () => handleDeleteProduct;
+        }, []);
+
         return (
             <ModalContainer>
                 <OpacityBackground>
@@ -331,7 +335,7 @@ function ViewCart() {
         history.push('/checkout');
     };
 
-    console.log('view cart rendering...');
+    // console.log('view cart rendering', );
 
     useEffect(() => {
         if (deleteSuccessMessage) {

@@ -28,11 +28,11 @@ export const addOrder = createAsyncThunk(
 
 export const fetchUserOrders = createAsyncThunk(
     'orders/fetchUserOrders',
-    async (_, { rejectWithValue }) => {
+    async (typeNumber = '6', { rejectWithValue }) => {
         try {
             const {
                 data: { orders, successMessage },
-            } = await axios.get(`/user/orders`);
+            } = await axios.get(`/user/orders/${typeNumber}`);
 
             return { orders, successMessage };
         } catch ({ data: { errorMessage } }) {

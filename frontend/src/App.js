@@ -23,7 +23,7 @@ function App() {
                     <ProtectedRoute component={Home} path="/" exact />
                     <ProtectedRoute component={Checkout} path="/checkout" exact />
                     <ProtectedRoute component={Cart} path="/cart" exact />
-                    <ProtectedRoute component={Personal} path="/user/account/profile" exact />
+                    <ProtectedRoute component={Personal} path="/user/*" exact />
                     <ProtectedRoute component={CategoryMall} path="/:shopCategory" exact />
                     <ProtectedRoute component={ShopProducts} path="/shop/:shopId/search" exact />
                     <ProtectedRoute component={ViewShop} path="/shop/:shopName" exact />

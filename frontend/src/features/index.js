@@ -9,3 +9,4 @@ export { default as reviewsReducer } from './reviews/reviewsSlice';
 export { default as cartReducer } from './cart/cartSlice';
 export { default as userAddressesReducer } from './userAddresses/userAddressesSlice';
 export { default as ordersReducer } from './orders/ordersSlice';
+export { default as profilePageTabReducer } from './pageTab/profilePageTabSlice';

@@ -1,22 +1,24 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { Header, User } from '../../components';
-import { fetchUserOrders } from '../../features/orders/ordersSlice';
-import { PageBodyContainer, ContentContainer } from '../../globalStyle';
+import { Header, User, LeftMenu, Purchase } from '../../components';
+import { PageBodyContainer, ContentContainer, Flex } from '../../globalStyle';
 
-function Personal() {
+function Personal({ match }) {
+    const { url } = match;
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        dispatch(fetchUserOrders());
-    }, [dispatch]);
+    console.log(match.url);
 
     return (
         <>
             <Header />
             <PageBodyContainer backgroundColor="#f5f5f5" pt="2rem">
-                <ContentContainer>
-                    <User />
+                <ContentContainer height="300rem">
+                    <Flex alignItems="flex-start">
+                        <LeftMenu />
+                        {url === '/user/account/profile' && <User />}
+                        {url === '/user/purchase' && <Purchase url={url} match={match} />}
+                    </Flex>
                 </ContentContainer>
             </PageBodyContainer>
         </>

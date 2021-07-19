@@ -57,20 +57,125 @@ exports.addOrder = catchAsyncError(async (req, res, next) => {
     }
 });
 
-exports.getUserOrders = (req, res, next) => {
+exports.getUserOrders = async (req, res, next) => {
     const { _id: user } = req.user;
+    const { typeNumber } = req.params;
+    let orderStatus = '';
 
-    Order.find({ user }).exec((err, orders) => {
-        if (err) {
-            return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-        }
+    switch (typeNumber) {
+        case '9':
+            orderStatus = 'confirming';
+            break;
+        case '7':
+            orderStatus = 'packing';
+            break;
+        case '8':
+            orderStatus = 'shipping';
+            break;
+        case '3':
+            orderStatus = 'delivered';
+            break;
+        case '4':
+            orderStatus = 'cancelled';
+            break;
+        case '2':
+            orderStatus = 'refund';
+            break;
 
-        if (orders) {
-            return res.status(httpStatusCode.OK).json({
-                successMessage: "User's orders fetched successfully",
-                orders,
-            });
-        }
+        default:
+            orderStatus = undefined;
+    }
+
+    let orderPineLine = Order.aggregate([
+        { $match: { user } },
+        {
+            $lookup: {
+                from: 'shops',
+                localField: 'shop',
+                foreignField: '_id',
+                as: 'shop',
+            },
+        },
+        { $unwind: '$shop' },
+        {
+            $project: {
+                'shop.homeImages': 0,
+                'shop.vouchers': 0,
+            },
+        },
+        { $unwind: '$products' },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'products.productId',
+                foreignField: '_id',
+                as: 'product',
+            },
+        },
+        {
+            $project: {
+                'product.description': 0,
+            },
+        },
+        {
+            $unwind: '$product',
+        },
+        {
+            $unwind: '$product.productTypes',
+        },
+        {
+            $addFields: { quantity: '$products.quantity' },
+        },
+        {
+            $redact: {
+                $cond: {
+                    if: { $eq: ['$products.productTypeId', '$product.productTypes._id'] },
+                    then: '$$KEEP',
+                    else: '$$PRUNE',
+                },
+            },
+        },
+        {
+            $project: { products: 0 },
+        },
+        {
+            $project: { 'product.images': 0, 'product.transporters': 0 },
+        },
+        {
+            $project: { 'product.images': 0, 'product.transporters': 0 },
+        },
+        {
+            $group: {
+                _id: '$createdAt',
+                shop: { $mergeObjects: '$shop' },
+                products: {
+                    $push: { product: '$product', quantity: '$quantity' },
+                },
+                orderInfo: {
+                    $push: { orderStatus: '$orderStatus' },
+                },
+            },
+        },
+        {
+            $unwind: '$orderInfo',
+        },
+        {
+            $sort: {
+                _id: -1,
+            },
+        },
+    ]);
+
+    if (orderStatus) {
+        orderPineLine = orderPineLine.match({ 'orderInfo.orderStatus': orderStatus });
+    }
+
+    const orders = await orderPineLine;
+
+    return res.status(httpStatusCode.OK).json({
+        successMessage: "User's orders fetched successfully",
+        length: orders.length,
+        orders,
     });
 };
 

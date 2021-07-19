@@ -18,9 +18,13 @@ router.post(
     addOrder
 );
 
-router.get('/user/orders', [isAuthenticatedUser, authorizeRoles('user')], getUserOrders);
+router.get(
+    '/user/orders/:typeNumber',
+    [isAuthenticatedUser, authorizeRoles('user', 'admin')],
+    getUserOrders
+);
 
-router.get('/shop/orders', [isAuthenticatedUser, authorizeRoles('shop')], getShopOrders);
+router.get('/shop/orders', [isAuthenticatedUser, authorizeRoles('shop', 'admin')], getShopOrders);
 
 router.get('/admin/orders', [isAuthenticatedUser, authorizeRoles('admin')], getAllOrders);
 

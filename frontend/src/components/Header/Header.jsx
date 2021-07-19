@@ -126,10 +126,12 @@ function Header({ bgColor, noBelowSeachForm, secondLogo, getBgInCartPage, match 
                                 render={
                                     <MenuList>
                                         <MenuItem>
-                                            <MenuLink to="/">tài khoản của tôi</MenuLink>
+                                            <MenuLink to="/user/account/profile">
+                                                tài khoản của tôi
+                                            </MenuLink>
                                         </MenuItem>
                                         <MenuItem>
-                                            <MenuLink to="/user/account/profile">đơn mua </MenuLink>
+                                            <MenuLink to="/user/purchase">đơn mua </MenuLink>
                                         </MenuItem>
                                         <MenuItem to="/buyer/login" onClick={handleLogoutRequest}>
                                             <MenuLink>đăng xuất</MenuLink>

@@ -3,87 +3,14 @@ import { Flex, MenuItem, MenuList, Button } from '../../globalStyle';
 
 export const QuickMenuTitle = styled.div``;
 
-export const DetailFunc = styled(MenuItem)`
-    font-size: 1.75rem;
-    color: rgba(0, 0, 0, 0.65);
-    margin-bottom: 1.875rem;
-    cursor: pointer;
-    line-height: 2.5rem;
-
-    & a {
-        color: #565656;
-    }
-
-    &:last-child {
-        margin-bottom: 0;
-    }
-
-    &:hover a {
-        color: #ee4d2d;
-    }
-`;
-
-export const MenuDetail = styled(MenuList).attrs(() => ({
-    className: 'menuDetail',
-}))`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    padding-left: 1rem;
-
-    & ${DetailFunc}:hover {
-        color: #ee4d2d;
-    }
-`;
-
-export const MenuTitle = styled.div`
-    cursor: pointer;
-    font-size: 1.8rem;
-    line-height: 2.5rem;
-    padding-left: 1rem;
-
-    &:hover {
-        color: #ee4d2d;
-    }
-`;
-export const MenuIcon = styled.img`
-    width: 25px;
-    height: 25px;
-`;
-
-export const FlexAlignStart = styled(Flex)`
-    align-items: flex-start;
-    width: 100%;
-    margin-bottom: 1.875rem;
-`;
-
-export const LeftMenu = styled.section`
-    flex: 1;
-    max-width: 20%;
-`;
-
-export const RightInfo = styled.section`
+export const UserInfoSection = styled.section`
     padding: 0 3.75rem 1.25rem;
     background: #fff;
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 13%);
     margin-left: 1.6875rem;
     border-radius: 2px;
     flex: 3;
-
-    // height: calc(100% - 17rem);
-`;
-
-export const Username = styled.div`
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    min-height: 2rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #333;
-    font-size: 1.75rem;
-    line-height: 1.8rem;
+    height: 80rem;
 `;
 
 export const Label = styled.label`
@@ -247,8 +174,3 @@ export const InfoSection = styled.section`
         padding-right: 6.25rem;
     }
 `;
-
-// margin-top: .1875rem;
-// font-size: .875rem;
-// line-height: 1.0625rem;
-// color: #555;

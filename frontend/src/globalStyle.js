@@ -100,6 +100,10 @@ export const MenuItem = styled.li`
     font-size: ${props => props.fontSize};
     padding: ${props => props.padding};
     color: ${props => props.color};
+
+    &.active {
+        border-bottom: 2px solid #ee4d2d;
+    }
 `;
 
 export const Button = styled.button`
