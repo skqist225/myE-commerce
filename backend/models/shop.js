@@ -43,6 +43,7 @@ const shopSchema = new Schema(
         shopLocation: { type: String },
         isMallType: { type: Boolean, default: false },
         shopCategory: { type: mongoose.Types.ObjectId, ref: 'Category', required: true },
+        number_of_products: { type: Number, default: 0 },
         approvedAt: {
             type: Date,
         },

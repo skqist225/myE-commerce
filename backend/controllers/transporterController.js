@@ -5,32 +5,25 @@ const httpStatusCode = require('../utils/constansts');
 const ErrorHandler = require('../utils/errorHandler');
 const mongoose = require('mongoose');
 const processImagePath = require('../helpers/processImageSavePath');
+const isSaveFolderExist = require('../helpers/isSaveFolderExist');
 
 exports.addTransporter = (req, res, next) => {
-    const { transporterName, contactNumber, policy, transportFee, pickUpArea, deliveryArea } =
-        req.body;
+    let transporterAddInfo = {};
 
-    let transporterLogo;
-    if (req.file) {
-        transporterLogo = processImagePath(req.file.path);
-    } else {
-        return res
-            .status(httpStatusCode.BAD_REQUEST)
-            .json({ errorMessage: 'Please select transporter logo' });
-    }
-
-    const transporter = new Transporter({
-        transporterName,
-        transporterLogo,
-        contactNumber,
-        policy,
-        transportFee,
-        pickUpArea,
-        deliveryArea,
+    Object.keys(req.body).forEach(key => {
+        if (typeof req.body[key] !== 'undefined') {
+            transporterAddInfo[key] = req.body[key];
+        }
     });
 
+    if (req.file) {
+        transporterAddInfo[transporterLogo] = processImagePath(req.file.path);
+    }
+
+    const transporter = new Transporter(transporterAddInfo);
+
     transporter.save((err, transporter) => {
-        if (err) res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err });
+        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
         if (transporter) {
             return res.status(httpStatusCode.CREATED).json({
@@ -43,66 +36,64 @@ exports.addTransporter = (req, res, next) => {
 };
 
 exports.updateTransporter = async (req, res, next) => {
-    const { transporterId } = req.params;
-
-    const transporter = await Transporter.findById(transporterId);
-
-    if (!transporter) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-    let updatedTransporter = transporter;
+    const { transporterId: transporter } = req.params;
+    let transporterUpdateInfo = {};
 
     Object.keys(req.body).forEach(key => {
-        updatedTransporter[key] = req.body[key];
+        if (typeof req.body[key] !== 'undefined') {
+            transporterUpdateInfo[key] = req.body[key];
+        }
     });
 
     if (req.files) {
-        updatedTransporter[transporterLogo] = req.files[0];
+        transporterUpdateInfo[transporterLogo] = req.files[0];
     }
 
     Transporter.findByIdAndUpdate(
-        transporterId,
-        updatedTransporter,
+        transporter,
+        transporterUpdateInfo,
         { new: true },
-        (err, newTransporter) => {
-            return res.status(httpStatusCode.OK).json({
-                successMessage: `${newTransporter.transporterName} updated successfully`,
-                updatedTransporter: newTransporter,
+        (err, transporter) => {
+            if (!transporter) {
+                res.status(httpStatusCode.NOT_FOUND).json({
+                    success: false,
+                    message: 'Transporter not found',
+                });
+            }
+            res.status(httpStatusCode.OK).json({
+                successMessage: `${transporter.transporterName} updated successfully`,
+                transporter,
             });
         }
     );
 };
 
-exports.getAllTransporters = (req, res, next) => {
-    Transporter.find({}).exec((err, transporters) => {
-        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+exports.getAllTransporters = catchAsyncError(async (req, res, next) => {
+    const transporters = await Transporter.find();
 
-        if (transporters) {
-            return res.status(httpStatusCode.OK).json({
-                successMessage: 'All transporter fetched successfully',
-                transporters,
-            });
-        }
+    res.status(httpStatusCode.OK).json({
+        successMessage: 'All transporter fetched successfully',
+        transporters,
     });
-};
+});
 
 exports.getProductTransporters = (req, res, next) => {
-    const { productId } = req.params;
+    const { productId: product } = req.params;
 
-    if (mongoose.isValidObjectId(productId)) {
-        Product.findById(productId)
-            .select('transporters')
-            .populate('transporters')
-            .exec((err, transporters) => {
-                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-                if (transporters) {
-                    return res.status(httpStatusCode.OK).json({
-                        success: true,
-                        message: "Product's transporters fetched successfully",
-                        transporters_nbm: transporters.length,
-                        transporters,
-                    });
-                }
-            });
+    if (!mongoose.isValidObjectId(product)) {
+        res.status(httpStatusCode.BAD_REQUEST).json({ message: 'Product ID is invalid' });
     }
+
+    Product.findById(product)
+        .select('transporters')
+        .populate('transporters')
+        .exec((err, transporters) => {
+            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+            if (transporters) {
+                return res.status(httpStatusCode.OK).json({
+                    successMessage: "Product's transporters fetched successfully",
+                    transporters,
+                });
+            }
+        });
 };

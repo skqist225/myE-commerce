@@ -9,57 +9,30 @@ const processImagePath = require('../helpers/processImageSavePath');
 const mongoose = require('mongoose');
 const deleteImage = require('../helpers/deleteImage');
 const ProductFeatures = require('../utils/productFeatureAPIs');
+const { updateOne } = require('../models/productModal');
 
 exports.addProduct = catchAsyncError(async (req, res, next) => {
     const { _id: user } = req.user;
 
     //DEVNOTIFY
-    if (!req.query || (req.query && req.query.dest === undefined)) {
+    if (!Object.keys(req.query).length || req.query.dest !== 'product') {
         return res
             .status(httpStatusCode.BAD_REQUEST)
             .json({ errorMessage: 'Please secify folder to save image' });
     } //DEVNOTIFY
 
     if (mongoose.isValidObjectId(user)) {
-        const { _id: shop } = await Shop.findOne({ user });
-        const shopProducts = await Product.find({ shop });
-
-        const isProductNameExist = ({ productName }) => {
-            let prdName = req.body.productName;
-
-            if (prdName.includes('-')) {
-                let prdNameSubName1 = prdName.split('-');
-
-                if (productName.includes('-')) {
-                    if (productName.split('-').length === prdNameSubName1.length) {
-                    }
-
-                    const prdNameSubName2 = productName.split('-');
-
-                    let trueAcc = 0;
-
-                    for (let i = 0; i < prdNameSubName1.length; i++) {
-                        if (prdNameSubName1[i] === prdNameSubName2[i]) {
-                            trueAcc++;
-                        }
-                    }
-
-                    if (trueAcc === prdNameSubName1.length) {
-                        return true;
-                    }
-                }
-            }
-
-            return productName === prdName;
-        };
+        const { _id: shop } = await Shop.findOne({ user }).select('_id').lean();
+        const isProductNameExist = await Product.findOne({
+            shop,
+            productName: { $regex: new RegExp(req.body.productName.replace(/-|_|\./g, ''), 'i') },
+        }).lean();
 
         if (shop) {
-            if (shopProducts.length > 0) {
-                if (shopProducts.some(isProductNameExist)) {
-                    res.status(httpStatusCode.BAD_REQUEST).json({
-                        errorMessage: 'This product name is already exists in our shop',
-                    });
-                }
+            if (isProductNameExist) {
+                res.status(httpStatusCode.FORBIDDEN).json({
+                    errorMessage: 'This product name is already exists in our shop',
+                });
             }
 
             const {
@@ -80,7 +53,7 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
             }
 
             let _product = {
-                shop: req.body.shop,
+                shop,
                 productName,
                 description,
                 category,
@@ -96,6 +69,13 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
             if (req.files.images) {
                 req.files.images.forEach(image => {
                     _product.images.push(processImagePath(image.path));
+                });
+            }
+
+            if (!req.body.productTypes) {
+                res.status(httpStatusCode.BAD_REQUEST).json({
+                    success: false,
+                    message: 'Can not please products types empty',
                 });
             }
 
@@ -164,12 +144,11 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
             const product = new Product(_product);
 
             product.save(async (err, product) => {
-                if (err)
-                    res.status(httpStatusCode.BAD_REQUEST).json({
-                        errorMessage: err.message,
-                    });
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (product) {
+                    await Shop.updateOne({ _id: shop }, { number_of_products: { $sum: 1 } });
+
                     res.status(httpStatusCode.CREATED).json({
                         successMessage: 'Product created successfully',
                         product,

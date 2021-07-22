@@ -42,10 +42,9 @@ exports.getAllSuppliers = (req, res, next) => {
         if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
         if (suppliers)
-            return res.status(httpStatusCode.OK).json({
+            res.status(httpStatusCode.OK).json({
                 success: true,
                 message: 'All suppliers fetched successfully',
-                suppliers_nbm: suppliers.length,
                 suppliers,
             });
     });
@@ -57,7 +56,7 @@ exports.getSingleSupplier = (req, res, next) => {
             if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
             if (supplier)
-                return res.status(httpStatusCode.OK).json({
+                res.status(httpStatusCode.OK).json({
                     success: true,
                     message: 'Supplier fetched successfully',
                     supplier,
@@ -67,48 +66,42 @@ exports.getSingleSupplier = (req, res, next) => {
 };
 
 exports.updateSupplier = catchAsyncError(async (req, res, next) => {
-    const { supplierId } = req.params;
+    const { supplierId: _id } = req.params;
 
-    if (mongoose.isValidObjectId(supplierId)) {
-        const oldSupplier = await Supplier.findById(supplierId);
+    if (mongoose.isValidObjectId(supplier)) {
+        let supplierUpdateInfo = {};
 
-        const { supplierName, contactNumber, headquarterAddress, webURL } = req.body;
-
-        let newSupplier = {
-            supplierName,
-            contactNumber,
-            headquarterAddress,
-            webURL,
-        };
+        Object.keys(req.body).forEach(key => {
+            if (typeof req.body[key] !== 'undefined') {
+                supplierUpdateInfo[key] = req.body[key];
+            }
+        });
 
         if (req.file) {
-            newSupplier.supplierLogo = processImagePath(req.file.path);
+            isSaveFolderExist(req, res, 'supplier');
+            supplierUpdateInfo.supplierLogo = processImagePath(req.file.path);
         }
 
-        if (!oldSupplier.isVerified) {
-            Supplier.findByIdAndUpdate(
-                supplierId,
-                newSupplier,
-                { runValidators: true, new: true },
-                (err, supplier) => {
-                    if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+        Supplier.findOneAndUpdate(
+            { _id, isVerified: true },
+            supplierUpdateInfo,
+            { runValidators: true, new: true },
+            (err, supplier) => {
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
-                    if (supplier)
-                        return res.status(httpStatusCode.CREATED).json({
-                            success: true,
-                            message: 'Update supplier successfully',
-                            updatedSupplier: supplier,
-                        });
+                if (!supplier) {
+                    res.status(httpStatusCode.NOT_FOUND).json({
+                        success: false,
+                        message: 'Supplier not found',
+                    });
                 }
-            );
-        } else {
-            return next(
-                new ErrorHandler(
-                    'This supplier had been verified so that you can modify its information',
-                    httpStatusCode.FORBIDDEN
-                )
-            );
-        }
+
+                res.status(httpStatusCode.CREATED).json({
+                    successMessage: `Update ${supplier.supplierName} successfully`,
+                    supplier,
+                });
+            }
+        );
     }
 });
 

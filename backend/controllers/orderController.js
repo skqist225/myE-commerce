@@ -11,7 +11,7 @@ const ErrorHandler = require('../utils/errorHandler');
 exports.addOrder = catchAsyncError(async (req, res, next) => {
     const { _id: user } = req.user;
 
-    if (req.body.length > 0) {
+    if (!req.body.length) {
         req.body.forEach(async $order => {
             let deliveryAddress;
             if ($order.deliveryAddress) {

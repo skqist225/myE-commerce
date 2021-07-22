@@ -80,9 +80,7 @@ exports.addShop = catchAsyncError(async (req, res, next) => {
     if (req.files && req.files.shopLogo) {
         shopLogo = processImagePath(req.files.shopLogo[0].path);
     } else {
-        return res
-            .status(httpStatusCode.BAD_REQUEST)
-            .json({ errorMessage: "Please select shop's logo" });
+        res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: "Please select shop's logo" });
     }
 
     if (req.files && req.files.homeImages) {
@@ -380,33 +378,36 @@ exports.deleteShop = catchAsyncError(async (req, res, next) => {
     }
 });
 
-exports.cancelShopRequest = (req, res, next) => {
-    const { shopId } = req.params;
+exports.cancelShopRequest = catchAsyncError(async (req, res, next) => {
+    const { shopId: shop } = req.params;
 
-    if (mongoose.isValidObjectId(shopId)) {
-        Shop.findById(shopId)
-            .then(async shop => {
-                await User.findByIdAndUpdate(shop.user._id, {
-                    isShopRequestSent: false,
-                });
-
-                return res.status(httpStatusCode.OK).json({
-                    cancelMessage: `Requesting for opening ${shop.shopName} canceled`,
-                    shop,
-                });
-            })
-            .catch(err => {
-                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err });
-            });
+    if (!mongoose.isValidObjectId(shop)) {
+        return next(new ErrorHandler('Shop ID is invalid', httpStatusCode.BAD_REQUEST));
     }
-};
+
+    const { user: _id } = await Shop.findById(shop).select('user').lean();
+    await User.updateOne(
+        { _id },
+        {
+            isShopRequestSent: false,
+        }
+    );
+
+    Shop.deleteOne({ _id: shop }).exec((err, done) => {
+        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+    });
+
+    res.status(httpStatusCode.OK).json({
+        cancelMessage: `Requesting for opening ${shop.shopName} canceled`,
+    });
+});
 
 exports.approvedShop = catchAsyncError(async (req, res, next) => {
-    const { shopId } = req.params;
+    const { shopId: shop } = req.params;
 
-    if (mongoose.isValidObjectId(shopId)) {
+    if (mongoose.isValidObjectId(shop)) {
         Shop.findByIdAndUpdate(
-            shopId,
+            shop,
             {
                 isApproved: true,
             },
@@ -419,12 +420,12 @@ exports.approvedShop = catchAsyncError(async (req, res, next) => {
                     });
                 }
 
-                return res.status(httpStatusCode.OK).json({
+                res.status(httpStatusCode.OK).json({
                     successMessage: `${shop.shopName} is approved`,
                 });
             })
             .catch(err => {
-                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err });
+                return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
             });
     }
 });
