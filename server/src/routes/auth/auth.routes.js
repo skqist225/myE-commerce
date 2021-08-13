@@ -1,4 +1,5 @@
 const express = require('express');
+const { body } = require('express-validator');
 const {
     registerUser,
     loginUser,
@@ -13,10 +14,10 @@ const {
     resetPassword,
     followOtherUsers,
     unfollowOtherUsers,
-} = require('../controllers/authController');
-const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
+} = require('../../controllers/auth-controller');
+const { isAuthenticatedUser, authorizeRoles } = require('../../middlewares/auth');
 const router = express.Router();
-const upload = require('../middlewares/multer');
+const upload = require('../../middlewares/multer');
 
 router.get('/user', [isAuthenticatedUser, authorizeRoles('user')], getUserProfile);
 
@@ -53,7 +54,11 @@ router.get('/logout', [isAuthenticatedUser], logoutUser);
 
 router.post('/user/forgot-password', forgotPassword);
 
-router.delete('/admin/user/:userId', [isAuthenticatedUser, authorizeRoles('admin')], deleteUser);
+router.delete(
+    '/admin/user/:userId',
+    [isAuthenticatedUser, authorizeRoles('admin')],
+    deleteUser
+);
 
 //Testing
 router.delete(
@@ -62,7 +67,11 @@ router.delete(
     deleteAllUsers
 );
 
-router.put('/user/follow/:userId', [isAuthenticatedUser, authorizeRoles('user'), followOtherUsers]);
+router.put('/user/follow/:userId', [
+    isAuthenticatedUser,
+    authorizeRoles('user'),
+    followOtherUsers,
+]);
 
 router.put(
     '/user/unfollow/:userId',

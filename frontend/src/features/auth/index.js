@@ -1,1 +1,7 @@
-export { userLogin, userLogout, clearErrorMessage, clearSuccessMessage } from './authSlice';
+export {
+    userLogin,
+    userLogout,
+    clearErrorMessage,
+    clearSuccessMessage,
+    updateUserLoggedOut,
+} from './authSlice';

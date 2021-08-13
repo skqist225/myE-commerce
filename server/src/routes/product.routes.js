@@ -13,6 +13,7 @@ const {
     getOneProductPerMallShop,
 } = require('../controllers/productController');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
+const isSaveFolderExist = require('../helpers/isSaveFolderExist');
 const router = express.Router();
 const upload = require('../middlewares/multer.js');
 
@@ -27,6 +28,7 @@ router.post(
         },
         { name: 'productTypes[typeImage]', maxCount: 20 },
     ]),
+    isSaveFolderExist('product'),
     addProduct
 );
 
@@ -44,6 +46,7 @@ router
             },
             { name: 'productType[typeImage]', maxCount: 20 },
         ]),
+        isSaveFolderExist('product'),
         updateProduct
     )
     .delete([isAuthenticatedUser, authorizeRoles('shop', 'admin')], deleteSingleProduct);
@@ -58,6 +61,7 @@ router.put(
     '/shop/product/:productId/update-product-type',
     [isAuthenticatedUser, authorizeRoles('shop')],
     upload.fields([{ name: 'productType[typeImage]', maxCount: 20 }]),
+    isSaveFolderExist('product'),
     updateProductType
 );
 
@@ -66,7 +70,11 @@ router.get('/products', getAllProducts);
 router.get('/advanced/:shopId/products', advancedGetAllProducts);
 router.get('/get-sale-products', getSaleProducts);
 router.get('/get-one-product-per-mall-shop/:shopCategory', getOneProductPerMallShop);
-router.get('/shop/products', [isAuthenticatedUser, authorizeRoles('shop')], getShopProducts);
+router.get(
+    '/shop/products',
+    [isAuthenticatedUser, authorizeRoles('shop')],
+    getShopProducts
+);
 router.route('/product/:productId').get(getSingleProduct);
 
 module.exports = router;

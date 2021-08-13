@@ -28,19 +28,22 @@ export const userLogin = createAsyncThunk(
     }
 );
 
-export const userLogout = createAsyncThunk('/user/userLogout', async (_, { rejectWithValue }) => {
-    try {
-        const {
-            data: { successMessage },
-        } = await axios.get('/logout');
+export const userLogout = createAsyncThunk(
+    '/user/userLogout',
+    async (_, { rejectWithValue }) => {
+        try {
+            const {
+                data: { successMessage },
+            } = await axios.get('/logout');
 
-        localStorage.removeItem('user');
+            localStorage.removeItem('user');
 
-        return { successMessage };
-    } catch ({ data: { errorMessage } }) {
-        return rejectWithValue(errorMessage);
+            return { successMessage };
+        } catch ({ data: { errorMessage } }) {
+            return rejectWithValue(errorMessage);
+        }
     }
-});
+);
 
 const authSlice = createSlice({
     name: 'auth',
@@ -57,6 +60,13 @@ const authSlice = createSlice({
         },
         clearErrorMessage(state) {
             state.errorMessage = null;
+        },
+        updateUserLoggedOut(state) {
+            state.user = null;
+            state.isAuthenticated = false;
+            state.successMessage = null;
+            state.errorMessage = null;
+            state.loading = false;
         },
     },
     extraReducers: builder => {
@@ -84,6 +94,7 @@ const authSlice = createSlice({
     },
 });
 
-export const { clearSuccessMessage, clearErrorMessage } = authSlice.actions;
+export const { clearSuccessMessage, clearErrorMessage, updateUserLoggedOut } =
+    authSlice.actions;
 
 export default authSlice.reducer;

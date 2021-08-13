@@ -12,7 +12,9 @@ const sendEmail = require('../helpers/sendEmail');
 exports.registerUser = catchAsyncError(async (req, res, next) => {
     User.findOne({ username: req.body.username }).exec((err, user) => {
         if (user) {
-            return next(new ErrorHandler('User already registered.', httpStatusCode.BAD_REQUEST));
+            return next(
+                new ErrorHandler('User already registered.', httpStatusCode.BAD_REQUEST)
+            );
         }
     });
 
@@ -36,8 +38,13 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
     };
 
     if (req.body.identityCard) {
-        if (!req.body.identityCard.number || req.files['identityCard[cardImage][]'] === undefined) {
-            return next(new ErrorHandler('Please enter card number and select card image'));
+        if (
+            !req.body.identityCard.number ||
+            req.files['identityCard[cardImage][]'] === undefined
+        ) {
+            return next(
+                new ErrorHandler('Please enter card number and select card image')
+            );
         }
         _identityCard.number = req.body.identityCard.number;
 
@@ -52,6 +59,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
     }
 
     const _user = await User.create(user);
+    console.log(_user);
 
     sendToken(_user, httpStatusCode.OK, res, 'User created successfully');
 });
@@ -61,7 +69,10 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
 
     if (!username || !password)
         return next(
-            new ErrorHandler('Please enter username & password', httpStatusCode.BAD_REQUEST)
+            new ErrorHandler(
+                'Please enter username & password',
+                httpStatusCode.BAD_REQUEST
+            )
         );
 
     const user = await User.findOne({ username }).select('+password');
@@ -132,7 +143,9 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
                     !req.body.identityCard.number ||
                     req.files['identityCard[cardImage][]'] === undefined
                 ) {
-                    return next(new ErrorHandler('Please enter card number and select card image'));
+                    return next(
+                        new ErrorHandler('Please enter card number and select card image')
+                    );
                 }
                 _identityCard.number = req.body.identityCard.number;
 
@@ -144,7 +157,9 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
                 );
                 user.identityCard = _identityCard;
             } else {
-                return next(new ErrorHandler('You can change this field after it had been set'));
+                return next(
+                    new ErrorHandler('You can change this field after it had been set')
+                );
             }
         }
 
@@ -162,7 +177,9 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-        return next(new ErrorHandler('User not found with this email', httpStatusCode.NOT_FOUND));
+        return next(
+            new ErrorHandler('User not found with this email', httpStatusCode.NOT_FOUND)
+        );
     }
 
     const resetToken = user.getResetPasswordToken();
@@ -213,7 +230,9 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
         );
 
     if (req.body.password !== req.body.confirmPassword) {
-        return next(new ErrorHandler('Password does not match', httpStatusCode.BAD_REQUEST));
+        return next(
+            new ErrorHandler('Password does not match', httpStatusCode.BAD_REQUEST)
+        );
     }
 
     user.password = req.body.password;
@@ -239,7 +258,9 @@ exports.followOtherUsers = catchAsyncError(async (req, res, next) => {
     const { userId } = req.params;
 
     if (mongoose.isValidObjectId(userId)) {
-        const followedUser = await User.findById(userId).select('role firstName lastName');
+        const followedUser = await User.findById(userId).select(
+            'role firstName lastName'
+        );
 
         if (!followedUser) {
             return next(new ErrorHandler('User not found', httpStatusCode.NOT_FOUND));
@@ -333,19 +354,27 @@ exports.getAllUsers = catchAsyncError(async (req, res, next) => {
 });
 
 exports.verifyEmail = (req, res, next) => {
-    User.updateOne({ _id: req.user._id }, { $set: { isEmailVerified: true } }).exec(err => {
-        if (err) res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+    User.updateOne({ _id: req.user._id }, { $set: { isEmailVerified: true } }).exec(
+        err => {
+            if (err)
+                res.status(httpStatusCode.BAD_REQUEST).json({
+                    errorMessage: err.message,
+                });
 
-        return res.status(httpStatusCode.CREATED).json({
-            successMessage: 'Email verified successfully',
-        });
-    });
+            return res.status(httpStatusCode.CREATED).json({
+                successMessage: 'Email verified successfully',
+            });
+        }
+    );
 };
 
 exports.deleteAllUsers = (req, res, next) => {
     User.find({}).then(users => {
         User.deleteMany({}, (err, done) => {
-            if (err) res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+            if (err)
+                res.status(httpStatusCode.BAD_REQUEST).json({
+                    errorMessage: err.message,
+                });
 
             if (done) {
                 users.forEach(user => {

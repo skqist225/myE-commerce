@@ -5,7 +5,7 @@ const {
     getProductTransporters,
     updateTransporter,
 } = require('../controllers/transporterController');
-const { default: isSaveFolderExist } = require('../helpers/isSaveFolderExist');
+const isSaveFolderExist = require('../helpers/isSaveFolderExist');
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
 const upload = require('../middlewares/multer');

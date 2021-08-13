@@ -6,6 +6,7 @@ const ErrorHandler = require('../utils/errorHandler');
 const mongoose = require('mongoose');
 const processImagePath = require('../helpers/processImageSavePath');
 const isSaveFolderExist = require('../helpers/isSaveFolderExist');
+const catchAsyncError = require('../middlewares/catchAsyncError');
 
 exports.addTransporter = (req, res, next) => {
     let transporterAddInfo = {};

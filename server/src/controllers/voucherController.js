@@ -33,10 +33,7 @@ exports.addShopVoucher = (req, res, next) => {
 
         if (voucher) {
             Shop.findOne({ user: req.user._id }, async (err, shop) => {
-                if (err)
-                    return next(
-                        new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
-                    );
+                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (shop) {
                     shop.vouchers.push(voucher);
@@ -55,8 +52,7 @@ exports.addShopVoucher = (req, res, next) => {
 };
 
 exports.addAdminVoucher = (req, res, next) => {
-    const { discountPrice, onWhatPriceOfProduct, voucherImage, end, amount } =
-        req.body;
+    const { discountPrice, onWhatPriceOfProduct, voucherImage, end, amount } = req.body;
 
     const voucher = new Voucher({
         discountPrice,

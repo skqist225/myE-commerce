@@ -14,24 +14,21 @@ const { updateOne } = require('../models/productModal');
 exports.addProduct = catchAsyncError(async (req, res, next) => {
     const { _id: user } = req.user;
 
-    //DEVNOTIFY
-    if (!Object.keys(req.query).length || req.query.dest !== 'product') {
-        return res
-            .status(httpStatusCode.BAD_REQUEST)
-            .json({ errorMessage: 'Please secify folder to save image' });
-    } //DEVNOTIFY
-
     if (mongoose.isValidObjectId(user)) {
         const { _id: shop } = await Shop.findOne({ user }).select('_id').lean();
         const isProductNameExist = await Product.findOne({
             shop,
-            productName: { $regex: new RegExp(req.body.productName.replace(/-|_|\./g, ''), 'i') },
-        }).lean();
+            productName: {
+                $regex: new RegExp(req.body.productName.replace(/-|_|\./g, ''), 'i'),
+            },
+        })
+            .select('_id')
+            .lean();
 
         if (shop) {
             if (isProductNameExist) {
-                res.status(httpStatusCode.FORBIDDEN).json({
-                    errorMessage: 'This product name is already exists in our shop',
+                res.status(httpStatusCode.BAD_REQUEST).json({
+                    errorMessage: 'This product name is already exists in your shop',
                 });
             }
 
@@ -47,9 +44,9 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
             } = req.body;
 
             if (transporters.length > 3) {
-                return res
-                    .status(httpStatusCode.BAD_REQUEST)
-                    .json({ errorMessage: 'Please do not choose over 3 transporters' });
+                res.status(httpStatusCode.BAD_REQUEST).json({
+                    errorMessage: 'Please do not choose over 3 transporters',
+                });
             }
 
             let _product = {
@@ -75,7 +72,7 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
             if (!req.body.productTypes) {
                 res.status(httpStatusCode.BAD_REQUEST).json({
                     success: false,
-                    message: 'Can not please products types empty',
+                    message: "Product's types is required",
                 });
             }
 
@@ -90,9 +87,9 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                     (req.files['productTypes[typeImage]'] &&
                         req.files['productTypes[typeImage]'].length !== arraySize)
                 ) {
-                    return res.status(httpStatusCode.BAD_REQUEST).json({
+                    res.status(httpStatusCode.BAD_REQUEST).json({
                         success: false,
-                        errorMessage: 'Can not leave out any field',
+                        errorMessage: "Please fill in full prodyct's type information",
                     });
                 }
 
@@ -106,6 +103,7 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                     productTypeObj.typeName = typeName[i];
                     productTypeObj.typeStock = typeStock[i];
                     productTypeObj.typePrice = typePrice[i];
+
                     productTypeObj.typeImage = req.files['productTypes[typeImage]']
                         ? processImagePath(req.files['productTypes[typeImage]'][i].path)
                         : '';
@@ -117,7 +115,9 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                     typeName,
                     typeStock,
                     typePrice,
-                    typeImage: processImagePath(req.files['productTypes[typeImage]'][0].path),
+                    typeImage: processImagePath(
+                        req.files['productTypes[typeImage]'][0].path
+                    ),
                 };
                 _product.productTypes.push(productTypeObj);
 
@@ -147,7 +147,10 @@ exports.addProduct = catchAsyncError(async (req, res, next) => {
                 if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (product) {
-                    await Shop.updateOne({ _id: shop }, { number_of_products: { $sum: 1 } });
+                    await Shop.updateOne(
+                        { _id: shop },
+                        { number_of_products: { $sum: 1 } }
+                    );
 
                     res.status(httpStatusCode.CREATED).json({
                         successMessage: 'Product created successfully',
@@ -173,7 +176,10 @@ exports.updateProduct = async (req, res, next) => {
     if (mongoose.isValidObjectId(productId)) {
         if (shop) {
             const isProductNameExist = productName => {
-                return productName.replace(/-/g, '') === req.body.productName.replace(/-/g, '');
+                return (
+                    productName.replace(/-/g, '') ===
+                    req.body.productName.replace(/-/g, '')
+                );
             };
 
             if (
@@ -220,7 +226,9 @@ exports.updateProduct = async (req, res, next) => {
             return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
         }
     } else {
-        return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));
+        return next(
+            new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST)
+        );
     }
 };
 
@@ -303,7 +311,9 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                         typeName,
                         typeStock,
                         typePrice,
-                        typeImage: processImagePath(req.files['productType[typeImage]'][0].path),
+                        typeImage: processImagePath(
+                            req.files['productType[typeImage]'][0].path
+                        ),
                     };
 
                     if (req.query.addProductType === 'true') {
@@ -314,7 +324,10 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
                             },
                             { runValidators: true, new: true }
                         ).exec((err, product) => {
-                            if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+                            if (err)
+                                return next(
+                                    new ErrorHandler(err, httpStatusCode.BAD_REQUEST)
+                                );
 
                             return res.status(httpStatusCode.CREATED).json({
                                 successMessage: "Product's type updated successfully",
@@ -382,7 +395,9 @@ exports.updateProductType = catchAsyncError(async (req, res, next) => {
             return next(new ErrorHandler('Shop not found', httpStatusCode.NOT_FOUND));
         }
     } else {
-        return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));
+        return next(
+            new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST)
+        );
     }
 });
 
@@ -419,7 +434,9 @@ exports.deleteSingleProduct = catchAsyncError(async (req, res, next) => {
         // } else {
         Product.deleteOne({ _id: productId }, (err, product) => {
             if (err)
-                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+                return res
+                    .status(httpStatusCode.BAD_REQUEST)
+                    .json({ errorMessage: err.message });
 
             if (product) {
                 if (product.productTypes) {
@@ -452,7 +469,9 @@ exports.getAllProducts = (req, res, next) => {
         .populate('supplier', 'supplierName headquarterAddress -_id')
         .exec((err, products) => {
             if (err)
-                return res.status(httpStatusCode.BAD_REQUEST).json({ errorMessage: err.message });
+                return res
+                    .status(httpStatusCode.BAD_REQUEST)
+                    .json({ errorMessage: err.message });
 
             if (products) {
                 res.status(httpStatusCode.OK).json({
@@ -485,7 +504,11 @@ exports.advancedGetAllProducts = async (req, res, next) => {
                 },
             ]);
             features.query = features.query.match({
-                _id: { $in: productsRatings.map(({ _id }) => new mongoose.Types.ObjectId(_id)) },
+                _id: {
+                    $in: productsRatings.map(
+                        ({ _id }) => new mongoose.Types.ObjectId(_id)
+                    ),
+                },
             });
         }
 
@@ -587,10 +610,10 @@ exports.getOneProductPerMallShop = async (req, res, next) => {
 };
 
 exports.getSingleProduct = (req, res, next) => {
-    const { productId } = req.params;
+    const { productId: product } = req.params;
 
-    if (mongoose.isValidObjectId(productId)) {
-        Product.findById(productId)
+    if (mongoose.isValidObjectId(product)) {
+        Product.findById(product)
             .populate('transporters', 'transporterName transportFee -_id')
             .populate('supplier', 'supplierName headquarterAddress -_id')
             .populate('category', 'categoryName _id parentId')
@@ -600,13 +623,13 @@ exports.getSingleProduct = (req, res, next) => {
                 if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
 
                 if (!product) {
-                    res.status(httpStatusCode.NOT_FOUND).json({ message: 'Product not found' });
+                    res.status(httpStatusCode.NOT_FOUND).json({
+                        message: 'Product not found',
+                    });
                 }
 
                 if (product) {
-                    const number_of_products = await Product.countDocuments({
-                        shop: product.shop._id,
-                    });
+                    const number_of_products = 0;
 
                     const number_of_stocks = product.productTypes.reduce(
                         (acc, type) => acc + type.typeStock,
@@ -622,7 +645,9 @@ exports.getSingleProduct = (req, res, next) => {
                 }
             });
     } else {
-        return next(new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST));
+        return next(
+            new ErrorHandler('Product id is invalid', httpStatusCode.BAD_REQUEST)
+        );
     }
 };
 
@@ -641,7 +666,9 @@ exports.deleteAllProducts = (req, res, next) => {
                     }
 
                     if (product.productType.length > 0) {
-                        product.productType.forEach(({ typeImage }) => deleteImage(typeImage));
+                        product.productType.forEach(({ typeImage }) =>
+                            deleteImage(typeImage)
+                        );
                     }
                 });
 

@@ -10,7 +10,7 @@ function ProductCard({ product }) {
     const countDotNum = number => {
         const resultOfDivisionOperator = number / 1000;
 
-        if (r >= 1) {
+        if (resultOfDivisionOperator >= 1) {
             dotNum++;
             const _number = resultOfDivisionOperator;
             countDotNum(_number);
@@ -38,7 +38,9 @@ function ProductCard({ product }) {
         const { typePrice } = product.productTypes[0];
 
         return product.discountPercent !== 0
-            ? seperateNumber(typePrice - Math.round((product.discountPercent * typePrice) / 100))
+            ? seperateNumber(
+                  typePrice - Math.round((product.discountPercent * typePrice) / 100)
+              )
             : seperateNumber(typePrice);
     };
 

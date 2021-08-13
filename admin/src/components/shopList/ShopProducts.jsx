@@ -19,11 +19,10 @@ import './shopProducts.css';
 function ShopProducts({ match }) {
     const { shopId } = match.params;
     const dispatch = useDispatch();
-    const { shop, successMessage, errorMessage, shopProducts, loading, selectedTab } = useSelector(
+    const { shop, successMessage, shopProducts, loading, selectedTab } = useSelector(
         state => state.shop
     );
     const transporters = useSelector(transportersSelector.selectAll);
-    const savedRefToSetSelectedOption = React.useRef();
 
     const handleSelectedOption = () => {
         const filterOptions = document.getElementsByClassName('shopProductsSortOption');
@@ -33,7 +32,9 @@ function ShopProducts({ match }) {
         const wrapperForDropDownClick = document.getElementsByClassName(
             'shopProductsFilterOptionDropDown'
         );
-        const spanDisplay = document.getElementById('shopProductsDisplaySelectedPriceFilterOption');
+        const spanDisplay = document.getElementById(
+            'shopProductsDisplaySelectedPriceFilterOption'
+        );
 
         filterOptions[0].classList.add('shopProductsSelectedOption');
         for (let option of wrapperForDropDownClick) {
@@ -91,11 +92,11 @@ function ShopProducts({ match }) {
     }, [dispatch, shopId]);
 
     React.useEffect(() => {
-        if (!loading) {
+        if (!loading && successMessage) {
             handleSelectedOption();
             handleSelectedTab();
         }
-    }, [loading]);
+    }, [loading, successMessage]);
 
     return (
         <>
@@ -140,41 +141,73 @@ function ShopProducts({ match }) {
                                         alt=""
                                         className="shopProductsSM"
                                     />
-                                    <div className="shopProductsShopName">{shop.shopName}</div>
-                                    <span className="shopProductsActiveTime">Active time</span>
+                                    <div className="shopProductsShopName">
+                                        {shop.shopName}
+                                    </div>
+                                    <span className="shopProductsActiveTime">
+                                        Active time
+                                    </span>
                                 </div>
                                 <div className="shopProductsMenuFilterBar">
                                     <div className="shopProductsShopCategories">
-                                        <div className="shopProductsFilterTitle">DANH MỤC SHOP</div>
+                                        <div className="shopProductsFilterTitle">
+                                            DANH MỤC SHOP
+                                        </div>
                                         <ul className="shopProductsListFilter">
-                                            <li className="shopProductsItemFilter" data-index={1}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={1}
+                                            >
                                                 Sản phẩm
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={2}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={2}
+                                            >
                                                 Sản phẩm bán chạy
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={3}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={3}
+                                            >
                                                 Sản phẩm mới{' '}
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={4}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={4}
+                                            >
                                                 iPhone
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={5}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={5}
+                                            >
                                                 iPad
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={6}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={6}
+                                            >
                                                 Apple Watch
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={7}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={7}
+                                            >
                                                 MacBook
                                             </li>
-                                            <li className="shopProductsItemFilter" data-index={8}>
+                                            <li
+                                                className="shopProductsItemFilter"
+                                                data-index={8}
+                                            >
                                                 Phụ kiện Apple
                                             </li>
                                         </ul>
                                     </div>
                                     <div className="shopProductsShopCategories">
-                                        <div className="shopProductsFilterTitle">THEO DANH MỤC</div>
+                                        <div className="shopProductsFilterTitle">
+                                            THEO DANH MỤC
+                                        </div>
                                         <div className="shopProductsCategoryFilter">
                                             {shopProducts.map(({ category }) => (
                                                 <div
@@ -189,14 +222,18 @@ function ShopProducts({ match }) {
                                                         />
                                                     </div>
                                                     <div className="shopProductsLabelWrapper">
-                                                        <label>{category.categoryName}</label>
+                                                        <label>
+                                                            {category.categoryName}
+                                                        </label>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                     <div className="shopProductsShopCategories">
-                                        <div className="shopProductsFilterTitle">NƠI BÁN</div>
+                                        <div className="shopProductsFilterTitle">
+                                            NƠI BÁN
+                                        </div>
                                         <div>
                                             <div className="shopProductsCategoryItem">
                                                 <div className="shopProductsInputWrapper">
@@ -241,14 +278,18 @@ function ShopProducts({ match }) {
                                                     />
                                                 </div>
                                                 <div className="shopProductsLabelWrapper">
-                                                    <label>{transporter.transporterName}</label>
+                                                    <label>
+                                                        {transporter.transporterName}
+                                                    </label>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
 
                                     <div className="shopProductsShopCategories">
-                                        <div className="shopProductsFilterTitle">KHOẢNG GIÁ</div>
+                                        <div className="shopProductsFilterTitle">
+                                            KHOẢNG GIÁ
+                                        </div>
                                         <div className="shopProductsPriceFilterWrapper">
                                             <div className="shopProductsPriceFilterContainer">
                                                 <input
@@ -273,7 +314,9 @@ function ShopProducts({ match }) {
                                         </div>
                                     </div>
                                     <div className="shopProductsShopCategories">
-                                        <div className="shopProductsFilterTitle">TÌNH TRẠNG</div>
+                                        <div className="shopProductsFilterTitle">
+                                            TÌNH TRẠNG
+                                        </div>
                                         <div>
                                             <div className="shopProductsCategoryItem">
                                                 <div className="shopProductsInputWrapper">
@@ -321,7 +364,9 @@ function ShopProducts({ match }) {
                                         </div>
                                     </div>
                                     <div className="shopProductsShopCategories">
-                                        <div className="shopProductsFilterTitle">ĐÁNH GIÁ</div>
+                                        <div className="shopProductsFilterTitle">
+                                            ĐÁNH GIÁ
+                                        </div>
                                         <div>
                                             {[5, 4, 3, 2, 1].map(value => {
                                                 return (
@@ -330,26 +375,26 @@ function ShopProducts({ match }) {
                                                         key={`ratingFilter=${value}`}
                                                         className="shopProductsRatingFilter"
                                                     >
-                                                        {Array.from({ length: value }).map(
-                                                            (_, index) => {
-                                                                return (
-                                                                    <span
-                                                                        className="fa fa-star checked"
-                                                                        key={index}
-                                                                    ></span>
-                                                                );
-                                                            }
-                                                        )}
-                                                        {Array.from({ length: 5 - value }).map(
-                                                            (_, index) => {
-                                                                return (
-                                                                    <StarEmptyBodyIcon
-                                                                        className="unchecked"
-                                                                        key={index + 5}
-                                                                    />
-                                                                );
-                                                            }
-                                                        )}
+                                                        {Array.from({
+                                                            length: value,
+                                                        }).map((_, index) => {
+                                                            return (
+                                                                <span
+                                                                    className="fa fa-star checked"
+                                                                    key={index}
+                                                                ></span>
+                                                            );
+                                                        })}
+                                                        {Array.from({
+                                                            length: 5 - value,
+                                                        }).map((_, index) => {
+                                                            return (
+                                                                <StarEmptyBodyIcon
+                                                                    className="unchecked"
+                                                                    key={index + 5}
+                                                                />
+                                                            );
+                                                        })}
                                                         {/* trở lên */}
                                                     </div>
                                                 );
@@ -389,7 +434,9 @@ function ShopProducts({ match }) {
                             </div>
                             <div className="shopProductsRight">
                                 <div className="shopProductsFilterBar">
-                                    <div className="shopProductsOptionTitle ">Sắp xếp theo</div>
+                                    <div className="shopProductsOptionTitle ">
+                                        Sắp xếp theo
+                                    </div>
                                     <div
                                         style={{
                                             display: 'flex',
@@ -404,9 +451,15 @@ function ShopProducts({ match }) {
                                                 alignItems: 'center',
                                             }}
                                         >
-                                            <div className="shopProductsSortOption">Phổ biến</div>
-                                            <div className="shopProductsSortOption">Mới nhất</div>
-                                            <div className="shopProductsSortOption">Bán chạy</div>
+                                            <div className="shopProductsSortOption">
+                                                Phổ biến
+                                            </div>
+                                            <div className="shopProductsSortOption">
+                                                Mới nhất
+                                            </div>
+                                            <div className="shopProductsSortOption">
+                                                Bán chạy
+                                            </div>
                                             <div className="shopProductsDropDownOption">
                                                 <span
                                                     style={{
@@ -453,7 +506,12 @@ function ShopProducts({ match }) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}
+                                        >
                                             <div className="shopProductsPageDisplay">
                                                 <span>1</span>/1
                                             </div>
@@ -469,7 +527,10 @@ function ShopProducts({ match }) {
                                 <div className="shopProductsProductContainer">
                                     {selectedTab === 1 &&
                                         shopProducts.map(product => (
-                                            <Link key={product._id} to={`/product/${product._id}`}>
+                                            <Link
+                                                key={product._id}
+                                                to={`/product/${product._id}`}
+                                            >
                                                 <ProductCard product={product} />
                                             </Link>
                                         ))}
