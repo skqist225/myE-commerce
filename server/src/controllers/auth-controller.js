@@ -8,60 +8,27 @@ const processImagePath = require('../helpers/processImageSavePath');
 const deleteImage = require('../helpers/deleteImage');
 const deleteCollection = require('../helpers/deleteCollection');
 const sendEmail = require('../helpers/sendEmail');
+const RequestValidationError = require('../errors/request-validation-error');
+const BadRequestError = require('../errors/bad-request-error');
+const NotFoundError = require('../errors/not-found-error');
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
-    User.findOne({ username: req.body.username }).exec((err, user) => {
-        if (user) {
-            return next(
-                new ErrorHandler('User already registered.', httpStatusCode.BAD_REQUEST)
-            );
-        }
-    });
+    const existingUser = await User.findOne({ username: req.body.username })
+        .select('_id')
+        .lean();
 
-    const { username, password, firstName, lastName, email, phoneNumber } = req.body;
-
-    let user = {
-        username,
-        password,
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        role: req.body.role ? req.body.role : 'user',
-        avatar: req.files.avatar ? processImagePath(req.files.avatar[0].path) : null,
-        birthday: req.body.birthday ? req.body.birthday : null,
-    };
-
-    let _identityCard = {
-        number: '',
-        cardImage: [],
-    };
-
-    if (req.body.identityCard) {
-        if (
-            !req.body.identityCard.number ||
-            req.files['identityCard[cardImage][]'] === undefined
-        ) {
-            return next(
-                new ErrorHandler('Please enter card number and select card image')
-            );
-        }
-        _identityCard.number = req.body.identityCard.number;
-
-        _identityCard.cardImage.push(
-            processImagePath(req.files['identityCard[cardImage][]'][0].path)
-        );
-        _identityCard.cardImage.push(
-            processImagePath(req.files['identityCard[cardImage][]'][1].path)
-        );
-
-        user.identityCard = _identityCard;
+    if (existingUser) {
+        return next(new BadRequestError('User already registered'));
     }
 
-    const _user = await User.create(user);
-    console.log(_user);
+    // if(req.role) {
 
-    sendToken(_user, httpStatusCode.OK, res, 'User created successfully');
+    // }
+
+    const user = new User(req.body);
+    await user.save();
+
+    sendToken(user, httpStatusCode.OK, res);
 });
 
 exports.loginUser = catchAsyncError(async (req, res, next) => {
@@ -69,29 +36,22 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
 
     if (!username || !password)
         return next(
-            new ErrorHandler(
-                'Please enter username & password',
-                httpStatusCode.BAD_REQUEST
-            )
+            new RequestValidationError([{ message: 'Please enter username & password' }])
         );
 
     const user = await User.findOne({ username }).select('+password');
-
     if (!user) {
-        res.status(httpStatusCode.BAD_REQUEST).json({
-            errorMessage: 'User not found',
-        });
+        return next(new BadRequestError('user not found'));
     }
 
     const isPasswordMatched = await user.comparePassword(password);
-
     if (!isPasswordMatched) {
-        res.status(httpStatusCode.BAD_REQUEST).json({
-            errorMessage: 'Password does not match or user name is invalid',
-        });
+        return next(
+            new BadRequestError('Password does not match or user name is invalid')
+        );
     }
 
-    sendToken(user, httpStatusCode.OK, res, 'Login successfully');
+    sendToken(user, httpStatusCode.OK, res);
 });
 
 exports.logoutUser = (req, res, next) => {
@@ -177,17 +137,11 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-        return next(
-            new ErrorHandler('User not found with this email', httpStatusCode.NOT_FOUND)
-        );
+        return next(new NotFoundError('User not found'));
     }
 
-    const resetToken = user.getResetPasswordToken();
-
-    await user.save({ validateBeforeSave: false });
-
+    const resetToken = await user.getResetPasswordToken();
     const resetUrl = `${req.protocol}://${req.get('host')}/password/reset/${resetToken}`;
-
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`;
 
     sendEmail({
@@ -195,19 +149,23 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
         subject: 'Welcome to myE-commerce',
         message,
     })
-        .then(result => console.log(`Email sent to ${user.email}`))
+        .then(result => {
+            console.log(`Email sent to ${user.email}`);
+
+            res.status(httpStatusCode.OK).json({
+                success: true,
+                message: `Email sent to ${user.email}`,
+            });
+        })
         .catch(async error => {
             user.resetPasswordToken = undefined;
             user.resetPasswordExpire = undefined;
 
+            console.log(error);
+
             await user.save({ validateBeforeSave: false });
             return next(new ErrorHandler(error.message, httpStatusCode.INTERNAL_SERVER));
         });
-
-    return res.status(httpStatusCode.OK).json({
-        success: true,
-        message: `Email sent to ${user.email}`,
-    });
 });
 
 exports.resetPassword = catchAsyncError(async (req, res, next) => {
@@ -368,36 +326,43 @@ exports.verifyEmail = (req, res, next) => {
     );
 };
 
-exports.deleteAllUsers = (req, res, next) => {
-    User.find({}).then(users => {
-        User.deleteMany({}, (err, done) => {
-            if (err)
-                res.status(httpStatusCode.BAD_REQUEST).json({
-                    errorMessage: err.message,
-                });
+exports.deleteAllUsers = async (req, res, next) => {
+    const condition = {
+        role: {
+            $in: ['user', 'shop'],
+        },
+    };
 
-            if (done) {
-                users.forEach(user => {
-                    if (user.avatar) {
-                        console.log(user.avatar);
-                        deleteImage(user.avatar);
-                    }
+    const userAssets = [];
+    const users = await User.find(condition)
+        .select('avatar identityCard.cardImage')
+        .lean();
 
-                    if (user.identityCard.cardImage) {
-                        user.identityCard.cardImage.forEach(image => {
-                            console.log(image);
+    users.forEach(user => {
+        if (user.avatar) {
+            userAssets.push(user.avatar);
+        }
+        if (user.identityCard.cardImage.length > 0) {
+            userAssets.push(user.identityCard.cardImage.flatten());
+        }
+    });
 
-                            deleteImage(image);
-                        });
-                    }
-                });
+    User.deleteMany(condition, (err, done) => {
+        if (err)
+            res.status(httpStatusCode.BAD_REQUEST).json({
+                errorMessage: err.message,
+            });
 
-                // deleteCollection('users');
-
-                return res.status(httpStatusCode.OK).json({
-                    successMessage: 'All users deleted',
+        if (done) {
+            if (userAssets.length > 0) {
+                userAssets.forEach(asset => {
+                    deleteImage(asset);
                 });
             }
-        });
+
+            return res.status(httpStatusCode.OK).json({
+                successMessage: 'All users deleted',
+            });
+        }
     });
 };

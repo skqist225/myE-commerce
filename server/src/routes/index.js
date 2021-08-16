@@ -1,5 +1,5 @@
 module.exports = [
-    require('./auth/auth.routes'),
+    require('./auth.routes'),
     require('./shop.routes'),
     require('./product.routes'),
     require('./category.routes'),

@@ -23,12 +23,12 @@ const userSchema = new Schema(
         },
         firstName: {
             type: String,
-            maxLength: [30, 'Your first name can not exceed 30 characters'],
+            maxLength: [20, 'Your first name can not exceed 30 characters'],
             required: [true, 'Please enter your first name'],
         },
         lastName: {
             type: String,
-            maxLength: [10, 'Your last name can not exceed 10 characters'],
+            maxLength: [20, 'Your last name can not exceed 10 characters'],
             required: [true, 'Please enter your last name'],
         },
         email: {
@@ -36,11 +36,13 @@ const userSchema = new Schema(
             lowercase: true,
             trim: true,
             required: [true, 'Email address is required'],
+            unique: true,
         },
         phoneNumber: {
             type: String,
             required: [true, 'Phone numer is required'],
             minLength: 10,
+            maxLength: 10,
         },
         bio: {
             type: String,
@@ -53,13 +55,10 @@ const userSchema = new Schema(
         },
         birthday: {
             type: Date,
-            default: null,
         },
-        timeShopRequestSent: Date,
         avatar: {
             type: String,
             trim: true,
-            default: null,
         },
         role: {
             type: String,
@@ -87,12 +86,10 @@ const userSchema = new Schema(
                 type: String,
                 minLength: 9,
                 maxLength: 12,
-                required: true,
             },
             cardImage: [
                 {
                     type: String,
-                    required: true,
                 },
             ],
         },
@@ -140,12 +137,16 @@ userSchema.methods = {
             expiresIn: process.env.JWT_EXPIRES_TIME,
         });
     },
-    getResetPasswordToken() {
+    async getResetPasswordToken() {
         const resetToken = crypto.randomBytes(20).toString('hex');
 
-        this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
+        this.resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
         this.resetPasswordExpire = Date.now() + 30 * 60 * 1000; // 30minutes
+
+        await this.save({ validateBeforeSave: false });
 
         return resetToken;
     },

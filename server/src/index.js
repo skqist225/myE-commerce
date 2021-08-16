@@ -11,17 +11,6 @@ const main = async () => {
         });
         console.log('Connected to mongoDB successfully');
 
-        process.on('uncaughtException', (error, origin) => {
-            console.log('----- Uncaught exception -----');
-            console.log(error);
-            console.log('----- Exception origin -----');
-            console.log(origin);
-        });
-
-        process.on('unhandledRejection', err => {
-            console.log(err);
-        });
-
         app.listen(process.env.PORT, () => {
             console.log(
                 `Server started on PORT: ${process.env.PORT} in ${process.env.NODE_ENV} mode`
@@ -31,5 +20,16 @@ const main = async () => {
         console.error(error);
     }
 };
+
+process.on('uncaughtException', (error, origin) => {
+    console.log('----- Uncaught exception -----');
+    console.log(error);
+    console.log('----- Exception origin -----');
+    console.log(origin);
+});
+
+process.on('unhandledRejection', err => {
+    console.log(err);
+});
 
 main();

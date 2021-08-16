@@ -5,7 +5,7 @@ const fileFilter = require('../helpers/imageFilter');
 
 const fileStorageEngine = multer.diskStorage({
     destination: (req, file, cb) => {
-        const path = `${imageFolder}/${req.query}`;
+        const path = `${imageFolder}/${req.query.dest}`;
 
         cb(null, path);
     },

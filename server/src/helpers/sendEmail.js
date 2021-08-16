@@ -3,20 +3,22 @@ const { google } = require('googleapis');
 const path = require('path');
 
 const emailTemplate = require('../utils/emailTemplate');
+// const { CLIENT_SECRET, REDIRECT_URI,CLIENT_ID,REFRESH_TOKEN } = process.env;
 
-const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN } = process.env;
+const CLIENT_SECRET = 'l_RDniKNXqGKVqb6awWsjDQg';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const CLIENT_ID =
+    '503314583762-bcpm6ocsci7ni3p931ms0tetuh53j3ji.apps.googleusercontent.com';
 
-const oAuth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URI
-);
+const REFRESH_TOKEN =
+    '1//04Mx-Hlqq-ut7CgYIARAAGAQSNwF-L9IryOof-HoUFZkT4JLsm0WuiCRlVaRMfHp1k0KA5Q5gmPwu7RWEVgaLsBRtCH0dx6w0p40';
 
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+// const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+// oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 async function sendEmail(options) {
     try {
-        const accessToken = await oAuth2Client.getAccessToken();
+        // const accessToken = await oAuth2Client.getAccessToken();
 
         const smtpTransport = nodemailer.createTransport({
             service: 'gmail',
@@ -26,22 +28,20 @@ async function sendEmail(options) {
                 clientId: CLIENT_ID,
                 clientSecret: CLIENT_SECRET,
                 refreshToken: REFRESH_TOKEN,
-                accessToken,
+                accessToken:
+                    'ya29.a0ARrdaM8cF4CywKRS0gyMbp8-r53tcu_sREAV2A9yRU1wDytrvepfVUCJ_TAKkGAaYdlBMesTOlFWLFD3jJvPSPd7P9hbd1RZlSWUgtBHEiYikMr-ROObQsVyM2YsbxxBweqmGaJQT-PxQMm5WfIZ9wCaqaRJ',
             },
         });
 
         const mailOptions = {
-            from: 'myE-commerce ❤❤❤ <thuan.leminhthuan.10.2@gmail.com>',
+            from: 'skqist2205 ❤❤❤ <thuan.leminhthuan.10.2@gmail.com>',
             to: options.email,
-            subject: options.subject,
-            html: emailTemplate(options.email),
+            subject: 'Email with no subject',
+            html: emailTemplate,
             attachments: [
                 {
                     filename: 'Logo.png',
-                    path: path.join(
-                        path.dirname(__dirname),
-                        '/uploads/images/Logo.png'
-                    ),
+                    path: path.join(path.dirname(__dirname), '/uploads/images/Logo.png'),
                     cid: 'logo',
                 },
                 {
@@ -54,10 +54,7 @@ async function sendEmail(options) {
                 },
                 {
                     filename: 'bee.png',
-                    path: path.join(
-                        path.dirname(__dirname),
-                        '/uploads/images/bee.png'
-                    ),
+                    path: path.join(path.dirname(__dirname), '/uploads/images/bee.png'),
                     cid: 'beeLogo',
                 },
                 {
@@ -97,9 +94,13 @@ async function sendEmail(options) {
 
         const result = await smtpTransport.sendMail(mailOptions);
 
-        return result;
+        return new Promise((resolve, reject) => {
+            resolve(result);
+        });
     } catch (error) {
-        return error;
+        return new Promise((resolve, reject) => {
+            reject(error);
+        });
     }
 }
 
