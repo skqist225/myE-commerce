@@ -11,6 +11,8 @@ const sendEmail = require('../helpers/sendEmail');
 const RequestValidationError = require('../errors/request-validation-error');
 const BadRequestError = require('../errors/bad-request-error');
 const NotFoundError = require('../errors/not-found-error');
+const crypto = require('crypto');
+const ForbiddenError = require('../errors/forbidden-error');
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
     const existingUser = await User.findOne({ username: req.body.username })
@@ -66,71 +68,84 @@ exports.logoutUser = (req, res, next) => {
 };
 
 exports.updateUser = catchAsyncError(async (req, res, next) => {
-    if (mongoose.isValidObjectId(req.user._id)) {
-        const user = await User.findById(req.user._id);
-        //Find user in database
+    let user;
 
-        //Know what field req.body contains
+    if (req.params.userId) {
+        user = await User.findById(req.params.userId);
+    } else {
+        user = req.user;
+    }
 
-        //Just update on that field and exclude another fields
+    Object.keys(req.body).forEach(field => {
+        if (!Array.isArray(req.body[field]) && req.body[field] !== 'identityCard') {
+            user[field] = req.body[field];
+        }
+    });
 
-        //Entity's image just using if to check
+    if (req.files.avatar) {
+        user.avatar = processImagePath(req.files.avatar[0].path);
+    }
 
-        Object.keys(req.body).forEach(field => {
-            if (!Array.isArray(req.body[field]) && req.body[field] !== 'identityCard') {
-                user[field] = req.body[field];
-            }
+    if (req.body.addresses) {
+        req.body.addresses.forEach(address => {
+            user.addresses.push(address);
         });
+    }
 
-        if (req.files.avatar) {
-            user.avatar = processImagePath(req.files.avatar[0].path);
-        }
+    if (user.isIdenityInfoVerified) {
+        return next(
+            new ForbiddenError('You can change identity info after it had been set')
+        );
+    }
 
-        if (req.body.addresses) {
-            req.body.addresses.forEach(address => {
-                user.addresses.push(address);
-            });
-        }
-
+    if (req.body.identityCard) {
         let _identityCard = {
             number: '',
             cardImage: [],
         };
 
-        if (req.body.identityCard) {
-            if (!_user.identityCard) {
-                if (
-                    !req.body.identityCard.number ||
-                    req.files['identityCard[cardImage][]'] === undefined
-                ) {
-                    return next(
-                        new ErrorHandler('Please enter card number and select card image')
-                    );
-                }
-                _identityCard.number = req.body.identityCard.number;
+        const {
+            identityCard: { number },
+        } = req.body;
+        const errors = [];
 
-                _identityCard.cardImage.push(
-                    processImagePath(req.files['identityCard[cardImage][]'][0].path)
-                );
-                _identityCard.cardImage.push(
-                    processImagePath(req.files['identityCard[cardImage][]'][1].path)
-                );
-                user.identityCard = _identityCard;
-            } else {
-                return next(
-                    new ErrorHandler('You can change this field after it had been set')
-                );
-            }
+        if (!number) {
+            errors.push({
+                message: 'Card number is required',
+                field: 'identityCard.number',
+            });
         }
 
-        await user.save();
+        if (req.files['identityCard[cardImage][]'] === undefined) {
+            errors.push({
+                message: 'Card image is required',
+                field: 'identityCard.cardImage',
+            });
+        }
 
-        return res.status(httpStatusCode.CREATED).json({
-            success: true,
-            message: 'User updated successfully',
-            updatedUser: user,
+        if (number.length < 9 || number.length > 12) {
+            errors.push({
+                message: 'Invalid number length',
+                field: 'identityCard.number',
+            });
+        }
+
+        if (errors.length > 0) {
+            return next(new RequestValidationError(errors));
+        }
+
+        req.files['identityCard[cardImage][]'].forEach(({ path }) => {
+            _identityCard.cardImage.push(processImagePath(path));
         });
+
+        user.identityCard = _identityCard;
     }
+
+    await user.save();
+    res.send({
+        successMessage: 'User updated successfully',
+        updated: user,
+    });
 });
 
 exports.forgotPassword = catchAsyncError(async (req, res, next) => {
@@ -150,11 +165,8 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
         message,
     })
         .then(result => {
-            console.log(`Email sent to ${user.email}`);
-
             res.status(httpStatusCode.OK).json({
-                success: true,
-                message: `Email sent to ${user.email}`,
+                successMessage: `Email sent to ${user.email}`,
             });
         })
         .catch(async error => {
@@ -181,150 +193,127 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 
     if (!user)
         return next(
-            new ErrorHandler(
-                'Password reset token is invalid or has been expired',
-                httpStatusCode.BAD_REQUEST
-            )
+            new NotFoundError('Password reset token is invalid or has been expired')
         );
 
     if (req.body.password !== req.body.confirmPassword) {
-        return next(
-            new ErrorHandler('Password does not match', httpStatusCode.BAD_REQUEST)
-        );
+        return next(new BadRequestError('Password does not match'));
     }
 
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
-
     await user.save();
 
-    sendToken(user, httpStatusCode.OK, res, 'Password updated successfully');
+    sendToken(user, httpStatusCode.OK, res);
 });
 
 exports.getUserProfile = catchAsyncError(async (req, res, next) => {
-    const user = await User.findById(req.user._id);
-
-    return res.status(httpStatusCode.OK).json({
-        success: true,
-        message: "User's profile fetched successfully",
-        user,
+    res.send({
+        successMessage: "User's profile fetched successfully",
+        user: req.user,
     });
 });
 
 exports.followOtherUsers = catchAsyncError(async (req, res, next) => {
-    const { userId } = req.params;
+    const followedUser = await User.findById(req.params.userId)
+        .select('_id role firstName lastName')
+        .lean();
 
-    if (mongoose.isValidObjectId(userId)) {
-        const followedUser = await User.findById(userId).select(
-            'role firstName lastName'
-        );
-
-        if (!followedUser) {
-            return next(new ErrorHandler('User not found', httpStatusCode.NOT_FOUND));
-        }
-
-        if (followedUser.role === 'shop') {
-            User.updateOne(req.user._id, {
-                $push: { following: userId },
-            }).exec(err => {
-                if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-                return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: `Follow ${followedUser.firstName} ${followedUser.lastName} successfully`,
-                });
-            });
-        } else {
-            return next(
-                new ErrorHandler(
-                    'You can not follow user, just only shop!',
-                    httpStatusCode.BAD_REQUEST
-                )
-            );
-        }
+    if (!followedUser) {
+        return next(new NotFoundError('User not found'));
     }
-});
+    const user = req.user;
 
-exports.unfollowOtherUsers = catchAsyncError(async (req, res, next) => {
-    const { userId } = req.params;
-
-    const unfollowedUser = await User.findById(userId).select('firstName lastName');
-
-    if (!unfollowedUser) {
-        return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
+    if (followedUser.role !== 'shop') {
+        return next(new BadRequestError('You can not follow user, just only shop!'));
     }
 
-    User.updateOne(req.user._id, {
-        $pull: { following: userId },
-    }).exec(err => {
-        if (err) return next(new ErrorHandler(err, httpStatusCode.BAD_REQUEST));
-
-        return res.status(httpStatusCode.OK).json({
-            success: true,
-            message: `Unfollow ${unfollowedUser.firstName} ${unfollowedUser.lastName} successfully`,
-        });
+    const isUserExistInFollowList = user.following.find(
+        userId => userId.toString() === followedUser._id.toString()
+    );
+    if (!isUserExistInFollowList) user.following.push(followedUser._id);
+    await user.save();
+    res.send({
+        successMessage: `Follow ${followedUser.firstName} ${followedUser.lastName} successfully`,
     });
 });
 
-exports.deleteUser = catchAsyncError(async (req, res, next) => {
-    const { userId } = req.params;
+exports.unfollowOtherUsers = catchAsyncError(async (req, res, next) => {
+    const unfollowedUser = await User.findById(req.params.userId)
+        .select('firstName lastName _id')
+        .lean();
 
-    if (mongoose.isValidObjectId(userId)) {
-        User.findOneAndDelete({ _id: userId, role: 'user' }, (err, user) => {
-            if (err)
-                return next(
-                    new ErrorHandler(
-                        'You do not have permission to delete this person',
-                        httpStatusCode.BAD_REQUEST
-                    )
-                );
+    if (!unfollowedUser) {
+        return next(new NotFoundError(err, httpStatusCode.BAD_REQUEST));
+    }
 
-            if (user) {
-                if (user.avatar) {
-                    deleteImage(user.avatar);
-                }
+    const user = req.user;
+    const beforeUnfollowNumber = user.following.length;
+    user.following = user.following.filter(
+        followingUser => followingUser.toString() !== unfollowedUser._id.toString()
+    );
+    await user.save();
+    const afterUnfollowNumber = user.following.length;
 
-                if (user.identityCard.cardImage) {
-                    user.identityCard.cardImage.forEach(image => {
-                        deleteImage(image);
-                    });
-                }
-
-                return res.status(httpStatusCode.OK).json({
-                    success: true,
-                    message: 'User deleted successfully',
-                });
-            }
+    if (beforeUnfollowNumber !== afterUnfollowNumber) {
+        return res.send({
+            successMessage: `Unfollow ${unfollowedUser.firstName} ${unfollowedUser.lastName} successfully`,
         });
     }
+
+    res.send({});
 });
 
-exports.getAllUsers = catchAsyncError(async (req, res, next) => {
-    const users = await User.find();
-    const admin_nbm = await User.countDocuments({ role: 'admin' });
+exports.deleteUser = (req, res, next) => {
+    User.findOneAndDelete({ _id: req.params.userId, role: 'user' }, (err, user) => {
+        if (err) console.log(err);
 
-    return res.status(httpStatusCode.OK).json({
-        successMessage: 'User fetched successfully',
-        admin_nbm,
+        if (user) {
+            if (user.avatar) {
+                deleteImage(user.avatar);
+            }
+
+            if (user.identityCard.cardImage) {
+                user.identityCard.cardImage.forEach(image => {
+                    deleteImage(image);
+                });
+            }
+
+            res.send({
+                successMessage: 'User deleted successfully',
+            });
+        }
+    });
+};
+
+exports.getAllUsers = catchAsyncError(async (req, res, next) => {
+    const users = await User.find({ role: 'user' });
+
+    res.send({
+        successMessage: 'Users fetched successfully',
+        num_of_users: users.length,
         users,
     });
 });
 
-exports.verifyEmail = (req, res, next) => {
-    User.updateOne({ _id: req.user._id }, { $set: { isEmailVerified: true } }).exec(
-        err => {
-            if (err)
-                res.status(httpStatusCode.BAD_REQUEST).json({
-                    errorMessage: err.message,
-                });
+exports.getAllAdmin = catchAsyncError(async (req, res, next) => {
+    const admins = await User.find({ role: 'admin' });
 
-            return res.status(httpStatusCode.CREATED).json({
-                successMessage: 'Email verified successfully',
-            });
-        }
-    );
-};
+    res.send({
+        successMessage: 'Admins fetched successfully',
+        number_of_admins: admins.length,
+        admins,
+    });
+});
+
+exports.verifyEmail = catchAsyncError(async (req, res, next) => {
+    await User.updateOne({ _id: req.user._id }, { $set: { isEmailVerified: true } });
+
+    res.send({
+        successMessage: 'Email verified successfully',
+    });
+});
 
 exports.deleteAllUsers = async (req, res, next) => {
     const condition = {

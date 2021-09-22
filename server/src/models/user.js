@@ -98,6 +98,10 @@ const userSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        isIdenityInfoVerified: {
+            type: Boolean,
+            default: false,
+        },
         isEmailVerified: {
             type: Boolean,
             default: false,
@@ -111,6 +115,13 @@ const userSchema = new Schema(
     },
     {
         timestamps: true,
+        toJSON: {
+            transform(doc, ret, options) {
+                delete ret.isActive;
+                delete ret.isShopRequestSent;
+                delete ret.__v;
+            },
+        },
     }
 );
 

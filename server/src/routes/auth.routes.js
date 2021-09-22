@@ -19,6 +19,7 @@ const router = express.Router();
 const upload = require('../middlewares/multer');
 const { body } = require('express-validator');
 const validateRequest = require('../middlewares/validateRequest');
+const validateParams = require('../middlewares/validateParams');
 
 router.post(
     '/register',
@@ -41,8 +42,18 @@ router.post(
     registerUser
 );
 
-router.get('/user', [isAuthenticatedUser, authorizeRoles('user')], getUserProfile);
-router.post('/password/reset/:resetToken', resetPassword);
+router.get('/user', isAuthenticatedUser, getUserProfile);
+router.post(
+    '/password/reset/:resetToken',
+    body('password')
+        .trim()
+        .isLength({ min: 8, max: 25 })
+        .withMessage(
+            'Password must be at least 8 characters and can not exceed 25 characters'
+        ),
+    validateRequest,
+    resetPassword
+);
 
 router.post(
     '/login',
@@ -78,8 +89,9 @@ router.put(
 );
 
 router.put(
-    '/admin/user/update/:userId',
+    '/admin/user/:userId',
     [isAuthenticatedUser, authorizeRoles('admin')],
+    validateParams('userId'),
     upload.fields([
         { name: 'avatar', maxCount: 1 },
         { name: 'identityCard[cardImage][]', maxCount: 2 },
@@ -99,6 +111,7 @@ router.post(
 router.delete(
     '/admin/user/:userId',
     [isAuthenticatedUser, authorizeRoles('admin')],
+    validateParams('userId'),
     deleteUser
 );
 
@@ -118,6 +131,7 @@ router.put('/user/follow/:userId', [
 router.put(
     '/user/unfollow/:userId',
     [isAuthenticatedUser, authorizeRoles('user')],
+    validateParams('userId'),
     unfollowOtherUsers
 );
 

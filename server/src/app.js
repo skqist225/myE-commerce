@@ -20,7 +20,10 @@ app.use(
         exposedHeaders: ['set-cookie'],
     })
 );
-app.use(express.static(path.join(__dirname, '/uploads/images')));
+
+app.use(express.static(__dirname));
+
+console.log(path.join(__dirname, '/uploads/images/'));
 
 routes.forEach(route => app.use('/api/v1', route));
 

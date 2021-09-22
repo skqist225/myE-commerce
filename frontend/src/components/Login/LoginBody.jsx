@@ -65,7 +65,10 @@ function LoginBody() {
                     <FormWrapper>
                         <LoginForm onSubmit={handleSubmit(onSubmit)}>
                             <LoginFormTitle>Đăng nhập </LoginFormTitle>
-                            <LoginInput placeholder="Tên đăng nhập" {...register('username')} />
+                            <LoginInput
+                                placeholder="Tên đăng nhập"
+                                {...register('username')}
+                            />
                             <SpecialInputWrapper>
                                 <LoginInput
                                     placeholder="Mật khẩu"
@@ -88,12 +91,17 @@ function LoginBody() {
                             <SubmitButton type="submit">ĐĂNG NHẬP</SubmitButton>
                             <OptionLine>
                                 <LoginFeature>Quên mật khẩu </LoginFeature>
-
                                 <LoginFeature>Đăng nhập với SMS</LoginFeature>
                             </OptionLine>
                             <LineWrraper>
                                 <Line />
-                                <div style={{ fontSize: '1.5rem', color: '#ccc', padding: '2rem' }}>
+                                <div
+                                    style={{
+                                        fontSize: '1.5rem',
+                                        color: '#ccc',
+                                        padding: '2rem',
+                                    }}
+                                >
                                     HOẶC
                                 </div>
                                 <Line />
